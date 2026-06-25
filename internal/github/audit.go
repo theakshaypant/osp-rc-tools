@@ -345,6 +345,9 @@ func resolveJiras(jiraClient *jira.Client, commits []Commit) {
 		return
 	}
 	for i := range commits {
+		if commits[i].Author == "dependabot[bot]" {
+			continue
+		}
 		if commits[i].PR != "" {
 			if ticket := jiraClient.FindTicketForPR(commits[i].PR); ticket != "" {
 				commits[i].Jira = ticket
