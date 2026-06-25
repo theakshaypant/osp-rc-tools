@@ -118,6 +118,11 @@ func extractCherryPickPRRef(text string) (num int, url string) {
 		if !cherryPickMentionRe.MatchString(line) {
 			continue
 		}
+		// "Merge pull request #NNN from user/cherrypick-..." references the
+		// current PR, not the original — skip it.
+		if strings.HasPrefix(line, "Merge pull request") {
+			continue
+		}
 		if m := prURLRe.FindString(line); m != "" {
 			return 0, m
 		}
