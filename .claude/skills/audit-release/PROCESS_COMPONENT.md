@@ -15,9 +15,11 @@ source .env
 
 Read the JSON file. Extract the component at the given index. **Verify the component name matches** — if it doesn't, abort with an error (wrong index).
 
-If the component has an `error` field set or no `commits`, skip to **Finalize**.
+If the component has an `error` field set or no `commits` (and no `unsynced_commits`), skip to **Finalize**.
 
-Count:
+Process both `commits` and `unsynced_commits` arrays through all steps below. They go through the same Jira search and release note pipeline — the only difference is how they are displayed in the report (separate tables).
+
+Count (across both arrays):
 - Commits where `author != "dependabot[bot]"` AND `jira` is empty AND `jira_source` is empty -> need Jira search
 - Commits where `author != "dependabot[bot]"` AND `jira` is non-empty but `release_note` is null/missing AND `rn_source` is empty -> need release notes
 

@@ -123,7 +123,7 @@ Read the complete JSON. Generate the report organized per component.
   - No release note -> `—`
 - **PR column:** `[#orig](url) → [#cherry](url)` when both exist and differ; just `[#N](url)` otherwise; `—` when missing.
 
-Include unsynced commits in a subsection if present.
+If the component has `unsynced_commits`, show them in a separate "### Unsynced Commits" subsection with the same table format (same columns, same annotation rules, same dependabot filtering). These are upstream commits not yet cherry-picked to downstream.
 
 **Unmatched Jiras with component labels:**
 If `unmatched_jiras` contains tickets with a `components` field, map them to release components using this table:
