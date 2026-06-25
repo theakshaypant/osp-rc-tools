@@ -64,7 +64,11 @@ func main() {
 
 	ctx := context.Background()
 	version := flag.Arg(0)
-	outputFile := fmt.Sprintf("release_%s.json", version)
+	if err := os.MkdirAll("reports", 0755); err != nil {
+		fmt.Fprintln(os.Stderr, "Error creating reports directory:", err)
+		os.Exit(1)
+	}
+	outputFile := fmt.Sprintf("reports/release_%s.json", version)
 
 	progress := func(format string, args ...any) {
 		fmt.Fprintf(os.Stderr, format+"\n", args...)
