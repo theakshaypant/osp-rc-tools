@@ -348,6 +348,45 @@
   ],
   "unmatched_jiras": [
     {
+      "key": "SRVKP-12584",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12584",
+      "summary": "CLI testing",
+      "status": "New"
+    },
+    {
+      "key": "SRVKP-12583",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12583",
+      "summary": "UI Regression testing",
+      "status": "New"
+    },
+    {
+      "key": "SRVKP-12582",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12582",
+      "summary": "Acceptance test",
+      "status": "In Progress",
+      "components": [
+        "QA"
+      ]
+    },
+    {
+      "key": "SRVKP-12581",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12581",
+      "summary": "Upgrade test",
+      "status": "New",
+      "components": [
+        "QA"
+      ]
+    },
+    {
+      "key": "SRVKP-12580",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12580",
+      "summary": "Test Openshift Pipelines 1.22.4",
+      "status": "In Progress",
+      "components": [
+        "QA"
+      ]
+    },
+    {
       "key": "SRVKP-12361",
       "url": "https://redhat.atlassian.net/browse/SRVKP-12361",
       "summary": "[GovCloud] pipelines-serve-tkn-cli-rhel9 - 9 CVEs (CRITICAL)",
