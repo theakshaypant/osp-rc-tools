@@ -58,23 +58,32 @@ func main() {
 
 	ctx := context.Background()
 	version := flag.Arg(0)
+	outputFile := fmt.Sprintf("release_%s.json", version)
 
 	progress := func(format string, args ...any) {
 		fmt.Fprintf(os.Stderr, format+"\n", args...)
 	}
 
-	var result *gh.AuditResult
+	writeResult := func(result *gh.AuditResult) {
+		data, err := json.MarshalIndent(result, "", "  ")
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to marshal result: %v\n", err)
+			return
+		}
+		if err := os.WriteFile(outputFile, data, 0644); err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: failed to write %s: %v\n", outputFile, err)
+		}
+	}
+
 	if _, _, merr := gh.ParseMinorVersion(version); merr == nil {
-		result, err = gh.GetMinorCommits(ctx, client, version, toDate, progress)
+		_, err = gh.GetMinorCommits(ctx, client, version, toDate, progress, writeResult)
 	} else {
-		result, err = gh.GetPatchCommits(ctx, client, version, toDate, progress)
+		_, err = gh.GetPatchCommits(ctx, client, version, toDate, progress, writeResult)
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
 	}
 
-	enc := json.NewEncoder(os.Stdout)
-	enc.SetIndent("", "  ")
-	enc.Encode(result)
+	fmt.Fprintf(os.Stderr, "Results written to %s\n", outputFile)
 }

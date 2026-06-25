@@ -55,11 +55,27 @@ func ParseMinorVersion(version string) (majorMinor string, prevMajorMinor string
 }
 
 type ProgressFunc func(format string, args ...any)
+type ResultFunc func(*AuditResult)
+
+func buildAuditResult(version, prevVersion string, bounds *PatchBounds, released bool, components []ComponentCommits) *AuditResult {
+	toDate := bounds.To
+	if toDate.IsZero() {
+		toDate = time.Now()
+	}
+	return &AuditResult{
+		Version:    version,
+		Previous:   prevVersion,
+		FromDate:   bounds.From.Format("2006-01-02T15:04:05Z"),
+		ToDate:     toDate.Format("2006-01-02T15:04:05Z"),
+		Released:   released,
+		Components: components,
+	}
+}
 
 // GetPatchCommits fetches all component commits for a patch release.
 // Handles both released patches (bounded by bot commits) and unreleased
 // patches (uses latest head SHA as the upper bound).
-func GetPatchCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc) (*AuditResult, error) {
+func GetPatchCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc, onResult ResultFunc) (*AuditResult, error) {
 	if progress == nil {
 		progress = func(string, ...any) {}
 	}
@@ -120,24 +136,16 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 				component, len(cc.UnsyncedCommits), cc.UpstreamBranch, cc.ToSHA[:12], cc.UpstreamHead[:12])
 		}
 		results = append(results, *cc)
+
+		if onResult != nil {
+			onResult(buildAuditResult(version, prevVersion, bounds, released, results))
+		}
 	}
 
-	toDate := bounds.To
-	if toDate.IsZero() {
-		toDate = time.Now()
-	}
-
-	return &AuditResult{
-		Version:    version,
-		Previous:   prevVersion,
-		FromDate:   bounds.From.Format("2006-01-02T15:04:05Z"),
-		ToDate:     toDate.Format("2006-01-02T15:04:05Z"),
-		Released:   released,
-		Components: results,
-	}, nil
+	return buildAuditResult(version, prevVersion, bounds, released, results), nil
 }
 
-func GetMinorCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc) (*AuditResult, error) {
+func GetMinorCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc, onResult ResultFunc) (*AuditResult, error) {
 	if progress == nil {
 		progress = func(string, ...any) {}
 	}
@@ -235,21 +243,13 @@ func GetMinorCommits(ctx context.Context, client *github.Client, version string,
 				component, len(cc.UnsyncedCommits), cc.UpstreamBranch, cc.ToSHA[:12], cc.UpstreamHead[:12])
 		}
 		results = append(results, *cc)
+
+		if onResult != nil {
+			onResult(buildAuditResult(version, prevVersion, bounds, released, results))
+		}
 	}
 
-	toDate := bounds.To
-	if toDate.IsZero() {
-		toDate = time.Now()
-	}
-
-	return &AuditResult{
-		Version:    version,
-		Previous:   prevVersion,
-		FromDate:   bounds.From.Format("2006-01-02T15:04:05Z"),
-		ToDate:     toDate.Format("2006-01-02T15:04:05Z"),
-		Released:   released,
-		Components: results,
-	}, nil
+	return buildAuditResult(version, prevVersion, bounds, released, results), nil
 }
 
 func getComponentCommits(ctx context.Context, client *github.Client, component string, branchCfg BranchConfig, fromBranch, toBranch string, bounds *PatchBounds, released bool, filterByDate bool, toDateOverride *time.Time, version, prevVersion string, progress ProgressFunc) (*ComponentCommits, error) {
