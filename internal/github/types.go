@@ -3,11 +3,15 @@ package github
 import "time"
 
 type Commit struct {
-	SHA     string `json:"sha"`
-	Message string `json:"message"`
-	Author  string `json:"author"`
-	Date    string `json:"date"`
-	PR      string `json:"pr,omitempty"`
+	SHA        string `json:"sha"`
+	Message    string `json:"message"`
+	Author     string `json:"author"`
+	Date       string `json:"date"`
+	PR         string `json:"pr,omitempty"`
+	OriginalPR string `json:"original_pr,omitempty"`
+
+	cherryPickOf string
+	fullMessage  string
 }
 
 type ComponentCommits struct {

@@ -167,6 +167,7 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 		cc.Commits = filtered
 		if len(filtered) > 0 {
 			ResolvePRs(ctx, client, upstreamParts[0], upstreamParts[1], cc.Commits)
+			ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], cc.Commits)
 		}
 	} else {
 		cc.Commits = []Commit{}
@@ -184,6 +185,7 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 			unsynced, err := GetCommitsBetweenRefs(ctx, client, upstreamParts[0], upstreamParts[1], toSHA, upstreamHead)
 			if err == nil {
 				ResolvePRs(ctx, client, upstreamParts[0], upstreamParts[1], unsynced)
+				ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], unsynced)
 				cc.UnsyncedCommits = unsynced
 			}
 		}
