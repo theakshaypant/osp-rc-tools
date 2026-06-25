@@ -151,8 +151,7 @@ func (c *Client) FindTicketForPR(prURL string) string {
 }
 
 func (c *Client) FindTicketsForFixVersion(version string) ([]Ticket, error) {
-	fixVersion := fmt.Sprintf("Pipeline %s", version)
-	jql := fmt.Sprintf(`project = SRVKP AND fixVersion = "%s"`, fixVersion)
+	jql := fmt.Sprintf(`project = SRVKP AND (fixVersion = "Pipeline %s" OR fixVersion = "Pipelines %s")`, version, version)
 
 	var tickets []Ticket
 	nextPage := ""

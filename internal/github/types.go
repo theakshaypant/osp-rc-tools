@@ -15,6 +15,8 @@ type Commit struct {
 	OriginalPR string `json:"original_pr,omitempty"`
 	Jira        string           `json:"jira,omitempty"`
 	ReleaseNote *jira.ReleaseNote `json:"release_note,omitempty"`
+	JiraSource  string           `json:"jira_source,omitempty"`
+	RNSource    string           `json:"rn_source,omitempty"`
 
 	cherryPickOf string
 	fullMessage  string
@@ -77,4 +79,10 @@ type AuditResult struct {
 	Released       bool               `json:"released"`
 	Components     []ComponentCommits `json:"components"`
 	UnmatchedJiras []jira.Ticket      `json:"unmatched_jiras,omitempty"`
+	SkillProgress  *SkillProgress     `json:"skill_progress,omitempty"`
+}
+
+type SkillProgress struct {
+	ProcessedComponents []string `json:"processed_components"`
+	ReportGenerated     bool     `json:"report_generated"`
 }
