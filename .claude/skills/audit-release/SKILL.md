@@ -72,7 +72,9 @@ Write the updated JSON back using a Python script.
 <step name="generate_report">
 **Generate the markdown report from the enriched JSON.**
 
-Read the complete JSON. Generate the report organized per component:
+Read the complete JSON. Generate the report organized per component.
+
+**Index and collapsible sections:** Add a table of contents after the summary stats linking to each component. Wrap each component in an HTML `<details>` tag so large sections are collapsible. Use a one-line summary showing commit count and Jira coverage.
 
 ```markdown
 # Release Audit: {version}
@@ -81,17 +83,31 @@ Read the complete JSON. Generate the report organized per component:
 **Total commits:** N across M components<br>
 **Already linked (by Go tool):** N · **Newly linked:** N · **Unlinked:** N · **Dependabot (skipped):** N<br>
 
+## Index
+
+| Component | Commits | Jira | Unsynced | Unmatched Jiras |
+|-----------|---------|------|----------|-----------------|
+| [component-name](#component-name) | 25 | 20/25 | 3 | 5 |
+| [another-comp](#another-comp) | 10 | 8/10 | 0 | 0 |
+
 ---
 
-## {component-name}
+<details>
+<summary><h2>component-name</h2> — 25 commits, 20 linked, 5 dependabot</summary>
 
-**Upstream:** {upstream} · **Commits:** N · **Unsynced:** N
+**Upstream:** {upstream} · **Commits:** N · **Unsynced:** N · **Dependabot:** N
 
 | SHA | Message | Author | PR | Jira | Release Note |
 |-----|---------|--------|----|------|--------------|
 | abc123 | fix: something | Name | [#100](orig-url) → [#123](pr-url) | [SRVKP-1234](url) | **Type:** Bug Fix<br>**Text:** Fixes panic on nil context. *(Jira)* |
 | def456 | feat: new thing | Name | [#123](pr-url) | [SRVKP-5678](url) *(PR body)* | **Type:** Feature<br>**Text:** Adds custom CA bundles. *(extracted)* |
+
+</details>
 ```
+
+**Important:** Place a blank line after `<summary>` and before `</details>` so markdown inside renders correctly. The `<h2>` inside `<summary>` creates a clickable heading. Use the component name as the anchor (lowercase, hyphens).
+
+**Skip dependabot commits in the table entirely.** Do not list them as rows. Only count them in the summary metrics (header stats, index, and cross-component summary table).
 
 **Determine annotations from source fields:**
 - **Jira column:**
@@ -104,11 +120,43 @@ Read the complete JSON. Generate the report organized per component:
   - `rn_source` empty + `release_note` non-null -> *(Jira)*
   - `rn_source == "extracted"` -> *(extracted)*
   - `rn_source == "generated"` -> *(generated)*
-  - Dependabot -> `skipped`
   - No release note -> `—`
 - **PR column:** `[#orig](url) → [#cherry](url)` when both exist and differ; just `[#N](url)` otherwise; `—` when missing.
 
-Include unsynced commits in a subsection if present. End with a cross-component summary table:
+Include unsynced commits in a subsection if present.
+
+**Unmatched Jiras with component labels:**
+If `unmatched_jiras` contains tickets with a `components` field, map them to release components using this table:
+
+| Jira Component | Release Component |
+|----------------|-------------------|
+| Tekton Pipelines | tektoncd-pipeline |
+| Tekton Triggers | tektoncd-triggers |
+| Tekton Chains | tektoncd-chains |
+| Tekton CLI | tektoncd-cli |
+| Tekton Results | tektoncd-results |
+| Tekton Hub | tektoncd-hub |
+| Pipelines as Code / pac | pipelines-as-code |
+| Operator | operator |
+| Pruner | tektoncd-pruner |
+| Manual Approval | manual-approval-gate |
+| Tekton Cache / cache | tekton-caches |
+| kueue | tekton-kueue |
+| OpenShift OPC | opc |
+| UI | console-plugin |
+
+For tickets that map to a component, show them in a "### Unmatched Jiras" subsection under that component's section:
+
+```markdown
+### Unmatched Jiras
+| Key | Summary | Status |
+|-----|---------|--------|
+| [SRVKP-1234](url) | Fix something | Closed |
+```
+
+Tickets with no component label or no matching component go in a top-level "## Unmatched Jiras" section at the end (before Summary).
+
+End with a cross-component summary table:
 
 | Component | Commits | Linked (tool) | Linked (audit) | Unlinked | Has RN | Generated RN | Dependabot |
 |-----------|---------|---------------|----------------|----------|--------|--------------|------------|
