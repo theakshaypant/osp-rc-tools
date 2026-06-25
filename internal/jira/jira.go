@@ -61,8 +61,13 @@ func (c *Client) newRequest(method, url string, body io.Reader) (*http.Request, 
 }
 
 type issueFields struct {
-	Summary string      `json:"summary"`
-	Status  issueStatus `json:"status"`
+	Summary    string           `json:"summary"`
+	Status     issueStatus      `json:"status"`
+	Components []issueComponent `json:"components"`
+}
+
+type issueComponent struct {
+	Name string `json:"name"`
 }
 
 type issueStatus struct {
@@ -80,10 +85,11 @@ type searchResponse struct {
 }
 
 type Ticket struct {
-	Key     string `json:"key"`
-	URL     string `json:"url"`
-	Summary string `json:"summary"`
-	Status  string `json:"status"`
+	Key        string   `json:"key"`
+	URL        string   `json:"url"`
+	Summary    string   `json:"summary"`
+	Status     string   `json:"status"`
+	Components []string `json:"components,omitempty"`
 }
 
 type ReleaseNote struct {
@@ -157,17 +163,22 @@ func (c *Client) FindTicketsForFixVersion(version string) ([]Ticket, error) {
 	nextPage := ""
 
 	for {
-		result, err := c.searchJQL(jql, []string{"summary", "status"}, 50, nextPage)
+		result, err := c.searchJQL(jql, []string{"summary", "status", "components"}, 50, nextPage)
 		if err != nil {
 			return nil, err
 		}
 
 		for _, issue := range result.Issues {
+			var compNames []string
+			for _, comp := range issue.Fields.Components {
+				compNames = append(compNames, comp.Name)
+			}
 			tickets = append(tickets, Ticket{
-				Key:     issue.Key,
-				URL:     c.browseURL(issue.Key),
-				Summary: issue.Fields.Summary,
-				Status:  issue.Fields.Status.Name,
+				Key:        issue.Key,
+				URL:        c.browseURL(issue.Key),
+				Summary:    issue.Fields.Summary,
+				Status:     issue.Fields.Status.Name,
+				Components: compNames,
 			})
 		}
 
