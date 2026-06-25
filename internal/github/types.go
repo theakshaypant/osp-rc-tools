@@ -13,7 +13,8 @@ type Commit struct {
 	Date       string `json:"date"`
 	PR         string `json:"pr,omitempty"`
 	OriginalPR string `json:"original_pr,omitempty"`
-	Jira       string `json:"jira,omitempty"`
+	Jira        string           `json:"jira,omitempty"`
+	ReleaseNote *jira.ReleaseNote `json:"release_note,omitempty"`
 
 	cherryPickOf string
 	fullMessage  string

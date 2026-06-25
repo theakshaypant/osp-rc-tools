@@ -97,19 +97,16 @@ func main() {
 	}
 
 	if jiraClient != nil {
+		progress("Fetching release note fields...")
+		rnCache := map[string]*jira.ReleaseNote{}
 		matched := map[string]bool{}
-		for _, comp := range result.Components {
-			for _, c := range comp.Commits {
-				if c.Jira != "" {
-					matched[jira.KeyFromURL(c.Jira)] = true
-				}
-			}
-			for _, c := range comp.UnsyncedCommits {
-				if c.Jira != "" {
-					matched[jira.KeyFromURL(c.Jira)] = true
-				}
-			}
+		rnCount := 0
+		for ci := range result.Components {
+			rnCount += attachReleaseNotes(jiraClient, result.Components[ci].Commits, rnCache, matched)
+			rnCount += attachReleaseNotes(jiraClient, result.Components[ci].UnsyncedCommits, rnCache, matched)
 		}
+		progress("%d commits with release note fields", rnCount)
+		writeResult(result)
 
 		progress("Searching Jira for fixVersion tickets...")
 		tickets, jerr := jiraClient.FindTicketsForFixVersion(version)
@@ -127,4 +124,30 @@ func main() {
 	}
 
 	fmt.Fprintf(os.Stderr, "Results written to %s\n", outputFile)
+}
+
+func attachReleaseNotes(jiraClient *jira.Client, commits []gh.Commit, cache map[string]*jira.ReleaseNote, matched map[string]bool) int {
+	count := 0
+	for i := range commits {
+		if commits[i].Jira == "" {
+			continue
+		}
+		key := jira.KeyFromURL(commits[i].Jira)
+		matched[key] = true
+
+		rn, ok := cache[key]
+		if !ok {
+			var err error
+			rn, err = jiraClient.FetchReleaseNotes(key)
+			if err != nil {
+				rn = nil
+			}
+			cache[key] = rn
+		}
+		if rn != nil {
+			commits[i].ReleaseNote = rn
+			count++
+		}
+	}
+	return count
 }
