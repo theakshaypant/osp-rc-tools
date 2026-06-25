@@ -84,7 +84,7 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 	for component, branchCfg := range releaseCfg.Branches {
 		progress("Processing %s...", component)
 
-		cc, err := getComponentCommits(ctx, client, component, branchCfg, downstreamBranch, bounds, released, toDateOverride)
+		cc, err := getComponentCommits(ctx, client, component, branchCfg, downstreamBranch, bounds, released, toDateOverride, version, prevVersion, progress)
 		if err != nil {
 			results = append(results, ComponentCommits{
 				Name:  component,
@@ -116,7 +116,7 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 	}, nil
 }
 
-func getComponentCommits(ctx context.Context, client *github.Client, component string, branchCfg BranchConfig, downstreamBranch string, bounds *PatchBounds, released bool, toDateOverride *time.Time) (*ComponentCommits, error) {
+func getComponentCommits(ctx context.Context, client *github.Client, component string, branchCfg BranchConfig, downstreamBranch string, bounds *PatchBounds, released bool, toDateOverride *time.Time, version, prevVersion string, progress ProgressFunc) (*ComponentCommits, error) {
 	repoCfg, err := FetchRepoConfig(ctx, client, component)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch repo config: %w", err)
@@ -135,7 +135,7 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 		DownstreamBranch: downstreamBranch,
 	}
 
-	fromSHA, err := GetHeadSHAAt(ctx, client, repoCfg.Repo, downstreamBranch, &bounds.From)
+	fromSHA, err := resolveHeadSHA(ctx, client, component, repoCfg.Repo, fmt.Sprintf("v%s", prevVersion), downstreamBranch, &bounds.From, progress)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get head SHA at from-date: %w", err)
 	}
@@ -143,7 +143,7 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 
 	var toSHA string
 	if released {
-		toSHA, err = GetHeadSHAAt(ctx, client, repoCfg.Repo, downstreamBranch, &bounds.To)
+		toSHA, err = resolveHeadSHA(ctx, client, component, repoCfg.Repo, fmt.Sprintf("v%s", version), downstreamBranch, &bounds.To, progress)
 	} else {
 		toSHA, err = GetHeadSHAAt(ctx, client, repoCfg.Repo, downstreamBranch, nil)
 	}
@@ -192,6 +192,16 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 	}
 
 	return &cc, nil
+}
+
+func resolveHeadSHA(ctx context.Context, client *github.Client, component, repo, tag, branch string, fallbackTime *time.Time, progress ProgressFunc) (string, error) {
+	sha, err := readHeadFileAt(ctx, client, repo, tag)
+	if err == nil {
+		progress("  %s: resolved tag %s", component, tag)
+		return sha, nil
+	}
+	progress("  %s: tag %s not found, using time-based resolution", component, tag)
+	return GetHeadSHAAt(ctx, client, repo, branch, fallbackTime)
 }
 
 func boundsFromHistory(history []PatchVersionEntry, targetVersion string) (*PatchBounds, error) {
