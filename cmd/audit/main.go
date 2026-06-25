@@ -85,14 +85,45 @@ func main() {
 		}
 	}
 
+	var result *gh.AuditResult
 	if _, _, merr := gh.ParseMinorVersion(version); merr == nil {
-		_, err = gh.GetMinorCommits(ctx, client, jiraClient, version, toDate, progress, writeResult)
+		result, err = gh.GetMinorCommits(ctx, client, jiraClient, version, toDate, progress, writeResult)
 	} else {
-		_, err = gh.GetPatchCommits(ctx, client, jiraClient, version, toDate, progress, writeResult)
+		result, err = gh.GetPatchCommits(ctx, client, jiraClient, version, toDate, progress, writeResult)
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
+	}
+
+	if jiraClient != nil {
+		matched := map[string]bool{}
+		for _, comp := range result.Components {
+			for _, c := range comp.Commits {
+				if c.Jira != "" {
+					matched[jira.KeyFromURL(c.Jira)] = true
+				}
+			}
+			for _, c := range comp.UnsyncedCommits {
+				if c.Jira != "" {
+					matched[jira.KeyFromURL(c.Jira)] = true
+				}
+			}
+		}
+
+		progress("Searching Jira for fixVersion tickets...")
+		tickets, jerr := jiraClient.FindTicketsForFixVersion(version)
+		if jerr != nil {
+			progress("Warning: Jira fixVersion search failed: %v", jerr)
+		} else {
+			for _, t := range tickets {
+				if !matched[t.Key] {
+					result.UnmatchedJiras = append(result.UnmatchedJiras, t)
+				}
+			}
+			progress("%d tickets with fixVersion, %d unmatched", len(tickets), len(result.UnmatchedJiras))
+			writeResult(result)
+		}
 	}
 
 	fmt.Fprintf(os.Stderr, "Results written to %s\n", outputFile)

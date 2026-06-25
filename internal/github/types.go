@@ -1,6 +1,10 @@
 package github
 
-import "time"
+import (
+	"time"
+
+	"github.com/theakshaypant/osp-rc-tools/internal/jira"
+)
 
 type Commit struct {
 	SHA        string `json:"sha"`
@@ -65,10 +69,11 @@ type PatchBounds struct {
 }
 
 type AuditResult struct {
-	Version    string             `json:"version"`
-	Previous   string             `json:"previous"`
-	FromDate   string             `json:"from_date"`
-	ToDate     string             `json:"to_date"`
-	Released   bool               `json:"released"`
-	Components []ComponentCommits `json:"components"`
+	Version        string             `json:"version"`
+	Previous       string             `json:"previous"`
+	FromDate       string             `json:"from_date"`
+	ToDate         string             `json:"to_date"`
+	Released       bool               `json:"released"`
+	Components     []ComponentCommits `json:"components"`
+	UnmatchedJiras []jira.Ticket      `json:"unmatched_jiras,omitempty"`
 }

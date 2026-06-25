@@ -52,45 +52,117 @@ func (c *Client) newRequest(method, url string, body io.Reader) (*http.Request, 
 	return req, nil
 }
 
+type issueFields struct {
+	Summary string      `json:"summary"`
+	Status  issueStatus `json:"status"`
+}
+
+type issueStatus struct {
+	Name string `json:"name"`
+}
+
 type searchIssue struct {
-	Key string `json:"key"`
+	Key    string      `json:"key"`
+	Fields issueFields `json:"fields"`
 }
 
 type searchResponse struct {
-	Issues []searchIssue `json:"issues"`
+	Issues        []searchIssue `json:"issues"`
+	NextPageToken string        `json:"nextPageToken"`
+}
+
+type Ticket struct {
+	Key     string `json:"key"`
+	URL     string `json:"url"`
+	Summary string `json:"summary"`
+	Status  string `json:"status"`
+}
+
+func (c *Client) browseURL(key string) string {
+	return fmt.Sprintf("%s/browse/%s", c.baseURL, key)
+}
+
+func KeyFromURL(url string) string {
+	if idx := strings.LastIndex(url, "/"); idx >= 0 {
+		return url[idx+1:]
+	}
+	return url
+}
+
+func (c *Client) searchJQL(jql string, fields []string, maxResults int, nextPageToken string) (*searchResponse, error) {
+	body := map[string]any{
+		"jql":        jql,
+		"fields":     fields,
+		"maxResults": maxResults,
+	}
+	if nextPageToken != "" {
+		body["nextPageToken"] = nextPageToken
+	}
+	payload, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := c.newRequest("POST", c.baseURL+"/rest/api/3/search/jql", bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	var result searchResponse
+	if resp.StatusCode != 200 {
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		return nil, fmt.Errorf("jira search failed (status %d): %s", resp.StatusCode, body)
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	resp.Body.Close()
+	return &result, err
 }
 
 func (c *Client) FindTicketForPR(prURL string) string {
 	jql := fmt.Sprintf(`cf[%s] ~ "%s"`, strings.TrimPrefix(c.prField, "customfield_"), prURL)
 
-	payload, err := json.Marshal(map[string]interface{}{
-		"jql":        jql,
-		"fields":     []string{"key"},
-		"maxResults": 1,
-	})
-	if err != nil {
+	result, err := c.searchJQL(jql, []string{"key"}, 1, "")
+	if err != nil || len(result.Issues) == 0 {
 		return ""
 	}
 
-	req, err := c.newRequest("POST", c.baseURL+"/rest/api/3/search/jql", bytes.NewBuffer(payload))
-	if err != nil {
-		return ""
+	return c.browseURL(result.Issues[0].Key)
+}
+
+func (c *Client) FindTicketsForFixVersion(version string) ([]Ticket, error) {
+	fixVersion := fmt.Sprintf("Pipeline %s", version)
+	jql := fmt.Sprintf(`project = SRVKP AND fixVersion = "%s"`, fixVersion)
+
+	var tickets []Ticket
+	nextPage := ""
+
+	for {
+		result, err := c.searchJQL(jql, []string{"summary", "status"}, 50, nextPage)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, issue := range result.Issues {
+			tickets = append(tickets, Ticket{
+				Key:     issue.Key,
+				URL:     c.browseURL(issue.Key),
+				Summary: issue.Fields.Summary,
+				Status:  issue.Fields.Status.Name,
+			})
+		}
+
+		if result.NextPageToken == "" || len(result.Issues) == 0 {
+			break
+		}
+		nextPage = result.NextPageToken
 	}
 
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return ""
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return ""
-	}
-
-	var result searchResponse
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil || len(result.Issues) == 0 {
-		return ""
-	}
-
-	return fmt.Sprintf("%s/browse/%s", c.baseURL, result.Issues[0].Key)
+	return tickets, nil
 }
