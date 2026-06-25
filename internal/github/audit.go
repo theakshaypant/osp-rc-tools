@@ -33,6 +33,27 @@ func ParsePatchVersion(version string) (majorMinor string, prevVersion string, e
 	return majorMinor, prevVersion, nil
 }
 
+func ParseMinorVersion(version string) (majorMinor string, prevMajorMinor string, err error) {
+	matches := patchVersionRe.FindStringSubmatch(version)
+	if len(matches) != 3 || matches[2] != "0" {
+		return "", "", fmt.Errorf("invalid minor version format: %s (expected X.Y.0)", version)
+	}
+
+	majorMinor = matches[1]
+	parts := strings.SplitN(majorMinor, ".", 2)
+	major, _ := strconv.Atoi(parts[0])
+	minor, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return "", "", fmt.Errorf("invalid minor number in version %s: %w", version, err)
+	}
+	if minor < 1 {
+		return "", "", fmt.Errorf("minor version must be >= 1, got %s", version)
+	}
+
+	prevMajorMinor = fmt.Sprintf("%d.%d", major, minor-1)
+	return majorMinor, prevMajorMinor, nil
+}
+
 type ProgressFunc func(format string, args ...any)
 
 // GetPatchCommits fetches all component commits for a patch release.
@@ -84,7 +105,7 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 	for component, branchCfg := range releaseCfg.Branches {
 		progress("Processing %s...", component)
 
-		cc, err := getComponentCommits(ctx, client, component, branchCfg, downstreamBranch, bounds, released, toDateOverride, version, prevVersion, progress)
+		cc, err := getComponentCommits(ctx, client, component, branchCfg, downstreamBranch, downstreamBranch, bounds, released, true, toDateOverride, version, prevVersion, progress)
 		if err != nil {
 			results = append(results, ComponentCommits{
 				Name:  component,
@@ -116,7 +137,122 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 	}, nil
 }
 
-func getComponentCommits(ctx context.Context, client *github.Client, component string, branchCfg BranchConfig, downstreamBranch string, bounds *PatchBounds, released bool, toDateOverride *time.Time, version, prevVersion string, progress ProgressFunc) (*ComponentCommits, error) {
+func GetMinorCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc) (*AuditResult, error) {
+	if progress == nil {
+		progress = func(string, ...any) {}
+	}
+
+	majorMinor, prevMajorMinor, err := ParseMinorVersion(version)
+	if err != nil {
+		return nil, err
+	}
+	prevVersion := prevMajorMinor + ".0"
+
+	progress("Fetching release config for %s...", majorMinor)
+	releaseCfg, err := FetchReleaseConfig(ctx, client, majorMinor)
+	if err != nil {
+		return nil, err
+	}
+
+	progress("Fetching release config for %s (previous minor)...", prevMajorMinor)
+	prevReleaseCfg, err := FetchReleaseConfig(ctx, client, prevMajorMinor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch previous minor release config: %w", err)
+	}
+
+	progress("Fetching patch history for %s...", prevMajorMinor)
+	prevHistory, err := GetPatchHistory(ctx, client, prevMajorMinor)
+	if err != nil {
+		return nil, err
+	}
+	prevBounds, err := boundsFromHistory(prevHistory, prevVersion)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find %s in patch history: %w", prevVersion, err)
+	}
+
+	progress("Fetching patch history for %s...", majorMinor)
+	currentHistory, err := GetPatchHistory(ctx, client, majorMinor)
+	if err != nil {
+		return nil, err
+	}
+	currentBounds, err := boundsFromHistory(currentHistory, version)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find %s in patch history: %w", version, err)
+	}
+
+	fromTime := prevBounds.From
+	if !prevBounds.To.IsZero() {
+		fromTime = prevBounds.To
+	}
+	bounds := &PatchBounds{
+		From: fromTime,
+		To:   currentBounds.To,
+	}
+
+	if toDateOverride != nil {
+		bounds.To = *toDateOverride
+	}
+
+	released := !bounds.To.IsZero()
+	if released {
+		progress("  From: %s (end of %s)", fromTime.Format("2006-01-02 15:04:05 MST"), prevVersion)
+		progress("  To:   %s", bounds.To.Format("2006-01-02 15:04:05 MST"))
+	} else {
+		progress("  From: %s (end of %s)", fromTime.Format("2006-01-02 15:04:05 MST"), prevVersion)
+		progress("  To:   (unreleased — using latest HEAD)")
+	}
+
+	fromBranch := fmt.Sprintf("release-v%s.x", prevMajorMinor)
+	toBranch := fmt.Sprintf("release-v%s.x", majorMinor)
+	var results []ComponentCommits
+
+	for component, branchCfg := range releaseCfg.Branches {
+		prevBranchCfg, exists := prevReleaseCfg.Branches[component]
+		if !exists {
+			progress("  %s: new in %s, skipping (no %s baseline)", component, majorMinor, prevMajorMinor)
+			results = append(results, ComponentCommits{
+				Name:  component,
+				Error: fmt.Sprintf("new component in %s, no %s baseline", majorMinor, prevMajorMinor),
+			})
+			continue
+		}
+
+		progress("Processing %s...", component)
+
+		cc, err := getComponentCommits(ctx, client, component, branchCfg, fromBranch, toBranch, bounds, released, false, toDateOverride, version, prevVersion, progress)
+		if err != nil {
+			results = append(results, ComponentCommits{
+				Name:  component,
+				Error: err.Error(),
+			})
+			continue
+		}
+
+		cc.PrevUpstreamBranch = prevBranchCfg.Upstream
+		progress("  %s: %d commits (%s → %s)", component, len(cc.Commits), prevBranchCfg.Upstream, branchCfg.Upstream)
+		if len(cc.UnsyncedCommits) > 0 {
+			progress("  ⚠ %s: %d unsynced commits on %s (downstream HEAD %s, upstream HEAD %s)",
+				component, len(cc.UnsyncedCommits), cc.UpstreamBranch, cc.ToSHA[:12], cc.UpstreamHead[:12])
+		}
+		results = append(results, *cc)
+	}
+
+	toDate := bounds.To
+	if toDate.IsZero() {
+		toDate = time.Now()
+	}
+
+	return &AuditResult{
+		Version:    version,
+		Previous:   prevVersion,
+		FromDate:   bounds.From.Format("2006-01-02T15:04:05Z"),
+		ToDate:     toDate.Format("2006-01-02T15:04:05Z"),
+		Released:   released,
+		Components: results,
+	}, nil
+}
+
+func getComponentCommits(ctx context.Context, client *github.Client, component string, branchCfg BranchConfig, fromBranch, toBranch string, bounds *PatchBounds, released bool, filterByDate bool, toDateOverride *time.Time, version, prevVersion string, progress ProgressFunc) (*ComponentCommits, error) {
 	repoCfg, err := FetchRepoConfig(ctx, client, component)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch repo config: %w", err)
@@ -132,10 +268,10 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 		Upstream:         repoCfg.Upstream,
 		Downstream:       fmt.Sprintf("openshift-pipelines/%s", repoCfg.Repo),
 		UpstreamBranch:   branchCfg.Upstream,
-		DownstreamBranch: downstreamBranch,
+		DownstreamBranch: toBranch,
 	}
 
-	fromSHA, err := resolveHeadSHA(ctx, client, component, repoCfg.Repo, fmt.Sprintf("v%s", prevVersion), downstreamBranch, &bounds.From, progress)
+	fromSHA, err := resolveHeadSHA(ctx, client, component, repoCfg.Repo, fmt.Sprintf("v%s", prevVersion), fromBranch, &bounds.From, progress)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get head SHA at from-date: %w", err)
 	}
@@ -143,9 +279,9 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 
 	var toSHA string
 	if released {
-		toSHA, err = resolveHeadSHA(ctx, client, component, repoCfg.Repo, fmt.Sprintf("v%s", version), downstreamBranch, &bounds.To, progress)
+		toSHA, err = resolveHeadSHA(ctx, client, component, repoCfg.Repo, fmt.Sprintf("v%s", version), toBranch, &bounds.To, progress)
 	} else {
-		toSHA, err = GetHeadSHAAt(ctx, client, repoCfg.Repo, downstreamBranch, nil)
+		toSHA, err = GetHeadSHAAt(ctx, client, repoCfg.Repo, toBranch, nil)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get head SHA at to-date: %w", err)
@@ -157,17 +293,22 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 		if err != nil {
 			return nil, fmt.Errorf("failed to compare commits: %w", err)
 		}
-		fromDateStr := bounds.From.Format("2006-01-02")
-		var filtered []Commit
-		for _, c := range commits {
-			if c.Date >= fromDateStr {
-				filtered = append(filtered, c)
+		if filterByDate {
+			fromDateStr := bounds.From.Format("2006-01-02")
+			var filtered []Commit
+			for _, c := range commits {
+				if c.Date >= fromDateStr {
+					filtered = append(filtered, c)
+				}
 			}
+			commits = filtered
 		}
-		cc.Commits = filtered
-		if len(filtered) > 0 {
+		cc.Commits = commits
+		if len(commits) > 0 {
 			ResolvePRs(ctx, client, upstreamParts[0], upstreamParts[1], cc.Commits)
-			ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], cc.Commits)
+			if filterByDate {
+				ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], cc.Commits)
+			}
 		}
 	} else {
 		cc.Commits = []Commit{}
@@ -185,7 +326,9 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 			unsynced, err := GetCommitsBetweenRefs(ctx, client, upstreamParts[0], upstreamParts[1], toSHA, upstreamHead)
 			if err == nil {
 				ResolvePRs(ctx, client, upstreamParts[0], upstreamParts[1], unsynced)
-				ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], unsynced)
+				if filterByDate {
+					ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], unsynced)
+				}
 				cc.UnsyncedCommits = unsynced
 			}
 		}

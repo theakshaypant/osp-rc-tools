@@ -18,7 +18,8 @@ type ComponentCommits struct {
 	Name             string   `json:"name"`
 	Upstream         string   `json:"upstream"`
 	Downstream       string   `json:"downstream"`
-	UpstreamBranch   string   `json:"upstream_branch"`
+	UpstreamBranch     string `json:"upstream_branch"`
+	PrevUpstreamBranch string `json:"prev_upstream_branch,omitempty"`
 	DownstreamBranch string   `json:"downstream_branch"`
 	FromSHA          string   `json:"from_sha,omitempty"`
 	ToSHA            string   `json:"to_sha,omitempty"`

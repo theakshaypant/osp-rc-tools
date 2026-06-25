@@ -59,9 +59,16 @@ func main() {
 	ctx := context.Background()
 	version := flag.Arg(0)
 
-	result, err := gh.GetPatchCommits(ctx, client, version, toDate, func(format string, args ...any) {
+	progress := func(format string, args ...any) {
 		fmt.Fprintf(os.Stderr, format+"\n", args...)
-	})
+	}
+
+	var result *gh.AuditResult
+	if _, _, merr := gh.ParseMinorVersion(version); merr == nil {
+		result, err = gh.GetMinorCommits(ctx, client, version, toDate, progress)
+	} else {
+		result, err = gh.GetPatchCommits(ctx, client, version, toDate, progress)
+	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
 		os.Exit(1)
