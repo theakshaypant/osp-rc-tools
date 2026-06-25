@@ -76,15 +76,9 @@ func ResolveOriginalPRs(ctx context.Context, client *github.Client, owner, repo 
 		}
 
 		// Method 2: cherry-pick mention + PR ref in commit message
-		if num, url := extractCherryPickPRRef(c.fullMessage); url != "" {
+		if url := resolvePRFromText(ctx, client, owner, repo, c.fullMessage); url != "" {
 			commits[i].OriginalPR = url
 			continue
-		} else if num > 0 {
-			pr, _, err := client.PullRequests.Get(ctx, owner, repo, num)
-			if err == nil {
-				commits[i].OriginalPR = pr.GetHTMLURL()
-				continue
-			}
 		}
 
 		// Method 3: cherry-pick mention + PR ref in the release-branch PR
@@ -99,16 +93,24 @@ func ResolveOriginalPRs(ctx context.Context, client *github.Client, owner, repo 
 		if err != nil {
 			continue
 		}
-		text := pr.GetTitle() + "\n" + pr.GetBody()
-		if num, url := extractCherryPickPRRef(text); url != "" {
+		if url := resolvePRFromText(ctx, client, owner, repo, pr.GetTitle()+"\n"+pr.GetBody()); url != "" {
 			commits[i].OriginalPR = url
-		} else if num > 0 {
-			origPR, _, err := client.PullRequests.Get(ctx, owner, repo, num)
-			if err == nil {
-				commits[i].OriginalPR = origPR.GetHTMLURL()
-			}
 		}
 	}
+}
+
+func resolvePRFromText(ctx context.Context, client *github.Client, owner, repo, text string) string {
+	num, url := extractCherryPickPRRef(text)
+	if url != "" {
+		return url
+	}
+	if num > 0 {
+		pr, _, err := client.PullRequests.Get(ctx, owner, repo, num)
+		if err == nil {
+			return pr.GetHTMLURL()
+		}
+	}
+	return ""
 }
 
 func extractCherryPickPRRef(text string) (num int, url string) {

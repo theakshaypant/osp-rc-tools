@@ -87,7 +87,7 @@ func GetPatchCommits(ctx context.Context, client *github.Client, jiraClient *jir
 	}
 
 	progress("Fetching release config for %s...", majorMinor)
-	releaseCfg, err := FetchReleaseConfig(ctx, client, majorMinor)
+	releaseCfg, err := FetchReleaseConfig(ctx, client, majorMinor, "main")
 	if err != nil {
 		return nil, err
 	}
@@ -158,13 +158,13 @@ func GetMinorCommits(ctx context.Context, client *github.Client, jiraClient *jir
 	prevVersion := prevMajorMinor + ".0"
 
 	progress("Fetching release config for %s...", majorMinor)
-	releaseCfg, err := FetchReleaseConfig(ctx, client, majorMinor)
+	releaseCfg, err := FetchReleaseConfig(ctx, client, majorMinor, "main")
 	if err != nil {
 		return nil, err
 	}
 
 	progress("Fetching release config for %s (previous minor)...", prevMajorMinor)
-	prevReleaseCfg, err := FetchReleaseConfig(ctx, client, prevMajorMinor)
+	prevReleaseCfg, err := FetchReleaseConfig(ctx, client, prevMajorMinor, "main")
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch previous minor release config: %w", err)
 	}

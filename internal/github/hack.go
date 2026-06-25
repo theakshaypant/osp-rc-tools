@@ -13,9 +13,13 @@ import (
 
 const hackRepo = "hack"
 
-func FetchReleaseConfig(ctx context.Context, client *github.Client, majorMinor string) (*ReleaseConfig, error) {
-	path := fmt.Sprintf("config/downstream/releases/%s.yaml", majorMinor)
-	content, _, _, err := client.Repositories.GetContents(ctx, downstreamOrg, hackRepo, path, &github.RepositoryContentGetOptions{Ref: "main"})
+func releaseConfigPath(majorMinor string) string {
+	return fmt.Sprintf("config/downstream/releases/%s.yaml", majorMinor)
+}
+
+func FetchReleaseConfig(ctx context.Context, client *github.Client, majorMinor, ref string) (*ReleaseConfig, error) {
+	path := releaseConfigPath(majorMinor)
+	content, _, _, err := client.Repositories.GetContents(ctx, downstreamOrg, hackRepo, path, &github.RepositoryContentGetOptions{Ref: ref})
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch release config for %s: %w", majorMinor, err)
 	}
@@ -64,7 +68,7 @@ func FetchRepoConfig(ctx context.Context, client *github.Client, component strin
 // recording when each version was first set. Entries are sorted
 // chronologically (oldest first).
 func GetPatchHistory(ctx context.Context, client *github.Client, majorMinor string) ([]PatchVersionEntry, error) {
-	path := fmt.Sprintf("config/downstream/releases/%s.yaml", majorMinor)
+	path := releaseConfigPath(majorMinor)
 
 	// Track dates per version. ListCommits returns newest-first, so we keep
 	// overwriting — the final date for each version is its oldest commit
@@ -114,21 +118,9 @@ func GetPatchHistory(ctx context.Context, client *github.Client, majorMinor stri
 }
 
 func getVersionAtCommit(ctx context.Context, client *github.Client, majorMinor, sha string) (string, error) {
-	path := fmt.Sprintf("config/downstream/releases/%s.yaml", majorMinor)
-	content, _, _, err := client.Repositories.GetContents(ctx, downstreamOrg, hackRepo, path, &github.RepositoryContentGetOptions{Ref: sha})
+	cfg, err := FetchReleaseConfig(ctx, client, majorMinor, sha)
 	if err != nil {
 		return "", err
 	}
-
-	raw, err := content.GetContent()
-	if err != nil {
-		return "", err
-	}
-
-	var cfg ReleaseConfig
-	if err := yaml.Unmarshal([]byte(raw), &cfg); err != nil {
-		return "", err
-	}
-
 	return strings.TrimSpace(cfg.EffectiveVersion()), nil
 }
