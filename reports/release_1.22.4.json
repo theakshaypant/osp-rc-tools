@@ -1,0 +1,399 @@
+{
+  "version": "1.22.4",
+  "previous": "1.22.3",
+  "from_date": "2026-06-19T04:51:24Z",
+  "to_date": "2026-06-25T12:30:26Z",
+  "released": false,
+  "components": [
+    {
+      "name": "git-init",
+      "upstream": "",
+      "downstream": "",
+      "upstream_branch": "",
+      "downstream_branch": "",
+      "error": "failed to get head SHA at from-date: failed to list head file commits for openshift-pipelines/git-init: GET https://api.github.com/repos/openshift-pipelines/git-init/commits?path=head\u0026per_page=1\u0026sha=release-v1.22.x\u0026until=2026-06-19T04%3A51%3A24Z: 404 Not Found []"
+    },
+    {
+      "name": "tekton-assist",
+      "upstream": "",
+      "downstream": "",
+      "upstream_branch": "",
+      "downstream_branch": "",
+      "error": "failed to get head SHA at from-date: failed to list head file commits for openshift-pipelines/p12n-tekton-assist: GET https://api.github.com/repos/openshift-pipelines/p12n-tekton-assist/commits?path=head\u0026per_page=1\u0026sha=release-v1.22.x\u0026until=2026-06-19T04%3A51%3A24Z: 404 Not Found []"
+    },
+    {
+      "name": "tekton-caches",
+      "upstream": "openshift-pipelines/tekton-caches",
+      "downstream": "openshift-pipelines/p12n-tekton-caches",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "2a6450268c385ce5eb03d45f0084d799118e7401",
+      "to_sha": "768eb9ad44621a4c899e93e490bc0b1aef5b8865",
+      "upstream_head": "768eb9ad44621a4c899e93e490bc0b1aef5b8865"
+    },
+    {
+      "name": "tektoncd-chains",
+      "upstream": "tektoncd/chains",
+      "downstream": "openshift-pipelines/tektoncd-chains",
+      "upstream_branch": "release-v0.26.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "881f5e9c57b9b1c403de909db0216b39e3762661",
+      "to_sha": "ac5a570e18d08fae082229f543b779061064a02f",
+      "commits": [
+        {
+          "sha": "ac5a570e18d08fae082229f543b779061064a02f",
+          "message": "chore(deps): bump the all group with 14 updates (#1728)",
+          "author": "dependabot[bot]",
+          "date": "2026-06-24",
+          "pr": "https://github.com/tektoncd/chains/pull/1725"
+        }
+      ],
+      "upstream_head": "ac5a570e18d08fae082229f543b779061064a02f"
+    },
+    {
+      "name": "tektoncd-cli",
+      "upstream": "tektoncd/cli",
+      "downstream": "openshift-pipelines/tektoncd-cli",
+      "upstream_branch": "release-v0.44.1",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "00740d6ae3b5da8508baa1ca6af103ee42a09f46",
+      "to_sha": "c2607484a98bd4d78e851f34e787e0f2a565b72c",
+      "upstream_head": "c2607484a98bd4d78e851f34e787e0f2a565b72c"
+    },
+    {
+      "name": "tektoncd-triggers",
+      "upstream": "tektoncd/triggers",
+      "downstream": "openshift-pipelines/tektoncd-triggers",
+      "upstream_branch": "release-v0.35.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "8c160e29e4aadffc3beed0a94e1ba32f762b2462",
+      "to_sha": "e00d998be4162d16d2112c90ef594e26d54a499a",
+      "commits": [
+        {
+          "sha": "0d62ad94f03052154041e4589443a8e1dc1db8c2",
+          "message": "fix: Skip GitHub API-dependent examples in e2e tests",
+          "author": "Shiv Verma",
+          "date": "2026-06-21",
+          "pr": "https://github.com/tektoncd/triggers/pull/2047",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12354"
+        },
+        {
+          "sha": "e00d998be4162d16d2112c90ef594e26d54a499a",
+          "message": "bump(deps): bump tektoncd/pipelione and google.golang.org/grpc to fix CVEs",
+          "author": "Shiv Verma",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/triggers/pull/2051",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12354"
+        }
+      ],
+      "upstream_head": "e00d998be4162d16d2112c90ef594e26d54a499a"
+    },
+    {
+      "name": "multicluster-proxy-aae",
+      "upstream": "openshift-pipelines/multicluster-proxy-aae",
+      "downstream": "openshift-pipelines/p12n-multicluster-proxy-aae",
+      "upstream_branch": "release-v0.1.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "7855b3abd2512b08e2445c11f72d015c2c7d666d",
+      "to_sha": "7855b3abd2512b08e2445c11f72d015c2c7d666d",
+      "upstream_head": "7855b3abd2512b08e2445c11f72d015c2c7d666d"
+    },
+    {
+      "name": "console-plugin",
+      "upstream": "openshift-pipelines/console-plugin",
+      "downstream": "openshift-pipelines/p12n-console-plugin",
+      "upstream_branch": "release-v1.23.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "83539f43cd76e2eb87d29358c209d944f58d61f3",
+      "to_sha": "22161b27baa81d5b27a7e41b6dadcd3019ed8463",
+      "commits": [
+        {
+          "sha": "f9699c58096928d1e670811870158bd640eb9c4b",
+          "message": "feat: add CVE fix skill with dependency analysis script",
+          "author": "Ankur Sinha",
+          "date": "2026-06-22",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1140",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1136",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12265"
+        },
+        {
+          "sha": "22161b27baa81d5b27a7e41b6dadcd3019ed8463",
+          "message": "Merge pull request #1140 from openshift-cherrypick-robot/cherry-pick-1136-to-release-v1.23.x",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1140",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1140"
+        }
+      ],
+      "upstream_head": "22161b27baa81d5b27a7e41b6dadcd3019ed8463"
+    },
+    {
+      "name": "tektoncd-hub",
+      "upstream": "openshift-pipelines/hub",
+      "downstream": "openshift-pipelines/tektoncd-hub",
+      "upstream_branch": "release-v1.23.12",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "f7d1f0b9f25b1c9b51d35944903722a671f3338a",
+      "to_sha": "f7d1f0b9f25b1c9b51d35944903722a671f3338a",
+      "upstream_head": "f7d1f0b9f25b1c9b51d35944903722a671f3338a"
+    },
+    {
+      "name": "tektoncd-pipeline",
+      "upstream": "tektoncd/pipeline",
+      "downstream": "openshift-pipelines/tektoncd-pipeline",
+      "upstream_branch": "release-v1.9.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "1eb2fe31dd4d782d17776d8aa43eb7a893c48e6d",
+      "to_sha": "7c4eb3ca893da521064d8dcac12fe6d817b858a3",
+      "commits": [
+        {
+          "sha": "7c4eb3ca893da521064d8dcac12fe6d817b858a3",
+          "message": "fix: bump Go and x deps for CVEs",
+          "author": "Vibhav Bobade",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10337",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12360"
+        }
+      ],
+      "upstream_head": "7c4eb3ca893da521064d8dcac12fe6d817b858a3"
+    },
+    {
+      "name": "tektoncd-pruner",
+      "upstream": "tektoncd/pruner",
+      "downstream": "openshift-pipelines/tektoncd-pruner",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "0715ff1e0a8a4757391de2cf4f0d0c4831ea1c55",
+      "to_sha": "0715ff1e0a8a4757391de2cf4f0d0c4831ea1c55",
+      "upstream_head": "0715ff1e0a8a4757391de2cf4f0d0c4831ea1c55"
+    },
+    {
+      "name": "tektoncd-results",
+      "upstream": "tektoncd/results",
+      "downstream": "openshift-pipelines/tektoncd-results",
+      "upstream_branch": "release-v0.18.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "85a6075a8ad4d74ad1fb7a6cf06939f10a3f34da",
+      "to_sha": "ad9dbfdc1d308ded6918c9396d498218f1e1c9df",
+      "commits": [
+        {
+          "sha": "ad9dbfdc1d308ded6918c9396d498218f1e1c9df",
+          "message": "Merge pull request #1335 from divyansh42/cherrypick-11380",
+          "author": "Emil Natan",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/results/pull/1335",
+          "original_pr": "https://github.com/tektoncd/results/pull/1335"
+        }
+      ],
+      "upstream_head": "ad9dbfdc1d308ded6918c9396d498218f1e1c9df"
+    },
+    {
+      "name": "syncer-service",
+      "upstream": "openshift-pipelines/syncer-service",
+      "downstream": "openshift-pipelines/p12n-syncer-service",
+      "upstream_branch": "release-v0.1.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "30b70d11b3afd3d8c4a3b537ad1243cd4ecf84b6",
+      "to_sha": "30b70d11b3afd3d8c4a3b537ad1243cd4ecf84b6",
+      "upstream_head": "30b70d11b3afd3d8c4a3b537ad1243cd4ecf84b6"
+    },
+    {
+      "name": "operator",
+      "upstream": "tektoncd/operator",
+      "downstream": "openshift-pipelines/operator",
+      "upstream_branch": "release-v0.79.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "82f67a944c34d58a9592b79e9f4dd4c8f7f164b0",
+      "to_sha": "184d0d67eb9ea0738475862827288394e5ff4a76",
+      "commits": [
+        {
+          "sha": "88fce7e924a83bca67ff55f59db9ecf72d261c0c",
+          "message": "chore(deps): update openshift images sha",
+          "author": "Shiv Verma",
+          "date": "2026-06-21",
+          "pr": "https://github.com/tektoncd/operator/pull/3514"
+        },
+        {
+          "sha": "856d60c35d06e696735f4f699dc2b4444639320b",
+          "message": "Merge multikueueclusters permission to scheduler role",
+          "author": "Pramod Bindal",
+          "date": "2026-06-22",
+          "pr": "https://github.com/tektoncd/operator/pull/3522",
+          "original_pr": "https://github.com/tektoncd/operator/pull/3518",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12211",
+          "release_note": {
+            "text": "tekton-multicluster-proxy-aae-role and tekton-multicluster-proxy-aae-rolebinding are removed.\nRequired permissions are moved to tekton-scheduler-role role.\non openshift  tekton-scheduler-role-binding changes the subject to openshift-operator SA so there is no orphaned role or rolebinding present.",
+            "type": "Bug Fix",
+            "status": "Proposed"
+          }
+        },
+        {
+          "sha": "1ce87aadbb52fce87c5c4c52423712f046f5bce3",
+          "message": "chore(deps): bump chainguard-dev/actions from 1.6.5 to 1.6.23",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3567"
+        },
+        {
+          "sha": "164a8d5b5695316457cd65bafb0a53236437c271",
+          "message": "chore(deps): bump actions/checkout from 6.0.2 to 6.0.3",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3570"
+        },
+        {
+          "sha": "3c4c4bfd1485dbd469a736fcb675edfc9ace4220",
+          "message": "chore(deps): bump golangci/golangci-lint-action from 9.2.0 to 9.2.1",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3568"
+        },
+        {
+          "sha": "9f88e7724c2d1026123bc8a1fc6a05abc16e50c4",
+          "message": "chore(deps): bump actions/cache from 5.0.3 to 5.0.5",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3569"
+        },
+        {
+          "sha": "4d299695742d17f1130e53e1f5052dbe466ee4d4",
+          "message": "chore(deps): bump peter-evans/create-pull-request from 8.1.0 to 8.1.1",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3566"
+        },
+        {
+          "sha": "ead77a652232a72428f901ead4e9cfea6718921d",
+          "message": "chore(deps): bump github.com/sigstore/cosign/v2 from 2.6.2 to 2.6.3",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3576"
+        },
+        {
+          "sha": "1dbf76a65471a24b1382fb29aa5a4bc5eb497e3f",
+          "message": "chore(deps): bump github.com/tektoncd/pipeline from 1.9.3 to 1.9.4",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3575"
+        },
+        {
+          "sha": "184d0d67eb9ea0738475862827288394e5ff4a76",
+          "message": "chore(deps): bump github.com/cert-manager/cert-manager",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3577"
+        }
+      ],
+      "upstream_head": "184d0d67eb9ea0738475862827288394e5ff4a76"
+    },
+    {
+      "name": "manual-approval-gate",
+      "upstream": "openshift-pipelines/manual-approval-gate",
+      "downstream": "openshift-pipelines/p12n-manual-approval-gate",
+      "upstream_branch": "release-v0.8.0",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "0743ea36cde4bfc6f0fadf365e7032b8e1301e31",
+      "to_sha": "0743ea36cde4bfc6f0fadf365e7032b8e1301e31",
+      "upstream_head": "0743ea36cde4bfc6f0fadf365e7032b8e1301e31"
+    },
+    {
+      "name": "opc",
+      "upstream": "openshift-pipelines/opc",
+      "downstream": "openshift-pipelines/p12n-opc",
+      "upstream_branch": "release-v1.22.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "42646b843ac687b20f292ec6ceb936e901a87406",
+      "to_sha": "5fabea4ce262edf14ee775d7ad9bda58e6ae6241",
+      "commits": [
+        {
+          "sha": "5fabea4ce262edf14ee775d7ad9bda58e6ae6241",
+          "message": "bump tektoncd/cli to v0.44.2",
+          "author": "Shiv Verma",
+          "date": "2026-06-20",
+          "pr": "https://github.com/openshift-pipelines/opc/pull/468"
+        }
+      ],
+      "upstream_head": "5fabea4ce262edf14ee775d7ad9bda58e6ae6241"
+    },
+    {
+      "name": "console-plugin-pf5",
+      "upstream": "openshift-pipelines/console-plugin",
+      "downstream": "openshift-pipelines/p12n-console-plugin-pf5",
+      "upstream_branch": "release-v1.22.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "17a5fc8c908e144be6e8f83f8c97acf55fa21f1f",
+      "to_sha": "17a5fc8c908e144be6e8f83f8c97acf55fa21f1f",
+      "upstream_head": "17a5fc8c908e144be6e8f83f8c97acf55fa21f1f"
+    },
+    {
+      "name": "pipelines-as-code",
+      "upstream": "tektoncd/pipelines-as-code",
+      "downstream": "openshift-pipelines/pac-downstream",
+      "upstream_branch": "release-v0.42.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "5755d1a3f0731cece8d743b6f1b155e3e51076f6",
+      "to_sha": "5755d1a3f0731cece8d743b6f1b155e3e51076f6",
+      "upstream_head": "5755d1a3f0731cece8d743b6f1b155e3e51076f6"
+    },
+    {
+      "name": "tekton-kueue",
+      "upstream": "konflux-ci/tekton-kueue",
+      "downstream": "openshift-pipelines/tekton-kueue",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.22.x",
+      "from_sha": "ec8c653bc3211e3ce971265dd7c65a282ffdacbd",
+      "to_sha": "ec8c653bc3211e3ce971265dd7c65a282ffdacbd",
+      "upstream_head": "ec8c653bc3211e3ce971265dd7c65a282ffdacbd"
+    }
+  ],
+  "unmatched_jiras": [
+    {
+      "key": "SRVKP-12361",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12361",
+      "summary": "[GovCloud] pipelines-serve-tkn-cli-rhel9 - 9 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12359",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12359",
+      "summary": "[GovCloud] pipelines-events-rhel9 - 11 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12353",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12353",
+      "summary": "[GovCloud] pipelines-triggers-controller-rhel9 - 14 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12352",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12352",
+      "summary": "[GovCloud] pipelines-controller-rhel9 - 22 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12350",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12350",
+      "summary": "[GovCloud] pipelines-resolvers-rhel9 - 22 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12348",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12348",
+      "summary": "[GovCloud] pipelines-triggers-core-interceptors-rhel9 - 24 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12343",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12343",
+      "summary": "[GovCloud] pipelines-cli-tkn-rhel9 - 28 CVEs (CRITICAL)",
+      "status": "Closed"
+    },
+    {
+      "key": "SRVKP-12342",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12342",
+      "summary": "[GovCloud] June 2026 - FedRAMP CVE Remediation - OpenShift Pipelines",
+      "status": "Dev Complete"
+    }
+  ]
+}
