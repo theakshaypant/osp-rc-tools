@@ -11,6 +11,7 @@ import (
 	"time"
 
 	gh "github.com/theakshaypant/osp-rc-tools/internal/github"
+	"github.com/theakshaypant/osp-rc-tools/internal/jira"
 )
 
 func main() {
@@ -56,12 +57,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	jiraClient, err := jira.NewClient()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Warning: Jira client error:", err)
+	}
+
 	ctx := context.Background()
 	version := flag.Arg(0)
 	outputFile := fmt.Sprintf("release_%s.json", version)
 
 	progress := func(format string, args ...any) {
 		fmt.Fprintf(os.Stderr, format+"\n", args...)
+	}
+
+	if jiraClient != nil {
+		progress("Jira integration enabled")
 	}
 
 	writeResult := func(result *gh.AuditResult) {
@@ -76,9 +86,9 @@ func main() {
 	}
 
 	if _, _, merr := gh.ParseMinorVersion(version); merr == nil {
-		_, err = gh.GetMinorCommits(ctx, client, version, toDate, progress, writeResult)
+		_, err = gh.GetMinorCommits(ctx, client, jiraClient, version, toDate, progress, writeResult)
 	} else {
-		_, err = gh.GetPatchCommits(ctx, client, version, toDate, progress, writeResult)
+		_, err = gh.GetPatchCommits(ctx, client, jiraClient, version, toDate, progress, writeResult)
 	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)

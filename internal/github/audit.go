@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v88/github"
+	"github.com/theakshaypant/osp-rc-tools/internal/jira"
 )
 
 // ParsePatchVersion parses "1.22.3" into majorMinor="1.22" and previous="1.22.2".
@@ -75,7 +76,7 @@ func buildAuditResult(version, prevVersion string, bounds *PatchBounds, released
 // GetPatchCommits fetches all component commits for a patch release.
 // Handles both released patches (bounded by bot commits) and unreleased
 // patches (uses latest head SHA as the upper bound).
-func GetPatchCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc, onResult ResultFunc) (*AuditResult, error) {
+func GetPatchCommits(ctx context.Context, client *github.Client, jiraClient *jira.Client, version string, toDateOverride *time.Time, progress ProgressFunc, onResult ResultFunc) (*AuditResult, error) {
 	if progress == nil {
 		progress = func(string, ...any) {}
 	}
@@ -121,7 +122,7 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 	for component, branchCfg := range releaseCfg.Branches {
 		progress("Processing %s...", component)
 
-		cc, err := getComponentCommits(ctx, client, component, branchCfg, downstreamBranch, downstreamBranch, bounds, released, true, toDateOverride, version, prevVersion, progress)
+		cc, err := getComponentCommits(ctx, client, jiraClient, component, branchCfg, downstreamBranch, downstreamBranch, bounds, released, true, toDateOverride, version, prevVersion, progress)
 		if err != nil {
 			results = append(results, ComponentCommits{
 				Name:  component,
@@ -145,7 +146,7 @@ func GetPatchCommits(ctx context.Context, client *github.Client, version string,
 	return buildAuditResult(version, prevVersion, bounds, released, results), nil
 }
 
-func GetMinorCommits(ctx context.Context, client *github.Client, version string, toDateOverride *time.Time, progress ProgressFunc, onResult ResultFunc) (*AuditResult, error) {
+func GetMinorCommits(ctx context.Context, client *github.Client, jiraClient *jira.Client, version string, toDateOverride *time.Time, progress ProgressFunc, onResult ResultFunc) (*AuditResult, error) {
 	if progress == nil {
 		progress = func(string, ...any) {}
 	}
@@ -227,7 +228,7 @@ func GetMinorCommits(ctx context.Context, client *github.Client, version string,
 
 		progress("Processing %s...", component)
 
-		cc, err := getComponentCommits(ctx, client, component, branchCfg, fromBranch, toBranch, bounds, released, false, toDateOverride, version, prevVersion, progress)
+		cc, err := getComponentCommits(ctx, client, jiraClient, component, branchCfg, fromBranch, toBranch, bounds, released, false, toDateOverride, version, prevVersion, progress)
 		if err != nil {
 			results = append(results, ComponentCommits{
 				Name:  component,
@@ -252,7 +253,7 @@ func GetMinorCommits(ctx context.Context, client *github.Client, version string,
 	return buildAuditResult(version, prevVersion, bounds, released, results), nil
 }
 
-func getComponentCommits(ctx context.Context, client *github.Client, component string, branchCfg BranchConfig, fromBranch, toBranch string, bounds *PatchBounds, released bool, filterByDate bool, toDateOverride *time.Time, version, prevVersion string, progress ProgressFunc) (*ComponentCommits, error) {
+func getComponentCommits(ctx context.Context, client *github.Client, jiraClient *jira.Client, component string, branchCfg BranchConfig, fromBranch, toBranch string, bounds *PatchBounds, released bool, filterByDate bool, toDateOverride *time.Time, version, prevVersion string, progress ProgressFunc) (*ComponentCommits, error) {
 	repoCfg, err := FetchRepoConfig(ctx, client, component)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch repo config: %w", err)
@@ -309,6 +310,7 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 			if filterByDate {
 				ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], cc.Commits)
 			}
+			resolveJiras(jiraClient, cc.Commits)
 		}
 	} else {
 		cc.Commits = []Commit{}
@@ -329,12 +331,32 @@ func getComponentCommits(ctx context.Context, client *github.Client, component s
 				if filterByDate {
 					ResolveOriginalPRs(ctx, client, upstreamParts[0], upstreamParts[1], unsynced)
 				}
+				resolveJiras(jiraClient, unsynced)
 				cc.UnsyncedCommits = unsynced
 			}
 		}
 	}
 
 	return &cc, nil
+}
+
+func resolveJiras(jiraClient *jira.Client, commits []Commit) {
+	if jiraClient == nil {
+		return
+	}
+	for i := range commits {
+		if commits[i].PR != "" {
+			if ticket := jiraClient.FindTicketForPR(commits[i].PR); ticket != "" {
+				commits[i].Jira = ticket
+				continue
+			}
+		}
+		if commits[i].OriginalPR != "" {
+			if ticket := jiraClient.FindTicketForPR(commits[i].OriginalPR); ticket != "" {
+				commits[i].Jira = ticket
+			}
+		}
+	}
 }
 
 func resolveHeadSHA(ctx context.Context, client *github.Client, component, repo, tag, branch string, fallbackTime *time.Time, progress ProgressFunc) (string, error) {
