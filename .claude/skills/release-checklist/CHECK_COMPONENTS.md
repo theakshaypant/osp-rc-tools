@@ -4,6 +4,8 @@ Verify component PRs are merged on release branches, upstream sources are synced
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `COMPONENTS` (list from release config), `TZ_FMT`
 
+**Report ownership:** Steps 6, 7, 8. Detail section: `## Component Details`.
+
 **Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/REPO/pull/NUM)` using the correct repo. All commit SHAs as `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`. All timestamps as absolute local time.
 
 **Early stop:** Check steps 6, 7, 8 in order. If any step requires action, return immediately with the blocking step's status and action details. Do not check subsequent steps.
@@ -109,4 +111,4 @@ This is fully automated. If builds are stuck, you can:
 2. Trigger image rebuilds: https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml
    (Parameters: version=${MAJOR_MINOR}, optionally a specific repo name)
 
-**Return:** Status for steps 6, 7, 8 with details. Include counts (merged/open/missing PRs, merged/open nudges).
+**Return:** Status for steps 6, 7, 8 with details. Include counts (merged/open/missing PRs, merged/open nudges). After producing results, read and follow the report update instructions in `REPORT.md` to write/update `reports/checklist-${VERSION}.md`.

@@ -4,6 +4,8 @@ Verify stage and production release status on Konflux, QA handover readiness, an
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`
 
+**Report ownership:** Steps 13, 14, 15, 16. Detail section: `## Release Status Details`.
+
 **Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/REPO/pull/NUM)`. All commit SHAs as links. All timestamps as absolute local time.
 
 **Early stop:** Check steps 13, 14, 15, 16 in order. If any step requires action, return immediately with the blocking step's status and action details. Do not check subsequent steps.
@@ -176,4 +178,4 @@ MANUAL: Send advisory for ${VERSION}.
 Coordinate with the release team to publish the advisory.
 ```
 
-**Return:** Status for steps 13-16 with details. Include Konflux release status table (Application, ReleasePlan, Status, Timestamp), CSV PR status, and production readiness.
+**Return:** Status for steps 13-16 with details. Include Konflux release status table (Application, ReleasePlan, Status, Timestamp), CSV PR status, and production readiness. After producing results, read and follow the report update instructions in `REPORT.md` to write/update `reports/checklist-${VERSION}.md`.

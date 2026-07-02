@@ -31,49 +31,9 @@ The version is passed as the skill argument. Example: `/release-checklist 1.21.3
 <step name="setup">
 **Parse arguments, initialize, and set up time formatting.**
 
-Parse the version argument. It must match `X.Y.Z` (patch) or `X.Y.0` (minor).
+Read and follow the instructions in `SETUP.md`.
 
-Derive:
-- `MAJOR_MINOR` — e.g. `1.21`
-- `MM_DASHED` — e.g. `1-21` (dots replaced with dashes)
-- `VERSION` — e.g. `1.21.3`
-- `RELEASE_BRANCH` — `release-v${MAJOR_MINOR}.x`
-- `IS_PATCH` — true if Z > 0
-- `KONFLUX_NS` — always `tekton-ecosystem-tenant`
-
-Source environment for external credentials:
-```bash
-source .env
-```
-
-Verify `GITLAB_URL`, `GITLAB_TOKEN`, `KONFLUX_SERVER`, `KONFLUX_TOKEN` are set. If any are missing, note which external checks will be skipped.
-
-**Time formatting:**
-
-Capture the local timezone and define a format string for absolute timestamps:
-```bash
-LOCAL_TZ=$(date +%Z)
-TZ_FMT='%Y-%m-%d %H:%M %Z'
-```
-
-**CRITICAL:** All timestamps in the report and conversation output MUST use absolute local time. Convert all RFC3339/ISO8601 timestamps from `gh`, `oc`, Jira, or any API to local time:
-```bash
-date -d "${TIMESTAMP}" +"${TZ_FMT}"
-```
-
-**Never** use relative time expressions like "3 min ago", "~30 min ago", "6d5h", "N days ago", or similar. Always show the actual date and time with timezone.
-
-Fetch the release config from the hack repo:
-```bash
-RELEASE_CFG=$(gh api repos/openshift-pipelines/hack/contents/config/downstream/releases/${MAJOR_MINOR}.yaml --jq '.content' | base64 -d)
-```
-
-Parse key fields from the YAML:
-- `RELEASE_TAG` — the `release-tag` field (e.g. `1.21.3`)
-- `CODE_FREEZE` — the `code-freeze` field (true/false)
-- `COMPONENTS` — list of component names from the `branches` map
-
-If the release config doesn't exist, stop: "Release config for ${MAJOR_MINOR} not found in hack repo."
+The version is passed as the skill argument. Example: `/release-checklist 1.21.3`
 </step>
 
 <step name="check_hack">
@@ -140,48 +100,14 @@ Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KON
 <step name="report">
 **Step 17: Generate summary report.**
 
-Compile all step results into a summary table and write to `reports/checklist-${VERSION}.md`.
+Read and follow the instructions in `REPORT.md` to create or update `reports/checklist-${VERSION}.md`.
+
+Since this is the full orchestrator run, update ALL step rows and ALL detail sections from the results collected above.
 
 Use the **Generated** timestamp in absolute local time:
 ```bash
 GENERATED=$(date +"${TZ_FMT}")
 ```
-
-Include:
-- Summary table with step status (only steps that were checked)
-- Detail sections for checked steps (build validation, open PRs, Konflux releases — only if those steps were reached)
-- The first blocking step with actionable next-action guidance
-- List of remaining unchecked steps
-
-**Formatting reminders:**
-- All PR numbers must be markdown links: `[#NUM](https://github.com/OWNER/REPO/pull/NUM)`
-- All commit SHAs must be markdown links: `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`
-- All timestamps must be absolute local time with timezone
-
-```markdown
-# Release Checklist: ${VERSION}
-
-**Generated:** ${GENERATED}
-**Release branch:** ${RELEASE_BRANCH}
-**Release tag:** ${RELEASE_TAG}
-**Code freeze:** ${CODE_FREEZE}
-**Component monitor:** https://openshift-pipelines.github.io/hack/
-**Konflux UI:** https://konflux-ui.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com
-
-| # | Step | Status | Details |
-|---|------|--------|---------|
-| ... | (only steps checked so far) | ... | ... |
-
-## Next Action
-
-${NEXT_ACTION_DETAILS_FOR_FIRST_BLOCKING_STEP}
-
-## Remaining Steps
-
-${LIST_OF_UNCHECKED_STEPS}
-```
-
-Write the report to `reports/checklist-${VERSION}.md`.
 
 Print the summary to the conversation.
 </step>

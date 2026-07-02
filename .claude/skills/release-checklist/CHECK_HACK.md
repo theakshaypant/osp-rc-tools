@@ -4,6 +4,8 @@ Verify the hack repo has the correct release version configured and the release-
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `RELEASE_TAG` (from release config), `TZ_FMT` (date format string for local time)
 
+**Report ownership:** Steps 1, 2. No detail section.
+
 **Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/hack/pull/NUM)`. All commit SHAs as `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`. All timestamps as absolute local time.
 
 ## Step 1: Verify release version
@@ -47,4 +49,4 @@ gh pr list --repo openshift-pipelines/hack \
 - If the most recent PR is open → **ACTION NEEDED**: review and merge it
 - If the most recent PR is closed (not merged) → may need to re-trigger the workflow
 
-**Return:** Status for steps 1 and 2 with details.
+**Return:** Status for steps 1 and 2 with details. After producing results, read and follow the report update instructions in `REPORT.md` to write/update `reports/checklist-${VERSION}.md`.

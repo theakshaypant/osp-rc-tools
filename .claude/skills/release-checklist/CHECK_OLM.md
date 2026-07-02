@@ -4,6 +4,8 @@ Verify OLM catalog configuration, index image builds, and code freeze status.
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `CODE_FREEZE` (from release config), `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`
 
+**Report ownership:** Steps 11, 12. Detail section: `## OLM and Code Freeze Details`.
+
 **Formatting:** All PR numbers must be rendered as markdown links. All commit SHAs as links. All timestamps as absolute local time.
 
 **Early stop:** Check steps 11, 12 in order. If any step requires action, return immediately with the blocking step's status and action details.
@@ -67,4 +69,4 @@ Check the value from the release config fetched in setup:
   Create a PR to set: code-freeze: true
   ```
 
-**Return:** Status for steps 11 and 12 with details. Include OLM config version coverage, latest workflow run time, index release status, and code freeze state.
+**Return:** Status for steps 11 and 12 with details. Include OLM config version coverage, latest workflow run time, index release status, and code freeze state. After producing results, read and follow the report update instructions in `REPORT.md` to write/update `reports/checklist-${VERSION}.md`.

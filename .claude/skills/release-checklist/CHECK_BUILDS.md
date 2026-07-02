@@ -4,6 +4,8 @@ Validate that Konflux builds originate from the correct (latest) commit SHA on e
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`
 
+**Report ownership:** Steps 9, 9b, 10. Detail section: `## Build Validation Details`.
+
 **Formatting:** All commit SHAs in the comparison table must be rendered as markdown links `[SHORT](https://github.com/OWNER/REPO/commit/FULL)` using the first 12 characters for SHORT. Both the HEAD SHA and Snapshot SHA columns should contain links. All timestamps as absolute local time.
 
 **Constraints:**
@@ -40,6 +42,54 @@ This must be done BEFORE triggering the final image rebuild.
 ```
 
 **This step must be completed before build validation (step 10).** If the version is wrong, do not proceed to build validation — any images built now would have the wrong version.
+
+## Step 9b: Check if image rebuilds were triggered after latest changes
+
+Before validating SHAs, check whether the `trigger-image-rebuilds` workflow was run after the latest upstream sync and operator version update landed. If no rebuild was triggered, builds are guaranteed stale — skip SHA validation and guide the user to trigger rebuilds.
+
+### 9b.1: Get the latest upstream sync merge time
+
+```bash
+gh pr list --repo openshift-pipelines/operator \
+  --head "actions/update/sources-${RELEASE_BRANCH}" \
+  --state merged --limit 1 \
+  --json mergedAt --jq '.[0].mergedAt'
+```
+
+### 9b.2: Get the latest trigger-image-rebuilds run for this version
+
+```bash
+gh run list --repo openshift-pipelines/hack \
+  --workflow=trigger-image-rebuilds.yaml \
+  --limit 20 \
+  --json databaseId,status,conclusion,createdAt,displayTitle
+```
+
+Filter for runs that mention `${MAJOR_MINOR}` in the display title or inputs. Get the most recent one's `createdAt` timestamp.
+
+### 9b.3: Compare timestamps
+
+- If a rebuild run exists AND its `createdAt` is **after** the latest upstream sync merge time → **DONE** (rebuilds were triggered after the latest changes)
+- If a rebuild run exists but its `createdAt` is **before** the latest upstream sync merge time → **ACTION NEEDED** (changes landed after the last rebuild)
+- If no rebuild run exists for this version → **ACTION NEEDED**
+
+If not done:
+```
+NEXT ACTION: Trigger image rebuilds.
+
+The latest upstream sync ([#PR_NUMBER](URL)) merged at ${SYNC_MERGE_TIME},
+but the most recent image rebuild for ${MAJOR_MINOR} was at ${REBUILD_TIME} (before the sync).
+
+Trigger a rebuild:
+  Go to: https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml
+  Click "Run workflow" with:
+    - version: ${MAJOR_MINOR}
+    - repo: (leave empty to rebuild all)
+
+Wait for the rebuild to complete, then re-run the checklist.
+```
+
+If done, proceed to step 10.
 
 ## Step 10: Validate Konflux builds against downstream repo commits
 
@@ -140,4 +190,4 @@ oc get snapshot ${LATEST_BUNDLE} -n tekton-ecosystem-tenant \
 
 Compare the bundle snapshot's operator revision against the operator repo HEAD. If they differ, the bundle was built from a stale operator commit. Report the bundle snapshot name and its creation time as absolute local time.
 
-**Return:** Status for steps 9 and 10 with operator project.yaml version check, SHA comparison table, list of stale/split repos, and bundle snapshot status.
+**Return:** Status for steps 9 and 10 with operator project.yaml version check, SHA comparison table, list of stale/split repos, and bundle snapshot status. After producing results, read and follow the report update instructions in `REPORT.md` to write/update `reports/checklist-${VERSION}.md`.

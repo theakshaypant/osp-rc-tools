@@ -4,6 +4,8 @@ Verify Konflux config PRs are merged, configuration is applied on the cluster, R
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `GITLAB_URL`, `GITLAB_TOKEN`, `TZ_FMT`
 
+**Report ownership:** Steps 3, 3b, 4, 5. Detail section: `## Konflux Config Details`.
+
 **Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/hack/pull/NUM)`. All commit SHAs as `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`. All timestamps as absolute local time.
 
 **Early stop:** If any step in this group requires action, return immediately with the blocking step's status and action details. Do not check subsequent steps.
@@ -214,4 +216,4 @@ https://gitlab.cee.redhat.com/releng/pyxis-repo-configs/
 Check hack repo for generated Pyxis config.
 ```
 
-**Return:** Status for steps 3, 3b, 4, 5 with details.
+**Return:** Status for steps 3, 3b, 4, 5 with details. After producing results, read and follow the report update instructions in `REPORT.md` to write/update `reports/checklist-${VERSION}.md`.
