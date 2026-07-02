@@ -5,9 +5,11 @@ description: Verify release checklist progress and identify next steps for a pat
 # Release Checklist
 
 <objective>
-Given a release version (e.g. `1.21.3`), walk through the OpenShift Pipelines release workflow steps in order, verify which are complete by querying GitHub, GitLab, Konflux cluster, and local tools, and identify the next required action.
+Given a release version (e.g. `1.21.3`), walk through the OpenShift Pipelines release workflow steps in order, verify which are complete by querying GitHub, GitLab, Konflux cluster, and local tools, and **stop at the first step that requires action**.
 
 Steps are **sequential** — each step depends on the previous one being complete. The skill validates not just that PRs merged or builds exist, but that builds originate from the **correct commit SHAs** on the downstream repos.
+
+**Early stop rule:** Check steps in order. As soon as a step's status is anything other than DONE (i.e. ACTION NEEDED, IN PROGRESS, STALE, FAILED, etc.), **stop checking further steps**. Report all completed steps plus the first blocking step with its actionable guidance. Do not query systems for steps beyond the blocker.
 
 The version is passed as the skill argument. Example: `/release-checklist 1.21.3`
 
@@ -18,6 +20,11 @@ The version is passed as the skill argument. Example: `/release-checklist 1.21.3
 - Jira: `JIRA_URL` + `JIRA_EMAIL` + `JIRA_TOKEN`
 
 **Konflux namespace:** All Konflux operations target `tekton-ecosystem-tenant`.
+
+**Formatting rules** (apply everywhere — report, conversation output, and all subskill output):
+- **PR links:** Always render PR numbers as markdown links: `[#NUMBER](https://github.com/OWNER/REPO/pull/NUMBER)`. For GitLab MRs: `[!NUMBER](GITLAB_URL/path/-/merge_requests/NUMBER)`.
+- **SHA links:** Always render commit SHAs as markdown links: `[SHORT_SHA](https://github.com/OWNER/REPO/commit/FULL_SHA)`. Use the first 12 characters for SHORT_SHA. When comparing SHAs (e.g. in build validation tables), both the HEAD SHA and Snapshot SHA columns should be links.
+- **Timestamps:** All timestamps must be absolute local time with timezone (e.g. `2026-07-01 13:11 IST`). Never use relative times.
 </objective>
 
 <process>
@@ -85,6 +92,8 @@ If step 1 is not done, stop — remaining steps depend on this.
 Read and follow the instructions in `CHECK_KONFLUX_CONFIG.md`.
 
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `GITLAB_URL`, `GITLAB_TOKEN`, `TZ_FMT` to the subskill context.
+
+**If any step in this group requires action, stop and skip to the report step.**
 </step>
 
 <step name="check_components">
@@ -93,34 +102,43 @@ Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KON
 Read and follow the instructions in `CHECK_COMPONENTS.md`.
 
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `COMPONENTS`, `TZ_FMT` to the subskill context.
+
+**If any step in this group requires action, stop and skip to the report step.**
 </step>
 
 <step name="check_builds">
-**Step 9: Build validation (SHA comparison).**
+**Steps 9–10: Operator project.yaml version and build validation (SHA comparison).**
 
 Read and follow the instructions in `CHECK_BUILDS.md`.
 
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT` to the subskill context.
+
+**If project.yaml version is wrong (step 9), stop — images must not be built with the wrong version.**
+**If builds are stale or split (step 10), stop and skip to the report step.**
 </step>
 
 <step name="check_olm">
-**Steps 10–11: OLM config and code freeze.**
+**Steps 11–12: OLM config and code freeze.**
 
 Read and follow the instructions in `CHECK_OLM.md`.
 
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `CODE_FREEZE`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT` to the subskill context.
+
+**If any step in this group requires action, stop and skip to the report step.**
 </step>
 
 <step name="check_releases">
-**Steps 12–15: Stage release, QA handover, production release, and advisory.**
+**Steps 13–16: Stage release, QA handover, production release, and advisory.**
 
 Read and follow the instructions in `CHECK_RELEASES.md`.
 
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT` to the subskill context.
+
+**If any step in this group requires action, stop and skip to the report step.**
 </step>
 
 <step name="report">
-**Step 16: Generate summary report.**
+**Step 17: Generate summary report.**
 
 Compile all step results into a summary table and write to `reports/checklist-${VERSION}.md`.
 
@@ -130,11 +148,15 @@ GENERATED=$(date +"${TZ_FMT}")
 ```
 
 Include:
-- Summary table with step status
-- Build validation results (SHA comparison table)
-- Open PRs and their CI status
-- Konflux release status (stage/prod) with absolute timestamps
-- Next action with exact instructions
+- Summary table with step status (only steps that were checked)
+- Detail sections for checked steps (build validation, open PRs, Konflux releases — only if those steps were reached)
+- The first blocking step with actionable next-action guidance
+- List of remaining unchecked steps
+
+**Formatting reminders:**
+- All PR numbers must be markdown links: `[#NUM](https://github.com/OWNER/REPO/pull/NUM)`
+- All commit SHAs must be markdown links: `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`
+- All timestamps must be absolute local time with timezone
 
 ```markdown
 # Release Checklist: ${VERSION}
@@ -148,27 +170,15 @@ Include:
 
 | # | Step | Status | Details |
 |---|------|--------|---------|
-...
-
-## Build Validation (Step 9)
-
-| Downstream Repo | HEAD SHA | Snapshot SHA | Status |
-|-----------------|----------|-------------|--------|
-...
-
-## Konflux Releases
-
-| Application | ReleasePlan | Status | Timestamp |
-|------------|-------------|--------|-----------|
-...
+| ... | (only steps checked so far) | ... | ... |
 
 ## Next Action
 
-${NEXT_ACTION_DETAILS}
+${NEXT_ACTION_DETAILS_FOR_FIRST_BLOCKING_STEP}
 
 ## Remaining Steps
 
-${REMAINING_STEPS}
+${LIST_OF_UNCHECKED_STEPS}
 ```
 
 Write the report to `reports/checklist-${VERSION}.md`.
@@ -179,13 +189,13 @@ Print the summary to the conversation.
 
 <success_criteria>
 - [ ] Release config fetched and parsed correctly from hack repo
-- [ ] Each step verified against live GitHub/GitLab/Konflux state using correct branch/label patterns
+- [ ] Steps verified sequentially — stopped at first step requiring action
 - [ ] All Konflux commands target `tekton-ecosystem-tenant` namespace
 - [ ] GitLab and Konflux cluster accessed with READ-ONLY operations only
-- [ ] Build validation: snapshot component revisions compared against downstream repo HEAD SHAs
-- [ ] Stale or split builds flagged with actionable rebuild instructions
 - [ ] First incomplete step identified with actionable guidance
 - [ ] Manual steps include exact URLs, commands, and parameters
+- [ ] All PR numbers rendered as markdown links: `[#NUM](URL)`
+- [ ] All commit SHAs rendered as markdown links: `[SHORT_SHA](URL)`
 - [ ] All timestamps use absolute local time with timezone (e.g. `2026-07-01 13:11 IST`) — no relative times
 - [ ] Summary table written to `reports/checklist-${VERSION}.md`
 </success_criteria>

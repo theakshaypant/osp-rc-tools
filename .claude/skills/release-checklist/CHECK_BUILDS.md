@@ -4,14 +4,48 @@ Validate that Konflux builds originate from the correct (latest) commit SHA on e
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`
 
+**Formatting:** All commit SHAs in the comparison table must be rendered as markdown links `[SHORT](https://github.com/OWNER/REPO/commit/FULL)` using the first 12 characters for SHORT. Both the HEAD SHA and Snapshot SHA columns should contain links. All timestamps as absolute local time.
+
 **Constraints:**
 - Konflux cluster: **READ-ONLY** (`oc get`/`kubectl get` only, never `apply`/`create`/`delete`)
 
-## Step 9: Validate Konflux builds against downstream repo commits
+## Step 9: Verify operator project.yaml version
+
+The operator's `project.yaml` on the release branch contains the bundle version under `versions.current`. This **must** match `VERSION` before the final image rebuild — otherwise the operator image ships with the wrong version string.
+
+The `create-new-patch` workflow only bumps `release-tag` in the hack repo config. It does NOT update the operator's `project.yaml`. This is a separate step.
+
+```bash
+gh api repos/openshift-pipelines/operator/contents/project.yaml?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d | head -5
+```
+
+Check the `versions.current` field:
+- If `current: ${VERSION}` → **DONE**
+- If `current` shows a different version (e.g. previous patch) → **ACTION NEEDED**
+
+If not done:
+```
+NEXT ACTION: Update operator project.yaml version.
+
+The operator's project.yaml on ${RELEASE_BRANCH} shows current: ${CURRENT_VERSION},
+but it must be ${VERSION} before images are built.
+
+Create a PR on ${RELEASE_BRANCH} to update project.yaml:
+  versions:
+    current: ${VERSION}
+    previous: ${PREVIOUS_VERSION}
+
+This must be done BEFORE triggering the final image rebuild.
+```
+
+**This step must be completed before build validation (step 10).** If the version is wrong, do not proceed to build validation — any images built now would have the wrong version.
+
+## Step 10: Validate Konflux builds against downstream repo commits
 
 This is the critical validation step. Builds are only valid if they originate from the correct (latest) commit SHA on each downstream repo's release branch.
 
-### 9a. Get the latest core snapshot from Konflux
+### 10a. Get the latest core snapshot from Konflux
 
 ```bash
 LATEST_SNAPSHOT=$(oc get snapshots -n tekton-ecosystem-tenant \
@@ -21,7 +55,7 @@ LATEST_SNAPSHOT=$(oc get snapshots -n tekton-ecosystem-tenant \
 
 Report the snapshot name and its creation time as absolute local time.
 
-### 9b. Extract per-component (repo, revision) from the snapshot
+### 10b. Extract per-component (repo, revision) from the snapshot
 
 ```bash
 oc get snapshot ${LATEST_SNAPSHOT} -n tekton-ecosystem-tenant \
@@ -45,7 +79,7 @@ for repo, revs in sorted(repos.items()):
 "
 ```
 
-### 9c. Compare against downstream repo HEADs
+### 10c. Compare against downstream repo HEADs
 
 For each unique repo URL in the snapshot, get the HEAD SHA of the release branch:
 ```bash
@@ -57,28 +91,40 @@ Compare:
 - **Mismatch:** snapshot revision != HEAD → build is **stale**, needs rebuild
 - **Split:** same repo has multiple revisions in the snapshot → some components rebuilt, others didn't
 
-Report a table:
+Report a table with linked SHAs:
 ```
 | Downstream Repo | HEAD SHA | Snapshot SHA | Status |
 |-----------------|----------|-------------|--------|
-| openshift-pipelines/tektoncd-pipeline | f9d8e9cb... | f9d8e9cb... | CURRENT |
-| openshift-pipelines/operator | b6280897... | 6b5649fd... | STALE |
-| openshift-pipelines/pac-downstream | 217ca7d8... | 217ca7d8... (3), adb1dea6... (1) | SPLIT |
+| openshift-pipelines/tektoncd-pipeline | [f9d8e9cb9c85](https://github.com/openshift-pipelines/tektoncd-pipeline/commit/FULL) | [f9d8e9cb9c85](https://github.com/openshift-pipelines/tektoncd-pipeline/commit/FULL) | CURRENT |
+| openshift-pipelines/operator | [b628089785fc](https://github.com/openshift-pipelines/operator/commit/FULL) | [6b5649fd1234](https://github.com/openshift-pipelines/operator/commit/FULL) | STALE |
 ```
 
-If any components are STALE or SPLIT:
+If any components are STALE or SPLIT, generate the next-action guidance **in dependency order**. Triggering image rebuilds before downstream repos are in sync wastes builds — the resulting images will be stale as soon as pending changes land.
+
+Check for upstream blockers first:
+1. **Open update-sources PRs** on the operator (step 7) — if one is open, it must merge first to land upstream sync.
+2. **Stuck nudge PRs** (step 8) — if any nudge PR has failing CI, it must be fixed before rebuilds.
+3. **Pending downstream repo changes** — for each STALE/SPLIT repo, check what commits exist between the snapshot revision and HEAD. If they are Konflux config updates, Renovate digest updates, or upstream syncs, these must build and their nudge PRs must merge into the operator before triggering rebuilds.
+4. **Verify operator project.yaml version** (step 9) — `versions.current` must match `VERSION` before the final rebuild.
+5. **Trigger image rebuilds** — only after steps 1–4 are resolved and the operator HEAD is stable.
+6. **Verify new snapshots** — wait for new core + bundle snapshots where all SHAs match, then re-run the checklist.
+
 ```
-ACTION NEEDED: Trigger image rebuilds for stale components.
+ACTION NEEDED: Sync downstream repos, then rebuild.
 
-Go to: https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml
-Parameters:
-  - version: ${MAJOR_MINOR}
-  - repo: ${STALE_REPO_NAME} (or leave empty to rebuild all)
-
-After rebuilds complete, new nudge PRs will update the operator's project.yaml.
+Step 1: Merge any open update-sources PR (upstream sync must land first)
+Step 2: Fix any stuck nudge PRs with failing CI
+Step 3: Wait for pending downstream repo changes to build and nudge PRs to merge
+Step 4: Verify operator project.yaml version matches ${VERSION}
+Step 5: Trigger image rebuilds (only after operator HEAD is stable):
+  Go to: https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml
+  Parameters:
+    - version: ${MAJOR_MINOR}
+    - repo: (leave empty to rebuild all)
+Step 6: Verify new core + bundle snapshots match all downstream HEADs
 ```
 
-### 9d. Check bundle snapshot separately
+### 10d. Check bundle snapshot separately
 
 ```bash
 LATEST_BUNDLE=$(oc get snapshots -n tekton-ecosystem-tenant \
@@ -94,4 +140,4 @@ oc get snapshot ${LATEST_BUNDLE} -n tekton-ecosystem-tenant \
 
 Compare the bundle snapshot's operator revision against the operator repo HEAD. If they differ, the bundle was built from a stale operator commit. Report the bundle snapshot name and its creation time as absolute local time.
 
-**Return:** Status for step 9 with the SHA comparison table, list of stale/split repos, and bundle snapshot status.
+**Return:** Status for steps 9 and 10 with operator project.yaml version check, SHA comparison table, list of stale/split repos, and bundle snapshot status.

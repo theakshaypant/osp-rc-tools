@@ -4,10 +4,14 @@ Verify stage and production release status on Konflux, QA handover readiness, an
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`
 
+**Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/REPO/pull/NUM)`. All commit SHAs as links. All timestamps as absolute local time.
+
+**Early stop:** Check steps 13, 14, 15, 16 in order. If any step requires action, return immediately with the blocking step's status and action details. Do not check subsequent steps.
+
 **Constraints:**
 - Konflux cluster: **READ-ONLY** (`oc get`/`kubectl get` only, never `apply`/`create`/`delete`)
 
-## Step 12: Check stage release
+## Step 13: Check stage release
 
 Stage release involves three sub-steps done IN ORDER: Core, Bundle, Index.
 
@@ -26,10 +30,10 @@ Check status: Succeeded vs Failed. A Failed stage release is a blocker — retry
 
 Report all release timestamps as absolute local time.
 
-**12a. Core application (stage):**
+**13a. Core application (stage):**
 Use the latest core snapshot. Update `release.yaml` with the snapshot and apply on Konflux cluster. Wait for managed pipelinerun to succeed.
 
-**12b. Bundle application (stage):**
+**13b. Bundle application (stage):**
 The `operator-update-images` workflow updates the CSV to point to the staging registry. It creates a PR:
 - Branch: `actions/update/operator-update-images-${RELEASE_BRANCH}`
 - Labels: `automated`, `lgtm`, `approved`
@@ -94,7 +98,7 @@ Stage release has 3 sub-steps (IN ORDER):
 IMPORTANT: Note the snapshot IDs used — you need them for production release.
 ```
 
-## Step 13: QA handover (stage)
+## Step 14: QA handover (stage)
 
 When handing over the stage build to QA:
 - Attach the release-test report
@@ -121,7 +125,7 @@ NEXT ACTION: Hand over stage build to QA.
    - Audit report with commit/Jira analysis
 ```
 
-## Step 14: Check production release
+## Step 15: Check production release
 
 Production release follows the same 3-step pattern as stage.
 
@@ -162,7 +166,7 @@ Same 3 sub-steps as stage, but:
 - Index: Trigger render-olm-catalog with Environment: production
 ```
 
-## Step 15: Send advisory
+## Step 16: Send advisory
 
 This is a manual step after production release is complete and QA has verified the build.
 
@@ -172,4 +176,4 @@ MANUAL: Send advisory for ${VERSION}.
 Coordinate with the release team to publish the advisory.
 ```
 
-**Return:** Status for steps 12-15 with details. Include Konflux release status table (Application, ReleasePlan, Status, Timestamp), CSV PR status, and production readiness.
+**Return:** Status for steps 13-16 with details. Include Konflux release status table (Application, ReleasePlan, Status, Timestamp), CSV PR status, and production readiness.

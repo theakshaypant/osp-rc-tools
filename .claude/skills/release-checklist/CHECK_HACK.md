@@ -4,6 +4,8 @@ Verify the hack repo has the correct release version configured and the release-
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `RELEASE_TAG` (from release config), `TZ_FMT` (date format string for local time)
 
+**Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/hack/pull/NUM)`. All commit SHAs as `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`. All timestamps as absolute local time.
+
 ## Step 1: Verify release version
 
 Check if `RELEASE_TAG` matches `VERSION`:

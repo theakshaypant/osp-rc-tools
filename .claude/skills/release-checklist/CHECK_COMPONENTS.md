@@ -4,6 +4,10 @@ Verify component PRs are merged on release branches, upstream sources are synced
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `COMPONENTS` (list from release config), `TZ_FMT`
 
+**Formatting:** All PR numbers must be rendered as markdown links `[#NUM](https://github.com/openshift-pipelines/REPO/pull/NUM)` using the correct repo. All commit SHAs as `[SHORT](https://github.com/OWNER/REPO/commit/FULL)`. All timestamps as absolute local time.
+
+**Early stop:** Check steps 6, 7, 8 in order. If any step requires action, return immediately with the blocking step's status and action details. Do not check subsequent steps.
+
 ## Step 6: Check component PRs on release branches
 
 The generate-konflux workflow creates PRs in each downstream component repo. These PRs:

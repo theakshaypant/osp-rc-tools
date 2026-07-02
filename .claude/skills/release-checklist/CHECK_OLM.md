@@ -4,12 +4,16 @@ Verify OLM catalog configuration, index image builds, and code freeze status.
 
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `CODE_FREEZE` (from release config), `KONFLUX_NS` (`tekton-ecosystem-tenant`), `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`
 
+**Formatting:** All PR numbers must be rendered as markdown links. All commit SHAs as links. All timestamps as absolute local time.
+
+**Early stop:** Check steps 11, 12 in order. If any step requires action, return immediately with the blocking step's status and action details.
+
 **Constraints:**
 - Konflux cluster: **READ-ONLY** (`oc get`/`kubectl get` only, never `apply`/`create`/`delete`)
 
-## Step 10: Check OLM config and index images
+## Step 11: Check OLM config and index images
 
-### 10a. Check olm/config.yaml
+### 11a. Check olm/config.yaml
 
 ```bash
 gh api repos/openshift-pipelines/operator/contents/olm/config.yaml?ref=${RELEASE_BRANCH} \
@@ -20,7 +24,7 @@ Verify the config lists the current release version. The order of bundles matter
 
 If the config needs updating, a manual PR is required (like #24571 `update-olm-config-${VERSION}`).
 
-### 10b. Check render-olm-catalog workflow
+### 11b. Check render-olm-catalog workflow
 
 The `render-olm-catalog` workflow runs daily at 1 AM UTC and dispatches to all release branches. Check recent runs:
 ```bash
@@ -32,7 +36,7 @@ gh run list --repo openshift-pipelines/operator \
 
 Show all `createdAt` timestamps as absolute local time. A successful run means the catalog was generated and `catalog.json` was updated for each supported OCP version.
 
-### 10c. Check index images via Konflux releases
+### 11c. Check index images via Konflux releases
 
 Check for successful index releases in `tekton-ecosystem-tenant`:
 ```bash
@@ -45,7 +49,7 @@ If index releases are succeeding → index images are being built. Report the mo
 
 If catalog workflow succeeded and index releases exist → **DONE**.
 
-## Step 11: Check code freeze
+## Step 12: Check code freeze
 
 The `code-freeze` field in the hack release config should be set to `true` when sharing index images with QE for testing.
 
@@ -63,4 +67,4 @@ Check the value from the release config fetched in setup:
   Create a PR to set: code-freeze: true
   ```
 
-**Return:** Status for steps 10 and 11 with details. Include OLM config version coverage, latest workflow run time, index release status, and code freeze state.
+**Return:** Status for steps 11 and 12 with details. Include OLM config version coverage, latest workflow run time, index release status, and code freeze state.
