@@ -1,6 +1,6 @@
 # Release Checklist: 1.22.4
 
-**Generated:** 2026-07-01 13:58 IST
+**Generated:** 2026-07-02 11:01 IST
 **Release branch:** release-v1.22.x
 **Release tag:** 1.22.4
 **Code freeze:** false
@@ -9,133 +9,91 @@
 
 | # | Step | Status | Details |
 |---|------|--------|---------|
-| 1 | Generate patch in hack | DONE | release-tag: 1.22.4 |
-| 2 | Hack release PR merged | DONE | PR [#827](https://github.com/openshift-pipelines/hack/pull/827) merged 2026-06-19 10:29 IST |
-| 3 | Konflux config PR merged | DONE | PR [#828](https://github.com/openshift-pipelines/hack/pull/828) merged 2026-06-19 10:50 IST |
-| 3b | Konflux config applied | DONE | Applications and components confirmed in `tekton-ecosystem-tenant` |
-| 4 | ReleasePlanAdmission | DONE | 8 RPA files on GitLab (core/bundle/fbc, stage+prod) |
-| 5 | Pyxis configuration | DONE | Config exists under `products/openshift-pipelines/` |
-| 6 | Component PRs merged | PARTIAL | 16/19 merged, 3 open (see below) |
-| 7 | Upstream sources synced | DONE | PR [#24524](https://github.com/openshift-pipelines/operator/pull/24524) merged 2026-06-30 22:17 IST |
-| 8 | Component builds & nudges | PARTIAL | 99 merged, 1 open (see below) |
-| 9 | Build validation (SHA) | ISSUES | 3 repos stale/split — operator, tektoncd-hub, tektoncd-pipeline |
-| 10 | OLM config & index images | DONE | olm/config.yaml has 1.22.4; index images releasing successfully |
-| 11 | Code freeze set | NOT DONE | code-freeze: false |
-| 12 | Stage release | ISSUES | Core+Bundle stage: Succeeded; CDN stage: mixed; **Index 4-21 stage: FAILING** |
-| 13 | QA handover | NOT DONE | |
-| 14 | Production release | NOT DONE | No production releases found on Konflux |
-| 15 | Advisory | NOT DONE | |
+| 1 | Release version in hack config | DONE | `release-tag: 1.22.4` matches target version |
+| 2 | Hack release-manager PR | DONE | [#827](https://github.com/openshift-pipelines/hack/pull/827) merged 2026-06-19 10:29 IST |
+| 3 | Konflux configuration PR | DONE | [#828](https://github.com/openshift-pipelines/hack/pull/828) merged 2026-06-19 10:50 IST |
+| 3b | Cluster config matches hack repo | DONE | 12 applications, all present on cluster |
+| 4 | ReleasePlanAdmission | DONE | 8 RPAs found (core/bundle/fbc/cdn × stage/prod) |
+| 5 | Pyxis configuration | DONE | Existing config sufficient for patch release |
+| 6 | Component PRs on release branches | DONE | 19/19 components merged |
+| 7 | Upstream source sync | DONE | [#24524](https://github.com/openshift-pipelines/operator/pull/24524) merged 2026-06-30 22:17 IST |
+| 8 | Nudge PRs | IN PROGRESS | 1 open: [#24820](https://github.com/openshift-pipelines/operator/pull/24820) — bundle nudge, CI passing, needs `lgtm` label |
+| 9 | Operator project.yaml version | DONE | `versions.current: 1.22.4` ✓ |
+| 10 | Build validation (SHA comparison) | **STALE** | Operator 21 commits behind HEAD in core snapshot — see details below |
 
----
+## Build Validation Details
 
-## Open Component PRs (Step 6)
-
-3 Konflux configuration PRs are still open. They have the `hack` label and should auto-merge via `merge-hack-pull-requests` (runs hourly):
-
-| Downstream Repo | PR | Component |
-|-----------------|-----|-----------|
-| p12n-manual-approval-gate | [#319](https://github.com/openshift-pipelines/p12n-manual-approval-gate/pull/319) | manual-approval-gate |
-| pac-downstream | [#1600](https://github.com/openshift-pipelines/pac-downstream/pull/1600) | pipelines-as-code |
-| tektoncd-git-clone | [#834](https://github.com/openshift-pipelines/tektoncd-git-clone/pull/834) | git-init |
-
-Previous rounds of component PRs for these repos were already merged. These 3 should not block the release pipeline.
-
-## Open Nudge PR (Step 8)
-
-PR [#24614](https://github.com/openshift-pipelines/operator/pull/24614) — `chore(deps): update operator-1-22-bundle to 66533a6` — created **2026-07-01 13:09 IST** (today).
-
-**CI status:** All Konflux index pipelines **pass**. Tide reports: "Not mergeable. Needs lgtm label." This is a fresh PR — may need time for auto-labeling.
-
-## Build Validation — SHA Comparison (Step 9)
-
-Latest core snapshot: `openshift-pipelines-core-1-22-20260701-071148-000-ry` (created 2026-07-01 12:41 IST)
+**Core snapshot:** `openshift-pipelines-core-1-22-20260702-034604-000` (2026-07-02 09:16 IST)
 
 | Downstream Repo | HEAD SHA | Snapshot SHA | Status |
 |-----------------|----------|-------------|--------|
-| openshift-pipelines/operator | 6547a2082730 | a8570514dd8f (3) | **STALE** |
-| openshift-pipelines/p12n-console-plugin | 11c1ea728bb0 | 11c1ea728bb0 | CURRENT |
-| openshift-pipelines/p12n-console-plugin-pf5 | 5f871b8eb87f | 5f871b8eb87f | CURRENT |
-| openshift-pipelines/p12n-manual-approval-gate | f25d0d7642f0 | f25d0d7642f0 | CURRENT |
-| openshift-pipelines/p12n-multicluster-proxy-aae | 86475aae6abe | 86475aae6abe | CURRENT |
-| openshift-pipelines/p12n-opc | 75c5770be7ad | 75c5770be7ad | CURRENT |
-| openshift-pipelines/p12n-syncer-service | b029f0528ca8 | b029f0528ca8 | CURRENT |
-| openshift-pipelines/p12n-tekton-caches | 35d13ca95e59 | 35d13ca95e59 | CURRENT |
-| openshift-pipelines/pac-downstream | bd2efb6bac78 | bd2efb6bac78 (4) | CURRENT |
-| openshift-pipelines/serve-tkn-cl | — | a510d8905687 | N/A (no release branch) |
-| openshift-pipelines/tekton-kueue | 9e2bc49b0eb2 | 9e2bc49b0eb2 | CURRENT |
-| openshift-pipelines/tektoncd-chains | 5ce5347c8544 | 5ce5347c8544 | CURRENT |
-| openshift-pipelines/tektoncd-cl | — | 3f9d353d6e2b | N/A (no release branch) |
-| openshift-pipelines/tektoncd-git-clone | f4ea3d89f9db | f4ea3d89f9db | CURRENT |
-| openshift-pipelines/tektoncd-hub | ff21b02885dc | 410f9709ee1d (2), ff21b02885dc (1) | **SPLIT** |
-| openshift-pipelines/tektoncd-pipeline | 6b33b998e515 | 6b33b998e515 (7), 1774b2fdc8f3 (1) | **SPLIT** |
-| openshift-pipelines/tektoncd-pruner | 68bfea16b601 | 68bfea16b601 | CURRENT |
-| openshift-pipelines/tektoncd-results | 23029ec34482 | 23029ec34482 | CURRENT |
-| openshift-pipelines/tektoncd-triggers | 8abaa965abcc | 8abaa965abcc | CURRENT |
+| openshift-pipelines/tektoncd-pipeline | [`6b33b998e515`](https://github.com/openshift-pipelines/tektoncd-pipeline/commit/6b33b998e5151b664f440ac1ae156c3336c57302) | [`6b33b998e515`](https://github.com/openshift-pipelines/tektoncd-pipeline/commit/6b33b998e5151b664f440ac1ae156c3336c57302) | CURRENT |
+| openshift-pipelines/tektoncd-triggers | [`8abaa965abcc`](https://github.com/openshift-pipelines/tektoncd-triggers/commit/8abaa965abccd8cdfdea788ff381681f00194fa0) | [`8abaa965abcc`](https://github.com/openshift-pipelines/tektoncd-triggers/commit/8abaa965abccd8cdfdea788ff381681f00194fa0) | CURRENT |
+| openshift-pipelines/tektoncd-chains | [`5ce5347c8544`](https://github.com/openshift-pipelines/tektoncd-chains/commit/5ce5347c8544de34ddc9832921e4d3095f9dfc38) | [`5ce5347c8544`](https://github.com/openshift-pipelines/tektoncd-chains/commit/5ce5347c8544de34ddc9832921e4d3095f9dfc38) | CURRENT |
+| openshift-pipelines/tektoncd-results | [`23029ec34482`](https://github.com/openshift-pipelines/tektoncd-results/commit/23029ec344825b3f9bb60a11f8b9fd3cd893bbbe) | [`23029ec34482`](https://github.com/openshift-pipelines/tektoncd-results/commit/23029ec344825b3f9bb60a11f8b9fd3cd893bbbe) | CURRENT |
+| openshift-pipelines/tektoncd-hub | [`83d350ed657e`](https://github.com/openshift-pipelines/tektoncd-hub/commit/83d350ed657ef344b81918fca4b9a9270667677d) | [`83d350ed657e`](https://github.com/openshift-pipelines/tektoncd-hub/commit/83d350ed657ef344b81918fca4b9a9270667677d) | CURRENT |
+| openshift-pipelines/tektoncd-pruner | [`68bfea16b601`](https://github.com/openshift-pipelines/tektoncd-pruner/commit/68bfea16b60110e1dc6658b615bfe2300d6f630e) | [`68bfea16b601`](https://github.com/openshift-pipelines/tektoncd-pruner/commit/68bfea16b60110e1dc6658b615bfe2300d6f630e) | CURRENT |
+| openshift-pipelines/tektoncd-cli | [`3f9d353d6e2b`](https://github.com/openshift-pipelines/tektoncd-cli/commit/3f9d353d6e2bb547b64809d77a8dd17ca8212a78) | [`3f9d353d6e2b`](https://github.com/openshift-pipelines/tektoncd-cli/commit/3f9d353d6e2bb547b64809d77a8dd17ca8212a78) | CURRENT |
+| openshift-pipelines/tektoncd-git-clone | [`e07eb2b683f3`](https://github.com/openshift-pipelines/tektoncd-git-clone/commit/e07eb2b683f3c43cc47a7bb091a6ed4b44113a95) | [`e07eb2b683f3`](https://github.com/openshift-pipelines/tektoncd-git-clone/commit/e07eb2b683f3c43cc47a7bb091a6ed4b44113a95) | CURRENT |
+| openshift-pipelines/pac-downstream | [`0837eab48f06`](https://github.com/openshift-pipelines/pac-downstream/commit/0837eab48f0638d821941b802354a91cf21ce2b3) | [`0837eab48f06`](https://github.com/openshift-pipelines/pac-downstream/commit/0837eab48f0638d821941b802354a91cf21ce2b3) | CURRENT |
+| openshift-pipelines/p12n-console-plugin | [`11c1ea728bb0`](https://github.com/openshift-pipelines/p12n-console-plugin/commit/11c1ea728bb084d4e58f202001b2fc2aaf2cd913) | [`11c1ea728bb0`](https://github.com/openshift-pipelines/p12n-console-plugin/commit/11c1ea728bb084d4e58f202001b2fc2aaf2cd913) | CURRENT |
+| openshift-pipelines/p12n-console-plugin-pf5 | [`5f871b8eb87f`](https://github.com/openshift-pipelines/p12n-console-plugin-pf5/commit/5f871b8eb87fe7c7dcadb5294ea29414839da4db) | [`5f871b8eb87f`](https://github.com/openshift-pipelines/p12n-console-plugin-pf5/commit/5f871b8eb87fe7c7dcadb5294ea29414839da4db) | CURRENT |
+| openshift-pipelines/p12n-manual-approval-gate | [`b9e652dce488`](https://github.com/openshift-pipelines/p12n-manual-approval-gate/commit/b9e652dce4888b6bcecaa83855d26bcfd41fe19b) | [`b9e652dce488`](https://github.com/openshift-pipelines/p12n-manual-approval-gate/commit/b9e652dce4888b6bcecaa83855d26bcfd41fe19b) | CURRENT |
+| openshift-pipelines/p12n-multicluster-proxy-aae | [`86475aae6abe`](https://github.com/openshift-pipelines/p12n-multicluster-proxy-aae/commit/86475aae6abe26a17fe54541cb7c42d131f890c3) | [`86475aae6abe`](https://github.com/openshift-pipelines/p12n-multicluster-proxy-aae/commit/86475aae6abe26a17fe54541cb7c42d131f890c3) | CURRENT |
+| openshift-pipelines/p12n-opc | [`75c5770be7ad`](https://github.com/openshift-pipelines/p12n-opc/commit/75c5770be7ada0cdfdc2de4f76dc44e86c48faa5) | [`75c5770be7ad`](https://github.com/openshift-pipelines/p12n-opc/commit/75c5770be7ada0cdfdc2de4f76dc44e86c48faa5) | CURRENT |
+| openshift-pipelines/p12n-syncer-service | [`b029f0528ca8`](https://github.com/openshift-pipelines/p12n-syncer-service/commit/b029f0528ca8ca179001d2ded1d806bd3fad1c67) | [`b029f0528ca8`](https://github.com/openshift-pipelines/p12n-syncer-service/commit/b029f0528ca8ca179001d2ded1d806bd3fad1c67) | CURRENT |
+| openshift-pipelines/p12n-tekton-caches | [`35d13ca95e59`](https://github.com/openshift-pipelines/p12n-tekton-caches/commit/35d13ca95e59b3278264a3d9b6546afc890662df) | [`35d13ca95e59`](https://github.com/openshift-pipelines/p12n-tekton-caches/commit/35d13ca95e59b3278264a3d9b6546afc890662df) | CURRENT |
+| openshift-pipelines/serve-tkn-cli | [`a510d8905687`](https://github.com/openshift-pipelines/serve-tkn-cli/commit/a510d8905687a1be3e3d03ce7771bd8b2011b0ee) | [`a510d8905687`](https://github.com/openshift-pipelines/serve-tkn-cli/commit/a510d8905687a1be3e3d03ce7771bd8b2011b0ee) | CURRENT |
+| openshift-pipelines/tekton-kueue | [`9e2bc49b0eb2`](https://github.com/openshift-pipelines/tekton-kueue/commit/9e2bc49b0eb29f028d54778c0e3f1379049723fc) | [`9e2bc49b0eb2`](https://github.com/openshift-pipelines/tekton-kueue/commit/9e2bc49b0eb29f028d54778c0e3f1379049723fc) | CURRENT |
+| openshift-pipelines/operator | [`92006961c26a`](https://github.com/openshift-pipelines/operator/commit/92006961c26aadb484d4ff2f93f9620fa6c1db19) | [`e122ff116bf8`](https://github.com/openshift-pipelines/operator/commit/e122ff116bf8f9c1d20c4ca895ad946db4986e5a) / [`b7ec4f688997`](https://github.com/openshift-pipelines/operator/commit/b7ec4f688997d43159c2cf83176c26125b9b7842) | **STALE + SPLIT** (21 / 6 commits behind) |
 
-**3 repos need attention:**
+**Bundle snapshot:** `openshift-pipelines-bundle-1-22-20260702-045606-000` (2026-07-02 10:26 IST)
+- Operator revision: [`92006961c26a`](https://github.com/openshift-pipelines/operator/commit/92006961c26aadb484d4ff2f93f9620fa6c1db19) — **CURRENT** ✓ (matches operator HEAD)
 
-1. **operator** — Snapshot built from `a8570514dd8f`, HEAD is `6547a2082730`. Stale build; all 3 components need rebuild.
-2. **tektoncd-hub** — HEAD is `ff21b02885dc`. 1 component at HEAD, 2 at older rev `410f9709ee1d`. Split build; 2 components need rebuild.
-3. **tektoncd-pipeline** — HEAD is `6b33b998e515`. 7 components at HEAD, 1 at older rev `1774b2fdc8f3`. Split build; 1 component needs rebuild.
+### Operator commit gap (core snapshot → HEAD)
 
-**Bundle snapshot:** `openshift-pipelines-bundle-1-22-20260701-075342-000` (created 2026-07-01 13:23 IST)
-Bundle operator revision: `6547a2082730` — **matches operator HEAD** (bundle is current).
+The operator HEAD [`92006961c26a`](https://github.com/openshift-pipelines/operator/commit/92006961c26aadb484d4ff2f93f9620fa6c1db19) is 21 commits ahead of the older snapshot SHA. Key commits in the gap:
 
-**Action:** Trigger image rebuilds for stale core components via:
-https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml
+| SHA | Message |
+|-----|---------|
+| [`d44dbac53d86`](https://github.com/openshift-pipelines/operator/commit/d44dbac53d86) | Revert nudge: operator-1-22-operator |
+| [`ff91db419190`](https://github.com/openshift-pipelines/operator/commit/ff91db419190) | Revert nudge: operator-1-22-bundle |
+| [`880d5806218b`](https://github.com/openshift-pipelines/operator/commit/880d5806218b) | Add .placeholder for index rebuild |
+| 9× | `[bot:release-v1.22.x] update konflux configuration` |
+| [`0bfa3e2270d4`](https://github.com/openshift-pipelines/operator/commit/0bfa3e2270d4) | Rebuild 4.19 FBC |
+| [`92006961c26a`](https://github.com/openshift-pipelines/operator/commit/92006961c26a) | [bot] Update CSV |
 
-## OLM Config (Step 10)
+### Open nudge PR
 
-`olm/config.yaml` on `release-v1.22.x` has bundles up to **1.22.4** — **DONE**.
+[#24820](https://github.com/openshift-pipelines/operator/pull/24820) — `chore(deps): update operator-1-22-bundle to 47302ed` (CI passing, needs `lgtm` label for Prow merge)
 
-Index images releasing successfully — latest index releases on Konflux at 2026-07-01 11:10 IST.
+## Next Action
 
-## Konflux Stage Release (Step 12)
+**Step 10: Trigger operator image rebuild and wait for convergence**
 
-**Core stage:** Succeeded (multiple rounds, latest on 2026-06-30)
+The core snapshot operator images are 21 commits behind HEAD. The gap includes Konflux config updates, FBC rebuilds, reverts, and a CSV update. No blocking PRs — the operator HEAD is stable (latest commit is a CSV update).
 
-**Bundle stage:** Succeeded (latest on 2026-06-30, older failed on 2026-06-24 then retried successfully)
+1. **Ensure nudge PR [#24820](https://github.com/openshift-pipelines/operator/pull/24820) merges**
+   - CI is passing, needs `lgtm` label
+   - This will update the bundle image SHA in `project.yaml`
 
-**CDN stage:** Mixed results:
-| Release | Status |
-|---------|--------|
-| cdn-stage-release-ttczk | **Succeeded** |
-| cdn-stage-release-zxqjw | Failed |
-| cdn-stage-release-z8dd7 | Failed |
-| cdn-stage-release-z8dd7-rerun | Failed |
-| cdn-stage-release-snl6n | Failed |
+2. **Trigger image rebuilds** (after nudge merges):
+   - Go to: https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml
+   - Parameters: version: `1.22`, repo: `operator`
 
-**Index stage:** All OCP versions Succeeded **except index-4-21**:
-- index-4-21 stage: **FAILING** — 3 attempts all failed (latest rerun failed)
-- All other versions (4.14–4.20, 4.22–4.23, 5.0): Succeeded
+3. **Wait for convergence:**
+   - Operator images rebuild → nudge PRs update `project.yaml` → HEAD moves → converges
+   - Monitor: https://openshift-pipelines.github.io/hack/
 
-**Blocker:** Index 4-21 stage release is failing. Investigate the failed release:
-- `openshift-pipelines-index-4-21-1-22-stage-release-djwwk` and its reruns all failed.
+4. **Re-run `/release-checklist 1.22.4`** to verify all SHAs match in a new core snapshot
 
-## Cluster Access Notes
+## Remaining Steps
 
-The Konflux token for user `akpant` in namespace `tekton-ecosystem-tenant`:
-- **Can:** `oc get applications`, `oc get releases`, `oc get snapshots`
-- **Cannot:** `oc get components`, `oc get namespaces` (Forbidden)
-
----
-
-## Next Actions (Priority Order)
-
-1. **Fix index-4-21 stage release** (Step 12) — 3 attempts all failed. Investigate the release failure. Try with a newer snapshot: `openshift-pipelines-index-4-21-1-22-20260701-054031-000` (regular release succeeded).
-
-2. **Rebuild stale/split core components** (Step 9) — 3 repos have builds from outdated commits: operator (all 3 components), tektoncd-hub (2 components), tektoncd-pipeline (1 component). Trigger rebuilds via [trigger-image-rebuilds](https://github.com/openshift-pipelines/hack/actions/workflows/trigger-image-rebuilds.yaml).
-
-3. **Monitor nudge PR #24614** (Step 8) — Created today, all pipelines pass. Waiting for lgtm label. Should auto-merge soon.
-
-4. **Set code freeze** (Step 11) — Update `code-freeze: true` in [hack release config](https://github.com/openshift-pipelines/hack/blob/main/config/downstream/releases/1.22.yaml) when ready to hand off to QE.
-
-5. **Wait for component PRs to auto-merge** (Step 6) — 3 open PRs should merge via hourly `merge-hack-pull-requests`.
-
-6. **QA handover** (Step 13) — After stage issues resolved and code freeze set.
-
-## Remaining Steps After Blockers
-
-```
-Fix index-4-21 stage → Rebuild stale core components → New nudge PRs → Code freeze → QA handover → Prod release → Advisory
-```
+| # | Step |
+|---|------|
+| 11 | OLM config and index images |
+| 12 | Code freeze |
+| 13 | Stage release (core → bundle → index) |
+| 14 | QA handover |
+| 15 | Production release |
+| 16 | Advisory |

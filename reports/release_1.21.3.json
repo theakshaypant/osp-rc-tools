@@ -1,0 +1,3185 @@
+{
+  "version": "1.21.3",
+  "previous": "openshift-pipelines-core-1-21-20260530-122116-000",
+  "from_date": "",
+  "to_date": "",
+  "released": false,
+  "components": [
+    {
+      "name": "tektoncd-pipeline",
+      "upstream": "tektoncd/pipeline",
+      "downstream": "openshift-pipelines/tektoncd-pipeline",
+      "upstream_branch": "release-v1.6.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "8910674cb953317a4373f33822024b9de8c5fa22",
+      "to_sha": "b54dcda0d16d988eac811c9869b7440e7cd5bd4f",
+      "commits": [
+        {
+          "sha": "b728378f9383ac9f4afb43aeda7075ece8b0775f",
+          "message": "Remove deprecated `// +build` directive from most files",
+          "author": "Vincent Demeester",
+          "date": "2025-10-31",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Remove deprecated Go build directive syntax from source files.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "c1810c53bf3de91774f1deb99c9f10e95dc19926",
+          "message": "test: implement parallel/serial test categorization system",
+          "author": "Vincent Demeester",
+          "date": "2025-12-17",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Add parallel and serial test categorization system for e2e test execution.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "f7f95848d86d016be225568e13ab45918a9ece26",
+          "message": "refactor: add clock injection to cache for testing",
+          "author": "Stanislav Jakuschevskij",
+          "date": "2025-11-15",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Add clock injection to resolver cache for improved test isolation.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "c639f88b07479143ad5dbe4e55b3dcf5bb3f2400",
+          "message": "fix: Align cache configstore with framework implementation",
+          "author": "Seunghun Shin",
+          "date": "2026-01-31",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Fix resolver cache race condition causing duplicate upstream pulls under concurrent load.",
+            "type": "Bug Fix",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "48765b285eb8d1088160c1d1aab396109981190a",
+          "message": "fix: resolve cache race with singleflight",
+          "author": "Stanislav Jakuschevskij",
+          "date": "2026-02-15",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Deduplicate concurrent resolver cache requests with singleflight to prevent cache stampede and reduce upstream API calls (e.g., GitLab 429 throttling).",
+            "type": "Bug Fix",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "192a6c17b897c8db6b78c8a4a874e8e83c88295f",
+          "message": "fix: remove corrupted cache entries on type error",
+          "author": "Stanislav Jakuschevskij",
+          "date": "2026-03-21",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Remove corrupted cache entries on type assertion errors to prevent stale data from blocking subsequent resolution attempts.",
+            "type": "Bug Fix",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "6bbcfb18134f0392756e5260667feadfff7c6bbd",
+          "message": "fix: use TextParser struct directly for prometheus/common v0.62.0 compatibility",
+          "author": "Vibhav Bobade",
+          "date": "2026-03-25",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Fix compatibility with prometheus/common v0.62.0 by using TextParser struct directly.",
+            "type": "Bug Fix",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "6e0504b2ff2d94a8ff40c0d60c407494631543ef",
+          "message": "fix: add missing @test:execution annotation to e2e test",
+          "author": "Vibhav Bobade",
+          "date": "2026-04-02",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9665",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9365",
+          "jira": "https://redhat.atlassian.net/browse/KONFLUX-6727",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Add missing test execution annotation to e2e test.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "b2e34cff98c5dfe1dcc3751dacc6778ff9d6ed4d",
+          "message": "fix: bump Go to 1.24.13 to fix CVE-2025-61728, CVE-2025-61726, CVE-2025-61729",
+          "author": "Vibhav Bobade",
+          "date": "2026-04-07",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9734"
+        },
+        {
+          "sha": "00055c0d2ee3dcc2c4d71e8679d814ed1a4208b3",
+          "message": "fix: pin registry image and relax log-based cache assertion",
+          "author": "Vincent Demeester",
+          "date": "2026-04-10",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9734"
+        },
+        {
+          "sha": "d855289ac353b2a8c38132161099954547612044",
+          "message": "fix(e2e): improve dind-sidecar probe configuration for reliability",
+          "author": "Vincent Demeester",
+          "date": "2025-12-17",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9734"
+        },
+        {
+          "sha": "6765156f8688e45e29d2311ebc9907f2f28493e4",
+          "message": "fix(e2e): replace ubuntu with busybox in dind-sidecar test Dockerfile",
+          "author": "Vibhav Bobade",
+          "date": "2026-04-16",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9734"
+        },
+        {
+          "sha": "3f60a5d97eda2dda54ce9ada62fed4014f35c8a2",
+          "message": "Security: reject system API token with user-controlled serverURL",
+          "author": "Vincent Demeester",
+          "date": "2026-04-09",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "060e18c88ff20d583f5107bf2138e49bc873b0f8",
+          "message": "fix: prevent git argument injection via revision parameter (GHSA-94jr-7pqp-xhcq)",
+          "author": "Vincent Demeester",
+          "date": "2026-04-10",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "3090efa851184a2cc82ddbe31cef0dfe03afe0e8",
+          "message": "fix: normalize VolumeMount paths before /tekton/ restriction check",
+          "author": "Vincent Demeester",
+          "date": "2026-03-31",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "0ea06347e22359329832975512b26092da37d208",
+          "message": "fix: strip resolver prefixes and use non-capturing group for pattern anchoring",
+          "author": "Vincent Demeester",
+          "date": "2026-03-18",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "c9eef117936cc2d7b7ff7ec6048483f46d953d38",
+          "message": "fix: limit HTTP resolver response body size to prevent OOM DoS",
+          "author": "Vincent Demeester",
+          "date": "2026-03-18",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "43cc43379f453e982bd1fcdecf7928f1477181d8",
+          "message": "fix: trim whitespace from source URI before pattern matching",
+          "author": "Vincent Demeester",
+          "date": "2026-04-21",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "99f573243e494b38c11dffde658867207f3992fe",
+          "message": "fix: set GOTOOLCHAIN=auto in publish task for Go version compatibility",
+          "author": "Vincent Demeester",
+          "date": "2026-04-21",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10350"
+        },
+        {
+          "sha": "8009a7aeda8ce358f0a62d60db8c7e0197ed0b9e",
+          "message": "build(deps): bump step-security/harden-runner from 2.13.1 to 2.13.3",
+          "author": "dependabot[bot]",
+          "date": "2026-04-24",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9895"
+        },
+        {
+          "sha": "bbf35e2c89d6b62c1fa966b828a4ba385c4f1343",
+          "message": "build(deps): bump k8s.io/apiextensions-apiserver from 0.32.8 to 0.32.13",
+          "author": "dependabot[bot]",
+          "date": "2026-04-24",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9882"
+        },
+        {
+          "sha": "db2879380a1486d2a181438c925055e7ee8bcef2",
+          "message": "build(deps): bump tj-actions/changed-files",
+          "author": "dependabot[bot]",
+          "date": "2026-04-24",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9894"
+        },
+        {
+          "sha": "bda6fc646b810d54f85f280fbee3a1ab2378b950",
+          "message": "build(deps): bump github/codeql-action from 4.31.0 to 4.31.11",
+          "author": "dependabot[bot]",
+          "date": "2026-04-27",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9898"
+        },
+        {
+          "sha": "a6dd57703ebb063e45e3cff18377f0acb931a41b",
+          "message": "build(deps): bump github.com/cloudevents/sdk-go/v2 from 2.16.1 to 2.16.2",
+          "author": "dependabot[bot]",
+          "date": "2026-04-25",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9866"
+        },
+        {
+          "sha": "37d159ec693fbbb3a1ca0d6269b2c8597b7d952b",
+          "message": "build(deps): bump github.com/tektoncd/pipeline",
+          "author": "dependabot[bot]",
+          "date": "2026-04-24",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9888"
+        },
+        {
+          "sha": "93004a25a9eb1944c15c7590d8083c1f798ce6fb",
+          "message": "build(deps): bump actions/dependency-review-action from 4.8.1 to 4.8.3",
+          "author": "dependabot[bot]",
+          "date": "2026-04-27",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9897"
+        },
+        {
+          "sha": "8afae800a9e0fed470fad5670ecf0aaf64e66064",
+          "message": "build(deps): bump github.com/go-jose/go-jose/v3 from 3.0.4 to 3.0.5",
+          "author": "dependabot[bot]",
+          "date": "2026-04-27",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9918"
+        },
+        {
+          "sha": "34f4da6c79f8429db090960d21c2b148e005cbdb",
+          "message": "build(deps): bump google.golang.org/protobuf from 1.36.10 to 1.36.11",
+          "author": "dependabot[bot]",
+          "date": "2026-04-29",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9915"
+        },
+        {
+          "sha": "e1645ff6ab6a7c82065ab1e9033c549e37ff5955",
+          "message": "build(deps): bump go.uber.org/zap from 1.27.0 to 1.27.1",
+          "author": "dependabot[bot]",
+          "date": "2026-04-29",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9928"
+        },
+        {
+          "sha": "cd662ab52056e33bbce88f9b68beba40097b801d",
+          "message": "build(deps): bump actions/checkout from 5.0.0 to 5.0.1",
+          "author": "dependabot[bot]",
+          "date": "2026-04-30",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9946"
+        },
+        {
+          "sha": "0573db37de007b2a7fb157a7f829ce5dc529f7e9",
+          "message": "build(deps): bump the all group across 1 directory with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-04-30",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9867"
+        },
+        {
+          "sha": "bd098031cdb6996064eecfa247ccaebdfb6bdeb0",
+          "message": "build(deps): bump tj-actions/changed-files",
+          "author": "dependabot[bot]",
+          "date": "2026-05-04",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9947"
+        },
+        {
+          "sha": "80ef19a6abcacafc87a7c05684754e12b935cd3c",
+          "message": "build(deps): bump chainguard-dev/actions from 1.5.7 to 1.5.16",
+          "author": "dependabot[bot]",
+          "date": "2026-05-05",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9896"
+        },
+        {
+          "sha": "47cc14def6e8d95fc5be18ec7a40270f72cb1c17",
+          "message": "build(deps): bump tj-actions/changed-files",
+          "author": "dependabot[bot]",
+          "date": "2026-05-07",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9987"
+        },
+        {
+          "sha": "884826b0bd34cfeb2ea972c7dc542318ac1b0a50",
+          "message": "build(deps): bump github.com/google/cel-go from 0.26.0 to 0.26.1",
+          "author": "dependabot[bot]",
+          "date": "2026-05-04",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9914"
+        },
+        {
+          "sha": "73c0b133aae3619c1cc7e13922159443ae622410",
+          "message": "build(deps): bump the all group across 1 directory with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-05-07",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9980"
+        },
+        {
+          "sha": "d07581baffd1101bbd7fc74718604cbf90b07933",
+          "message": "build(deps): bump google.golang.org/grpc from 1.75.0 to 1.75.1",
+          "author": "dependabot[bot]",
+          "date": "2026-05-13",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9931",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/8528"
+        },
+        {
+          "sha": "15a950053b1e32aa2b6119c05239dd07fbf6f604",
+          "message": "build(deps): bump tj-actions/changed-files",
+          "author": "dependabot[bot]",
+          "date": "2026-05-14",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10042"
+        },
+        {
+          "sha": "2b3e1ea556eb9e60b95b5e30bf6c1c3e893f0173",
+          "message": "build(deps): bump the all group in /tekton with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-05-14",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10045"
+        },
+        {
+          "sha": "1f58aff1c8375765a461ceb87b96765178703967",
+          "message": "build(deps): bump tj-actions/changed-files",
+          "author": "dependabot[bot]",
+          "date": "2026-05-21",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10087"
+        },
+        {
+          "sha": "215d4cebb51a0eda5092e563490b1a3f785dcafa",
+          "message": "fix: convert pod latency metric to histogram and remove pod label",
+          "author": "Vibhav Bobade",
+          "date": "2026-03-09",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10109",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9530",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-6762",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "The tekton_pipelines_controller_taskruns_pod_latency_milliseconds metric has been converted from a Gauge to a Histogram and the pod label has been removed. Dashboards or alerts referencing this metric will need to be updated to use histogram_quantile() instead of direct value queries.",
+            "type": "Bug Fix",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "5fa8e845718545327d56f2845b668f86ffe617a9",
+          "message": "docs: add pod latency histogram metric to metrics.md",
+          "author": "Vibhav Bobade",
+          "date": "2026-03-17",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10109",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9530",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-6762",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Add documentation for the new pod latency histogram metric to metrics reference.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "0140b684e14fe2b0747bce6b90cbb44d16946aa3",
+          "message": "[cherry-pick: release-v1.6.x] fix: bump google.golang.org/grpc to 1.79.3 (CVE-2026-33186)",
+          "author": "Vibhav Bobade",
+          "date": "2026-05-21",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9909",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12033",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Bump google.golang.org/grpc from 1.75.0 to 1.80.0 to fix CVE-2026-33186 (gRPC-Go authorization bypass via missing leading slash in :path header).",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "86a407676de759e77ff8e28c05da833e96875715",
+          "message": "build(deps): bump the all group in /tekton with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-05-21",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10086"
+        },
+        {
+          "sha": "72f82e73c39ff6c538b45bd798d8ec4e8fe3bbb6",
+          "message": "build(deps): bump the all group in /tekton with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-05-28",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10132"
+        },
+        {
+          "sha": "0a30367aecba15510967f29f38400a10ac72238a",
+          "message": "fix(pipelinerun): use generateName for anonymous pipeline label",
+          "author": "Andrew Thorp",
+          "date": "2026-04-17",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10107",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9826"
+        },
+        {
+          "sha": "68544236c6e06da5feb1029f29da6274d909ab0f",
+          "message": "fix: resolve goroutine leak from unbuffered channels in resolver reconcilers",
+          "author": "Shubham Bhardwaj",
+          "date": "2026-05-25",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10111",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/10098"
+        },
+        {
+          "sha": "da7e8683c5c36eee975eb8b479527430484b9d56",
+          "message": "fix(resolvers): validate data is Tekton object in resolver framework",
+          "author": "Andrew Thorp",
+          "date": "2026-03-16",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9962",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/9588"
+        },
+        {
+          "sha": "4ff64cfeae2ed53547025fee2e31d649a01238b4",
+          "message": "fix: prevent controller CPU variant from leaking into platform commands",
+          "author": "Vincent Demeester",
+          "date": "2026-05-29",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10162",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/10077"
+        },
+        {
+          "sha": "41bc928ec2d30663179722c0cb8155e943e7c94a",
+          "message": "build(deps): bump the all group in /tekton with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10196"
+        },
+        {
+          "sha": "64ca547e83a93e7474513ada57b6f995145fd33e",
+          "message": "fix: add automated draft release support to release pipeline",
+          "author": "Vincent Demeester",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10213",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/10203"
+        },
+        {
+          "sha": "6a02b1c590a84f1e307038e4dd52ee465642b2d5",
+          "message": "build(deps): bump the all group in /tekton with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-06-09",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10231"
+        },
+        {
+          "sha": "83759245879f4f47a8ecaaba638337f522152dfd",
+          "message": "fix(resolvers): Allow ResolutionRequests to resolve all Tekton kinds",
+          "author": "Andrew Thorp",
+          "date": "2026-06-10",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10254",
+          "original_pr": "https://github.com/tektoncd/pipeline/pull/10242"
+        },
+        {
+          "sha": "c4c355f0f39b7092236ae44ac5b0dc0c24add024",
+          "message": "build(deps): bump the all group in /tekton with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-06-11",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10261"
+        },
+        {
+          "sha": "5b6efd8938d86470c12b3acd94029bffe78d60ac",
+          "message": "build(deps): bump github.com/google/go-containerregistry",
+          "author": "dependabot[bot]",
+          "date": "2026-06-15",
+          "pr": "https://github.com/tektoncd/pipeline/pull/9875"
+        },
+        {
+          "sha": "ffa6ba11e403307afcacdb6e2ecdd9b503507e51",
+          "message": "build(deps): bump the all group across 1 directory with 4 updates",
+          "author": "dependabot[bot]",
+          "date": "2026-06-18",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10311"
+        },
+        {
+          "sha": "f53bb0243a110d0e8cd53bc3b746c65422e522ae",
+          "message": "build: bump go directive to 1.25",
+          "author": "Vincent Demeester",
+          "date": "2026-05-13",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10028"
+        },
+        {
+          "sha": "b54dcda0d16d988eac811c9869b7440e7cd5bd4f",
+          "message": "fix: bump Go for CVEs",
+          "author": "Vibhav Bobade",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10341"
+        }
+      ]
+    },
+    {
+      "name": "console-plugin",
+      "upstream": "openshift-pipelines/console-plugin",
+      "downstream": "openshift-pipelines/p12n-console-plugin",
+      "upstream_branch": "release-v1.23.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "345945891bdd4e6f58ae488c9ad3d68cfee5928e",
+      "to_sha": "22161b27baa81d5b27a7e41b6dadcd3019ed8463",
+      "commits": [
+        {
+          "sha": "89018d71bcd440229d55c90c43135f9b10088992",
+          "message": "Fix: Reset submit error on YAML editor changes",
+          "author": "Anwesha Palit",
+          "date": "2025-11-14"
+        },
+        {
+          "sha": "f6b07dd1883d5df4387ad129e85cc2eb956b5b11",
+          "message": "Add anwesha-palit-redhat as approver and arvindk-softwaredev as reviewer",
+          "author": "Vikram Raj",
+          "date": "2025-11-26"
+        },
+        {
+          "sha": "8ebcf415a02a2f7751d3c71fe27ec99e8e06d5ca",
+          "message": "fix: updated field name for capturing next page token in tkr",
+          "author": "Anwesha Palit",
+          "date": "2025-11-25"
+        },
+        {
+          "sha": "c3816128917985ec8ab0f8d24a45792264774a1a",
+          "message": "feat: update filter from last weeks to last week",
+          "author": "Anwesha Palit",
+          "date": "2025-11-28"
+        },
+        {
+          "sha": "ddda0af71ba9722f34cf20e6bcfdb4f8b21a203c",
+          "message": "Merge pull request #818 from anwesha-palit-redhat/fix/SRVKP-9428",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-02"
+        },
+        {
+          "sha": "904e9c542c94a38487f9924db61e88505ecf34b2",
+          "message": "Merge pull request #815 from anwesha-palit-redhat/fix/SRVKP-9397",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-02"
+        },
+        {
+          "sha": "2706d9ecaa126dbe03f282a73c21e19342727839",
+          "message": "Add console.navigation/section for Pipelines",
+          "author": "Vikram Raj",
+          "date": "2025-11-28"
+        },
+        {
+          "sha": "72723a01131debc5a8d6606c987bedc6f4150885",
+          "message": "updated loading component to use spinner and used it in pipelineoverview page",
+          "author": "Arvind",
+          "date": "2025-12-03"
+        },
+        {
+          "sha": "5a34e36ef6e116d0b27857b46a82ec2b6ba97688",
+          "message": "Merge pull request #825 from arvindk-softwaredev/fix/SRVKP-9436",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-05"
+        },
+        {
+          "sha": "008b2d7347e0069fdb163eaa553f38c637e88b06",
+          "message": "feat: added abort controller, increased API timeout and added placeholder error banners for the pipeline overview page",
+          "author": "Anwesha Palit",
+          "date": "2025-11-26"
+        },
+        {
+          "sha": "fe98eb955c26bd00a4d66256d6d76dbd082c8fa1",
+          "message": "fix: preserve error state when namespace is all-namespace",
+          "author": "Anwesha Palit",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "3f98d39fc6fdef0bbd1d56a3b104e331a53992a1",
+          "message": "Merge pull request #824 from anwesha-palit-redhat/fix/SRVKP-9427",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "3a7d0b70a2a080a68909704f0a9ebca55d8a56df",
+          "message": "Merge pull request #828 from anwesha-palit-redhat/fix/SRVKP-9450",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "549980b0c40020be2fbf86238bd4a8802cebb0c9",
+          "message": "fix: updated condition to show error message instead of the loader after api has failed",
+          "author": "Anwesha Palit",
+          "date": "2025-12-09"
+        },
+        {
+          "sha": "28b7765ad00c47e6026cb2d4eb8188afb083957e",
+          "message": "feat: added redux state for pipeline overview filter to persist",
+          "author": "Anwesha Palit",
+          "date": "2025-12-09"
+        },
+        {
+          "sha": "b1ac3535704c226fe618a450fa967abb902d1536",
+          "message": "Merge pull request #833 from anwesha-palit-redhat/fix/SRVKP-9591",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-11"
+        },
+        {
+          "sha": "ec1aa2fecd52324c282ab22bd65dea5e4c14163a",
+          "message": "feat: added error banner and loader for average duration in pipeline metrics",
+          "author": "Anwesha Palit",
+          "date": "2025-12-11"
+        },
+        {
+          "sha": "3d3f04fdd2fe4723594611692f078ecccb5815cc",
+          "message": "pipeline overviewpage error css fix",
+          "author": "Arvind",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "332b1f66eea76d8a22294841cb0a42b8551f6637",
+          "message": "Merge pull request #832 from arvindk-softwaredev/fix/SRVKP-9470",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-11"
+        },
+        {
+          "sha": "8567c4c9626cce41752b23fc1782fddfc3254952",
+          "message": "feat: upgrading to PF6 - updated dependencies and ran codemodes suites",
+          "author": "Anwesha Palit",
+          "date": "2025-12-10"
+        },
+        {
+          "sha": "d57e3ee47df4c48dba864d8bdca7a304b17ab93d",
+          "message": "Merge pull request #836 from anwesha-palit-redhat/feat/SRVKP-SRVKP-9675",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-15"
+        },
+        {
+          "sha": "44d666d67de3042855740f8baa21e598f8f32429",
+          "message": "Merge pull request #845 from anwesha-palit-redhat/feat/SRVKP-9273",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-15"
+        },
+        {
+          "sha": "389583d4a3b43b21f32d0e950a30cd81cc67a9a4",
+          "message": "Merge pull request #834 from anwesha-palit-redhat/feat/SRVKP-9607",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-16"
+        },
+        {
+          "sha": "d8d244dfa6edc4471dbdd2dfc20de3881a353015",
+          "message": "PF6 Page Heading fixes and refactoring",
+          "author": "Arvind",
+          "date": "2025-12-16"
+        },
+        {
+          "sha": "21ec2dcc667c37e9e9812c8ba33911e14d63e97c",
+          "message": "fix: css fix for sub header issue",
+          "author": "Anwesha Palit",
+          "date": "2025-12-16"
+        },
+        {
+          "sha": "458bacc783d44af98de5a3a7fd390f08daa1ea20",
+          "message": "Merge pull request #850 from anwesha-palit-redhat/SRVKP-9787",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2025-12-16"
+        },
+        {
+          "sha": "2ffc6e229f3a0c29e8bfe828a25b68c29c38feb0",
+          "message": "Merge pull request #849 from arvindk-softwaredev/feature/SRVKP-9625",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-17"
+        },
+        {
+          "sha": "b91e0bbd2a8627c7ca95d30d9398f38b3ce0f749",
+          "message": "feat: start pipeline modal fixes and replacing useModal with useOverlay with npm console-sdk package bumps",
+          "author": "Anwesha Palit",
+          "date": "2025-12-17"
+        },
+        {
+          "sha": "473ec34732fdb67fb4ee0be303356a6b553ff601",
+          "message": "SRVKP-9675: Add Error Banner and Loading Spinner to Pipeline Metrics Page for Average Duration Card",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-15"
+        },
+        {
+          "sha": "123e81600e594791ac2f3640c3d58635cb21a282",
+          "message": "Merge pull request #834 from anwesha-palit-redhat/feat/SRVKP-9607",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-16"
+        },
+        {
+          "sha": "541fd496ec0bbcefc3ad645ebed4a48c5db301c8",
+          "message": "Merge pull request #851 from anwesha-palit-redhat/feat/SRVKP-9627",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2025-12-19"
+        },
+        {
+          "sha": "4f8773cafb52872580a678bc417cb03d0d3b78fc",
+          "message": "deprecated errormodal and reset modal changes for PipelineBuilder",
+          "author": "Anwesha Palit",
+          "date": "2025-12-11"
+        },
+        {
+          "sha": "813677d0bd78b982f5a2b2d74ea0470dc491c8ae",
+          "message": "Merge pull request #854 from arvindk-softwaredev/feat/SRVKP-9918",
+          "author": "Arvind Krishnamurthy",
+          "date": "2025-12-30"
+        },
+        {
+          "sha": "d6536ceb82e48cb4a98e061d48da80712ae3da8e",
+          "message": "Merge pull request #852 from anwesha-palit-redhat/cherry-pick-SRVKP-9605-SRVKP-9675",
+          "author": "anwesha-palit-redhat",
+          "date": "2025-12-31"
+        },
+        {
+          "sha": "d119fbf8f83cd8e33bd5b378e7769d5239f4ac38",
+          "message": "feat: Replaced the action menu with LazyActionMenu",
+          "author": "Anwesha Palit",
+          "date": "2025-12-23"
+        },
+        {
+          "sha": "e70e24252f02a8a18fe5b5daaaf4fa4dd106a002",
+          "message": "Merge pull request #856 from anwesha-palit-redhat/feat/SRVKP-9786",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-02"
+        },
+        {
+          "sha": "13e19124f2043cd3fd6d017e30344a0f0a3a7bf2",
+          "message": "feat: CSS fix for log viewer and nav items",
+          "author": "Anwesha Palit",
+          "date": "2025-12-31"
+        },
+        {
+          "sha": "b0da77c7e89fed676b7cbb87ce56cb3fa2d7e22a",
+          "message": "translations for pipeline overview page label changes",
+          "author": "Arvind",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "2e4b9a0d7e6af61e9005fddea905235ead54015b",
+          "message": "Merge pull request #855 from arvindk-softwaredev/fix/SRVKP-10032",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-05"
+        },
+        {
+          "sha": "dba45538b8f0d0674089ed6c45b57273caed9d6b",
+          "message": "translations for pipeline overview page label changes",
+          "author": "Arvind",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "5f38376eaf665507bf3f03a63be827c2362c6d7d",
+          "message": "Merge pull request #858 from openshift-cherrypick-robot/cherry-pick-855-to-main_ocp_4.22",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-05"
+        },
+        {
+          "sha": "4ba2184772d1a0862534f5d4cddf85d67fd7f47c",
+          "message": "Merge pull request #857 from anwesha-palit-redhat/feat/SRVKP-9983",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-06"
+        },
+        {
+          "sha": "ae1338bcfadeba5f7ee608cb86086c70a574cdbc",
+          "message": "PF6 changes for QuickSearch and PipelineBuilder",
+          "author": "Arvind",
+          "date": "2025-12-31"
+        },
+        {
+          "sha": "f7b885c87b300bafb7c05d2db8ec4bd5417ef0f5",
+          "message": "Merge pull request #860 from arvindk-softwaredev/feature/SRVKP-9785",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-08"
+        },
+        {
+          "sha": "c262024e996db3bcd91c9359ff77bc896ce4155b",
+          "message": "fix: ResourceDropdown.tsx update to support React functional component and PF6 to address WebhookSecret.tsx display issue",
+          "author": "Anwesha Palit",
+          "date": "2026-01-09"
+        },
+        {
+          "sha": "5795b948de7716480e48c5870fcf19b239740713",
+          "message": "css fix for pause play icon in event streaming",
+          "author": "Anwesha Palit",
+          "date": "2026-01-07"
+        },
+        {
+          "sha": "f2825c54fc5fdfea7851bdc090e42ee0457a29d2",
+          "message": "css fix for eventlistener triggers",
+          "author": "Arvind",
+          "date": "2026-01-12"
+        },
+        {
+          "sha": "6aeeecf9f9d6cfa0e4c14e7f08c60ac40468c1d2",
+          "message": "deprecated modal.tsx",
+          "author": "Arvind",
+          "date": "2026-01-13"
+        },
+        {
+          "sha": "8dab8965d4ca577dabb4158e442d06ec6e8eaba4",
+          "message": "Merge pull request #865 from anwesha-palit-redhat/fix/SRVKP-10077",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-13"
+        },
+        {
+          "sha": "1844f5aad083fd0f7db531168cc3404d509ebb88",
+          "message": "Merge pull request #861 from anwesha-palit-redhat/fix/SRVKP-10078",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-13"
+        },
+        {
+          "sha": "6373725903d7c8253f7d0a9afe2739f6dee93344",
+          "message": "Merge pull request #868 from arvindk-softwaredev/feature/SRVKP-10069",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-15"
+        },
+        {
+          "sha": "81e4367dc6d3476e31958f0be6224708e194062a",
+          "message": "Merge pull request #870 from arvindk-softwaredev/feature/SRVKP-10072",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-15"
+        },
+        {
+          "sha": "ca3aa91bd25007759dddd75ce63d8eb3e4547a3a",
+          "message": "added metadata for CRDs",
+          "author": "Arvind",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "c03fbf8a223436ab4c60bde1e2cdccca37167a5c",
+          "message": "fix: css fix for logviewer to preserve whitespace",
+          "author": "Anwesha Palit",
+          "date": "2026-01-09"
+        },
+        {
+          "sha": "31f1a7c19bc083e24563a985e65e471e7babd5af",
+          "message": "Merge pull request #867 from arvindk-softwaredev/fix/SRVKP-10310",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-19"
+        },
+        {
+          "sha": "318e71cadc11589f3c74f2b8a6e4ed1decaa01e0",
+          "message": "added metadata for CRDs",
+          "author": "Arvind",
+          "date": "2025-12-08"
+        },
+        {
+          "sha": "8ed3dab270e6e04e3ecc5a20c287725f7b7657a4",
+          "message": "Merge pull request #873 from openshift-cherrypick-robot/cherry-pick-867-to-main_ocp_4.22",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-19"
+        },
+        {
+          "sha": "c373d1e6d0a7b2bb77b91dc470470839f8ee9e82",
+          "message": "Merge pull request #866 from anwesha-palit-redhat/fix/SRVKP-10035",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-21"
+        },
+        {
+          "sha": "c9ae510af91c06e8b57829322883e3c390f149aa",
+          "message": "css spacing fix",
+          "author": "Arvind",
+          "date": "2026-01-23"
+        },
+        {
+          "sha": "d9de09c4f88eb048f308b489993778a23a919b5e",
+          "message": "deprecate react-helemt and use DocumentTitle",
+          "author": "Arvind",
+          "date": "2026-01-23"
+        },
+        {
+          "sha": "a87376c809bfb58c785ba465acadac5f08e3b7d7",
+          "message": "Merge pull request #880 from arvindk-softwaredev/feature/SRVKP-10076",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-23"
+        },
+        {
+          "sha": "3cacd320e943ed5dd7a51fe083261424b21fe07f",
+          "message": "feat: support ansi colors for logviewer",
+          "author": "Anwesha Palit",
+          "date": "2026-01-18"
+        },
+        {
+          "sha": "2d830f3279521927ed3fc3ff483f62bcc8a06faa",
+          "message": "Merge pull request #881 from anwesha-palit-redhat/feat/SRVKP-10407",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-01-28"
+        },
+        {
+          "sha": "a84982d750f947e8504b96274760b3888b8f1626",
+          "message": "Merge pull request #879 from arvindk-softwaredev/feature/SRVKP-9711",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-01-29"
+        },
+        {
+          "sha": "c76d7ee5e2b91b58ecfa093c2d1a3a36ef16ca22",
+          "message": "feat: adding main_ocp_4.22 and PR workflow",
+          "author": "Anwesha Palit",
+          "date": "2026-01-29"
+        },
+        {
+          "sha": "95f7ea032280bcbc33f0d4aa81882558ba6d94c4",
+          "message": "Merge pull request #883 from anwesha-palit-redhat/feat/SRVKP-10470",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-02"
+        },
+        {
+          "sha": "2c38f55fc15bc382603bced2e6c6c9f2c2d292c4",
+          "message": "SRVKP-10439: Yarn 4 migration",
+          "author": "Anwesha Palit",
+          "date": "2026-02-03"
+        },
+        {
+          "sha": "f749adeb3f7b2ba16dfce8dc4837ef2f0d542cc0",
+          "message": "SRVKP-10439: updating ci-operator.yaml to fix build errors in release PR",
+          "author": "Anwesha Palit",
+          "date": "2026-02-03"
+        },
+        {
+          "sha": "d0d194d2924ce61375ccc6ebe3b749f65efa4d18",
+          "message": "SRVKP-10439: updating ci-operator.yaml to fix build errors in release PR",
+          "author": "Anwesha Palit",
+          "date": "2026-02-03"
+        },
+        {
+          "sha": "a5833842f710597e4e29d447ff880f5b9466ee96",
+          "message": "Merge branch 'main' into test_yarn4",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-04"
+        },
+        {
+          "sha": "48c084f4791ff99b314dd9c1e1de560b7ea78e54",
+          "message": "Merge pull request #920 from openshift-pipelines/test_yarn4",
+          "author": "Vincent Demeester",
+          "date": "2026-02-04"
+        },
+        {
+          "sha": "b2c07f7007a8b18b12e154023be7968379b0195f",
+          "message": "feat/SRVKP-10439-update-ci-operator-config",
+          "author": "Anwesha Palit",
+          "date": "2026-02-05"
+        },
+        {
+          "sha": "502a8f8d7dd6208e1d3a548df3b68cbbccb21c58",
+          "message": "feat: adding Arvind as approver for the console-plugin repo",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-06",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/925"
+        },
+        {
+          "sha": "acefa4389f5b5d9ac6b33cbce81b327964a2ab84",
+          "message": "Merge pull request #925 from openshift-pipelines/anwesha-palit-redhat-patch-1",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-10",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/925"
+        },
+        {
+          "sha": "7aa509705744c02bf409a229bbeca11b84b6926c",
+          "message": "feat: adding logs for multicluster",
+          "author": "Anwesha Palit",
+          "date": "2026-01-25"
+        },
+        {
+          "sha": "3137a4403721d102e36e9af827d7dcb5d7adf09d",
+          "message": "Merge pull request #926 from anwesha-palit-redhat/feat/SRVKP-8974-MC-Changes",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-10"
+        },
+        {
+          "sha": "3d3f4df04144d0d302093ba144d962206a630a30",
+          "message": "Update: docker-build-ta location and nginx, node images",
+          "author": "Anwesha Palit",
+          "date": "2026-02-11"
+        },
+        {
+          "sha": "fbb43abb15abaef592c4febffff383490f5409f5",
+          "message": "Merge pull request #935 from anwesha-palit-redhat/update_location_docker-build-ta",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-11"
+        },
+        {
+          "sha": "c6cdb5cabc5536901ce7d988e2442f488408edf2",
+          "message": "Yarn 4 multi-arch support for main branch",
+          "author": "Anwesha Palit",
+          "date": "2026-02-11"
+        },
+        {
+          "sha": "14aa0daaf0ea2bba0845960f09bc9ae9d50f6f82",
+          "message": "Merge pull request #937 from anwesha-palit-redhat/yarn4-support-for-multi-arch-in-konflux",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "39a5efc3d18e10c49760ecc0415e3c95e4f402ae",
+          "message": "multicluster changes to use managedBy field",
+          "author": "Arvind",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "f9d72c9cb646c329b9a51a5d074645af843b0c65",
+          "message": "Merge pull request #944 from arvindk-softwaredev/feat/SRVKP-10808",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "9ecef9cc3a40e3b050e93f9a5d5ccc47ef7efd64",
+          "message": "feat: adding icon for multicluster plr in hub cluster",
+          "author": "Anwesha Palit",
+          "date": "2026-02-10"
+        },
+        {
+          "sha": "f994ff724be4b09516b44e47a259d87c0904abb7",
+          "message": "Merge pull request #934 from anwesha-palit-redhat/feat/SRVKP-10807",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "1bae704405ec99222a8cc7797e1582c4e8ea2e4e",
+          "message": "feat: addting translations for multi cluster logs",
+          "author": "Anwesha Palit",
+          "date": "2026-02-10"
+        },
+        {
+          "sha": "f2586d78e21359a98bbb3159f6c9afa2b13ea84f",
+          "message": "Merge pull request #929 from anwesha-palit-redhat/feat/SRVKP-10785",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "5d4951f33630733b40ffade1547a6ef977a2c90d",
+          "message": "CVE changes",
+          "author": "Anwesha Palit",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "eb9be4bacbf1ab80f8d65ba79de270629b08507e",
+          "message": "Merge pull request #945 from anwesha-palit-redhat/CVE-main",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-12"
+        },
+        {
+          "sha": "3ce8240541e125c034f7f66daf43c730ee1b8210",
+          "message": "updaed hub cluster detection to use multi-cluster-role",
+          "author": "Arvind",
+          "date": "2026-02-24"
+        },
+        {
+          "sha": "f0570215185e808346e83e5367bc5c386aa61e64",
+          "message": "Merge pull request #959 from arvindk-softwaredev/feat/SRVKP-10786",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-02-24"
+        },
+        {
+          "sha": "a2d6b8ca881d1143db6eee3e638d2bb610828c6b",
+          "message": "feat:CVEs SRVKP-10058 SRVKP-9700 and yarn 4 migration with node20 support",
+          "author": "Anwesha Palit",
+          "date": "2026-01-29"
+        },
+        {
+          "sha": "049dd9ef9974873ee74996355e12cd838a98c740",
+          "message": "Merge pull request #955 from arvindk-softwaredev/feat/SRVKP-10743",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-25"
+        },
+        {
+          "sha": "e686c3b856faf6bfbd66ca011b3f6d8f77402682",
+          "message": "fix konflux build",
+          "author": "Anwesha Palit",
+          "date": "2026-02-25"
+        },
+        {
+          "sha": "931f7d829899e2a169b9ad290017a09c37b20ba9",
+          "message": "Merge pull request #963 from anwesha-palit-redhat/fix-konflux/SRVKP-10743",
+          "author": "anwesha-palit-redhat",
+          "date": "2026-02-25"
+        },
+        {
+          "sha": "e104fb0e660df7f6e50bda76bd0e78acf6db15a5",
+          "message": "fix: marking tests as broken",
+          "author": "Anwesha Palit",
+          "date": "2026-02-26"
+        },
+        {
+          "sha": "f5c5a3beee5cc3063c20299882c0327b4a477387",
+          "message": "Merge pull request #964 from anwesha-palit-redhat/fix/SRVKP-10743",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-26"
+        },
+        {
+          "sha": "64b6e5fca048981342ffcc2efd248cc5df868214",
+          "message": "fix: marking tests as broken",
+          "author": "Anwesha Palit",
+          "date": "2026-02-26"
+        },
+        {
+          "sha": "46b5516a5d16ddb79cb7f900753dc32a4eb53576",
+          "message": "Merge pull request #965 from arvindk-softwaredev/fix/SRVKP-10743",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-02-26"
+        },
+        {
+          "sha": "bcee6cdd8d9f4cbb2a3d2cc749bef405dc4ff523",
+          "message": "fix: added missing translation to fix CI job",
+          "author": "Anwesha Palit",
+          "date": "2026-02-27"
+        },
+        {
+          "sha": "3cc46dd2bfa659af74d69dc5faf289dbe795e041",
+          "message": "Merge pull request #972 from anwesha-palit-redhat/fix/SRVKP-10953",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-02-27"
+        },
+        {
+          "sha": "0daf43922276f5b8645f749d9dae91159ac0262f",
+          "message": "approver list tag css fix",
+          "author": "Anwesha Palit",
+          "date": "2026-02-27"
+        },
+        {
+          "sha": "4646e73091a5691395d5fcf522e4a805548d982a",
+          "message": "Merge pull request #974 from arvindk-softwaredev/feat/SRVKP-10080",
+          "author": "Anwesha Palit",
+          "date": "2026-02-27"
+        },
+        {
+          "sha": "6572ad055ca9c102ca85afece4b541d5ac3e417d",
+          "message": "delete: removing .konflux and .tekton dir from upstream console-plugin",
+          "author": "Anwesha Palit",
+          "date": "2026-03-02"
+        },
+        {
+          "sha": "051af8da08c6857f80467938c2fbf8da743b3a9a",
+          "message": "[bot:main] update konflux configuration",
+          "author": "openshift-pipelines-bot",
+          "date": "2026-02-24"
+        },
+        {
+          "sha": "0b8374df12b9c1361b0e12aa7dd906127dca1800",
+          "message": "Merge pull request #975 from anwesha-palit-redhat/delete/SRVKP-10961",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-05"
+        },
+        {
+          "sha": "c386391c7ec151b97f79b5151e6dcdc9743ebdd6",
+          "message": "renamed main_ocp_4.22 branch to master",
+          "author": "Arvind",
+          "date": "2026-03-05"
+        },
+        {
+          "sha": "173c1b6f2883fa1806418f03c9667c7946dd786e",
+          "message": "Merge pull request #995 from arvindk-softwaredev/feat/SRVKP-11001",
+          "author": "Anwesha Palit",
+          "date": "2026-03-06"
+        },
+        {
+          "sha": "9e297902dca4ef92a6b8f724193510416df99865",
+          "message": "removing all .konflux and .tekton files from main_ocp_4.22",
+          "author": "Anwesha Palit",
+          "date": "2026-03-05"
+        },
+        {
+          "sha": "2f6d8e1bba072a3b70c240d73e2d1b366c8b185c",
+          "message": "Merge pull request #992 from anwesha-palit-redhat/cherry-pick/SRVKP-10961",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-09"
+        },
+        {
+          "sha": "f9bcbd9d5bb57a32c340bbc502c0f8e8d2e66d71",
+          "message": "react 18 readiness",
+          "author": "Anwesha Palit",
+          "date": "2026-03-09"
+        },
+        {
+          "sha": "14a239b9781944b12f9c4ddce445a05378015b60",
+          "message": "Merge pull request #999 from anwesha-palit-redhat/feat/SRVKP-11003",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-03-17"
+        },
+        {
+          "sha": "660064f1d56dea1e95de36bd41d81b146fb94022",
+          "message": "fix: ci job for docker image is failing",
+          "author": "Anwesha Palit",
+          "date": "2026-03-17"
+        },
+        {
+          "sha": "b0fa093c28ad24383247a28e14c6deb36b0de4c1",
+          "message": "Merge pull request #1001 from anwesha-palit-redhat/feat/SRVKP-11123",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-18"
+        },
+        {
+          "sha": "f5c64d0432c9081bd339f3be6c5c7e2fce81efdb",
+          "message": "feat: adding custom filter for ConsoleDataView",
+          "author": "Anwesha Palit",
+          "date": "2026-03-20"
+        },
+        {
+          "sha": "c64fba596221948b842d2b7bd540f82690a88891",
+          "message": "Merge pull request #1003 from anwesha-palit-redhat/feat/SRVKP-11167",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-23"
+        },
+        {
+          "sha": "3fde794dfc196f576efe414e531e1bc48f23ba90",
+          "message": "migrate to ConsoleDataView for PL and PLR list",
+          "author": "Arvind",
+          "date": "2026-03-26"
+        },
+        {
+          "sha": "0b44ca541923955349696c323f159ea9b1a7a8f6",
+          "message": "Merge pull request #1011 from arvindk-softwaredev/feat/SRVKP-9626",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-26"
+        },
+        {
+          "sha": "018b5a6b589f0bfe7a5895e5aa3406d0182ad386",
+          "message": "feat: Add consoledataview for tasks and taskruns",
+          "author": "Anwesha Palit",
+          "date": "2026-03-18"
+        },
+        {
+          "sha": "c387d0bcfc9cc8eca3a72f014f71d2ace3cafecd",
+          "message": "Merge pull request #1010 from anwesha-palit-redhat/feat/SRVKP-9710",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-26"
+        },
+        {
+          "sha": "41f2204668f2afc12ba15897d8cd105c0086c929",
+          "message": "Merge branch 'main' into master-with-main",
+          "author": "Anwesha Palit",
+          "date": "2026-03-27"
+        },
+        {
+          "sha": "5701cf09ebe509dce63681a8b5e396cfef6529ef",
+          "message": "refactor pipelines-overview page to use PatternFly v6 utilities",
+          "author": "shverma",
+          "date": "2026-01-13"
+        },
+        {
+          "sha": "a777dbdf3109a5411a3f3f8198270a00eb30fa57",
+          "message": "Merge pull request #869 from pratap0007/overview-pr-status-card",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-30"
+        },
+        {
+          "sha": "a273bd7bf8285689f4cb954d07dfdcfdf816618c",
+          "message": "Delete PipelineMetrics.scss file and Change some files for responsiveness and alignment",
+          "author": "adityavshinde",
+          "date": "2026-03-27"
+        },
+        {
+          "sha": "54f34c7b8581b4eb481e317b2346b62c45cecf6e",
+          "message": "fix: remove nested scrollbars and align metric cards for tekton-results",
+          "author": "Ankur Sinha",
+          "date": "2026-03-27"
+        },
+        {
+          "sha": "26e11bf9e9967bdbe48704904c2edf5d80b6f2c5",
+          "message": "Merge pull request #1004 from adityavshinde/fix/SRVKP-10871",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-30"
+        },
+        {
+          "sha": "eff032ddc2924e9f91abda20f7df0109417c6567",
+          "message": "Merge pull request #1005 from ankrsinha/fix/SRVKP-10073",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-30"
+        },
+        {
+          "sha": "df7f8589ab51500ce5c3fd3931b32548800878e2",
+          "message": "Merge pull request #1014 from anwesha-palit-redhat/master-with-main",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-03-30"
+        },
+        {
+          "sha": "9b20e2959e56c8dbc5bcacc900eac5ef24af895c",
+          "message": "fix: updated the pf-v5 classnames to pf-v6",
+          "author": "Anwesha Palit",
+          "date": "2026-03-31"
+        },
+        {
+          "sha": "56db3373d0e9359113391069ec03a9c7baae7dac",
+          "message": "fix: updated the loader logic so that the taskrun details page is visible for archived taskruns",
+          "author": "Anwesha Palit",
+          "date": "2026-03-31"
+        },
+        {
+          "sha": "1100e969976120d0ce2210424fe886176320ce59",
+          "message": "fix: remove sidebar list bullets for PipelineRuns and Triggers on the Topology page",
+          "author": "Ankur Sinha",
+          "date": "2026-04-01"
+        },
+        {
+          "sha": "ed537a700c92a715f58994234a6f8784ec7d9162",
+          "message": "Merge pull request #1017 from anwesha-palit-redhat/SRVKP-11190",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-02"
+        },
+        {
+          "sha": "afcc58fc485f7cd9d11b2b0c86650c11846ad8e1",
+          "message": "fix for fetching TRs of specific PLR",
+          "author": "Arvind",
+          "date": "2026-03-31"
+        },
+        {
+          "sha": "6b4c118f8dda9d8b07359733a4c16e2a75031fef",
+          "message": "Merge pull request #1016 from anwesha-palit-redhat/fix/SRVKP-11192",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-02"
+        },
+        {
+          "sha": "8e91e58f561998eff2019f7170835de492a3414c",
+          "message": "fix for archived plr loader logic",
+          "author": "Anwesha Palit",
+          "date": "2026-03-31"
+        },
+        {
+          "sha": "e7290ff33931983bffef8b64497a46390d10c1f1",
+          "message": "Merge pull request #1021 from arvindk-softwaredev/fix/SRVKP-11393",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-06"
+        },
+        {
+          "sha": "81d30ff5707b934674a416a96a73f7475dccec25",
+          "message": "Merge pull request #1023 from arvindk-softwaredev/fix/SRVKP-11391",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-06"
+        },
+        {
+          "sha": "96126425f3a99c5c3e811a12970d0f0ac30c91e4",
+          "message": "SRVKP-11398: bumped console sdk packages to 4.22.0-prerelease.2 (#1025)",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-04-06"
+        },
+        {
+          "sha": "281b9290cd79cef7231eeb2e56e2380fc39bb2ce",
+          "message": "feat: upgrading react-router",
+          "author": "Anwesha Palit",
+          "date": "2026-04-06"
+        },
+        {
+          "sha": "b48ed50e7e482bab59ac1452b000331dbe12c1d1",
+          "message": "Merge pull request #1024 from anwesha-palit-redhat/feat/SRVKP-10306",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-06"
+        },
+        {
+          "sha": "4d31b7e7bc8ee5e5471636abd886494083e02de0",
+          "message": "Merge pull request #1019 from ankrsinha/fix/SRVKP-9789",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-07"
+        },
+        {
+          "sha": "55c53627982d7044447325a6e94394d0f66ea1d5",
+          "message": "fix: pipeline topology task status fix and update default",
+          "author": "Anwesha Palit",
+          "date": "2026-04-07"
+        },
+        {
+          "sha": "a635dae118001c5c30684eae41a8111701216aab",
+          "message": "Merge pull request #1027 from anwesha-palit-redhat/fix/SRVKP-10037",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-08"
+        },
+        {
+          "sha": "64b6dad06b0fdbf909dc04edd5a10203d656c9bc",
+          "message": "conditinally navigate to details page on PLR re-run action",
+          "author": "Arvind",
+          "date": "2026-04-07"
+        },
+        {
+          "sha": "9da46533934f576d0613c282a6fccebd01031d4c",
+          "message": "Merge pull request #1035 from arvindk-softwaredev/feat/SRVKP-11394",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-10"
+        },
+        {
+          "sha": "7f8ba75fab72d9a91daf2f4abd62e5abbc4323ab",
+          "message": "feat: updating repository tabs with consoledataview",
+          "author": "Anwesha Palit",
+          "date": "2026-04-07"
+        },
+        {
+          "sha": "700f88873d93136c1d0ff2c8bb08ecc9d172846b",
+          "message": "Merge pull request #1036 from anwesha-palit-redhat/feat/SRVKP-9709",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-13"
+        },
+        {
+          "sha": "a22d4b9d06d225fa5cd1e9478c6b1ee8c5aa9403",
+          "message": "Improve UI and layout for pipeline overview loading states",
+          "author": "Aditya Shinde",
+          "date": "2026-04-01"
+        },
+        {
+          "sha": "4dc6fca0951a70309a44ab07ebbdb86b4bb7353a",
+          "message": "Merge pull request #1018 from adityavshinde/fix/SRVKP-11379",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-13"
+        },
+        {
+          "sha": "d23f435d4a69404379816c0486f4760d75ec1100",
+          "message": "Improve UI and layout for pipeline overview loading states",
+          "author": "Aditya Shinde",
+          "date": "2026-04-14"
+        },
+        {
+          "sha": "a9caa8b45b344cda836b1a461cd88cb89565c33e",
+          "message": "Merge pull request #1022 from adityavshinde/fix/SRVKP-11383",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-15"
+        },
+        {
+          "sha": "06a86f8832e1f3d0533c46109efda52816811a5b",
+          "message": "refactor: refactored useTaskRuns.ts",
+          "author": "Anwesha Palit",
+          "date": "2026-04-15"
+        },
+        {
+          "sha": "66b56e1d84100c473da6e32ab87c5b6ac01cfd37",
+          "message": "Merge pull request #1037 from anwesha-palit-redhat/fix/SRVKP-11395",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-17"
+        },
+        {
+          "sha": "a4623e22b946e243d7d811cfb577b932c37257c6",
+          "message": "updated consoledataview for eventlisteners and triggertemplates tab",
+          "author": "Arvind",
+          "date": "2026-04-17"
+        },
+        {
+          "sha": "cf80d0a3293a4fe1bb7356e691325ad08a357c53",
+          "message": "Merge pull request #1040 from arvindk-softwaredev/feat/SRVKP-9712",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-20"
+        },
+        {
+          "sha": "a3b9291be899124c8182d841de26d412a5460c54",
+          "message": "fixed color for EPL icon",
+          "author": "Arvind",
+          "date": "2026-04-21"
+        },
+        {
+          "sha": "dc45cbc8f9f2141277d9d48af7398a50d19b685d",
+          "message": "Merge pull request #1045 from arvindk-softwaredev/fix/SRVKP-11400",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-22"
+        },
+        {
+          "sha": "e6761e7c535ed94a55a6b02416b4f70f45085173",
+          "message": "feat: removed LoadingInline wrapper and updated the LoadingBox component",
+          "author": "Anwesha Palit",
+          "date": "2026-04-20",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1042",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11566",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "bbdb251b614e2ce1af8b6f533b50941c47b49a14",
+          "message": "Merge pull request #1042 from anwesha-palit-redhat/feat/SRVKP-11566",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-22",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1042",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11566",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "66544f6a7ce4a854b3ebc19c8ded7632fc457e63",
+          "message": "feat: added consoledataview and modified styles",
+          "author": "Anwesha Palit",
+          "date": "2026-04-16",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1041",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11399",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "993182c10a48ffa6023641dadadda7c08b871c64",
+          "message": "Merge pull request #1041 from anwesha-palit-redhat/feat/SRVKP-11399",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-23",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1041",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11399",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "e08957b01fb2a9e9bd813f5582ffba193b495e25",
+          "message": "feat: adding consoledataview and lazyactionmenu for the remaining resources",
+          "author": "Anwesha Palit",
+          "date": "2026-04-22",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1046",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-9713",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "ae1bb11220dbdc5c9920c101106e062d65baa480",
+          "message": "fix: added key for same plr names so that they rerender everytime a new plr is created / rerun",
+          "author": "Anwesha Palit",
+          "date": "2026-04-26",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1048",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11565",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "1c78bead545c523f3753f18cfe418358c50f473f",
+          "message": "Merge pull request #1048 from anwesha-palit-redhat/fix/SRVKP-11565",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1048",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11565",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "1e35a4c702d523aa86cf7d63d875be0ef4363e02",
+          "message": "upgraded console sdk to 4.22.0-prerelease.3",
+          "author": "Arvind",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1053",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11711",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "d99e84288ee7fa23e8563f4f05d1ee4e01527477",
+          "message": "Merge pull request #1046 from anwesha-palit-redhat/feat/SRVKP-9713",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1046",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-9713",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "dd67cb1f6d57d203f08d3d8f9f6c9d09fe6abdb6",
+          "message": "migrate ApprovalList to ConsoleDataView",
+          "author": "Arvind",
+          "date": "2026-04-20",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1047",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11401",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "02229d1c3c6e84dc1af1a6d96d95f2385c706fdf",
+          "message": "updated customData type and options for DataViewFilter",
+          "author": "Arvind",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1047",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11401",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "dcdc747865b84a9db15726dc99d3689e82be9288",
+          "message": "Merge pull request #1047 from arvindk-softwaredev/feat/SRVKP-11401",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1047",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11401",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "27b5419b88aff1d99f293c34319b354bfb506adf",
+          "message": "translations for master branch",
+          "author": "Arvind",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1052",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11715",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "61f01b98853382d9a05fa72087117aa3376a02e4",
+          "message": "Merge pull request #1052 from arvindk-softwaredev/feat/SRVKP-11715",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-28",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1052",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11715",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "4cdecf18b065b67c325c3aa843a5857c464614f0",
+          "message": "Merge pull request #1053 from arvindk-softwaredev/feat/SRVKP-11711",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-28",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1053",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11711",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "c27daa5d223321f792fa157a288383400291843b",
+          "message": "fix: renamed classnames to avoid classname collisions",
+          "author": "Anwesha Palit",
+          "date": "2026-04-27",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1049",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11708",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "13fc29d13daf13722b9ca0d492deec2e3f4d4ee6",
+          "message": "Merge pull request #1049 from anwesha-palit-redhat/fix/SRVKP-11708",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-04-28",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1049",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11708",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "23ca36492329e53a2c6407e9cbc85c420ca7d30d",
+          "message": "SRVKP-8292: Unify Stop and Cancel PipelineRun visibility logic [release-v1.23.x]  (#1063)",
+          "author": "OpenShift Cherrypick Robot",
+          "date": "2026-05-11",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1063",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1062"
+        },
+        {
+          "sha": "51a05dafac429946642dd3afe3a4027a2d0c1072",
+          "message": "SRVKP-11951: Updating modules in master branch to address CVEs [release-v1.23.x]  (#1065)",
+          "author": "OpenShift Cherrypick Robot",
+          "date": "2026-05-11",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1065",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1064",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11951",
+          "release_note": {
+            "type": "Release Note Not Required"
+          }
+        },
+        {
+          "sha": "8baa0260046d8bb4b9390da8203bd43e0ef1ed5c",
+          "message": "fix: redirection logic fix to resolver tasks",
+          "author": "Anwesha Palit",
+          "date": "2026-05-20",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1079",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1076"
+        },
+        {
+          "sha": "70d7102bf0728b6dc159b5096892898aa55e111b",
+          "message": "added flag for ApprovalTask tab display in PipelineRunDetails page",
+          "author": "Arvind",
+          "date": "2026-05-20",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1086",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1082"
+        },
+        {
+          "sha": "076a37aacb46503f4553eaec64a198d8ef309fc9",
+          "message": "Merge pull request #1079 from openshift-cherrypick-robot/cherry-pick-1076-to-release-v1.23.x",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-05-21",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1079",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1076"
+        },
+        {
+          "sha": "c39fcedac1898e1566246d10779906034fd697cf",
+          "message": "Merge pull request #1086 from openshift-cherrypick-robot/cherry-pick-1082-to-release-v1.23.x",
+          "author": "Arvind Krishnamurthy",
+          "date": "2026-05-25",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1086",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1082"
+        },
+        {
+          "sha": "62664eb4d09752f7a0182cc342d98359c9861e2d",
+          "message": "Add release branch pattern to workflow triggers (#1111)",
+          "author": "Anwesha Palit",
+          "date": "2026-06-04",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1111"
+        },
+        {
+          "sha": "83539f43cd76e2eb87d29358c209d944f58d61f3",
+          "message": "Update OWNERS to remove certain approvers and reviewers (#1113)",
+          "author": "Anwesha Palit",
+          "date": "2026-06-04",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1113"
+        },
+        {
+          "sha": "f9699c58096928d1e670811870158bd640eb9c4b",
+          "message": "feat: add CVE fix skill with dependency analysis script",
+          "author": "Ankur Sinha",
+          "date": "2026-06-22",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1140",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1136",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12265"
+        },
+        {
+          "sha": "22161b27baa81d5b27a7e41b6dadcd3019ed8463",
+          "message": "Merge pull request #1140 from openshift-cherrypick-robot/cherry-pick-1136-to-release-v1.23.x",
+          "author": "openshift-merge-bot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1140",
+          "original_pr": "https://github.com/openshift-pipelines/console-plugin/pull/1136",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12265"
+        }
+      ]
+    },
+    {
+      "name": "operator",
+      "upstream": "tektoncd/operator",
+      "downstream": "openshift-pipelines/operator",
+      "upstream_branch": "release-v0.78.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "fe2392a0e26fa1488df0e4ab432884fe7ca89d3c",
+      "to_sha": "9bcf791020d954b98f3f2a030d5b0c82388d51e4",
+      "commits": [
+        {
+          "sha": "774d04b3fe6759dc8fa42e8dd37dfbd1bc71bd77",
+          "message": "fix(cve): update Go to 1.25.10 to address stdlib security vulnerabilities",
+          "author": "Jawed Khelil",
+          "date": "2026-05-08",
+          "pr": "https://github.com/tektoncd/operator/pull/3411",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11355",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Updates Go from 1.25.0 to 1.25.10 to address 10 stdlib security vulnerabilities including fixes for crypto/x509, net/http, and mime packages.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "fefa49eafd61d33987c0ac0a015250b0a2a8f300",
+          "message": "fix(cve): CVE-2026-33814, CVE-2026-27141 - bump golang.org/x/net to v0.53.0",
+          "author": "Jawed Khelil",
+          "date": "2026-05-19",
+          "pr": "https://github.com/tektoncd/operator/pull/3436"
+        },
+        {
+          "sha": "b095a0f55755e21c565af1e90408828a5c70ae73",
+          "message": "update hub version to v1.23.10",
+          "author": "Shiv Verma",
+          "date": "2026-06-01",
+          "pr": "https://github.com/tektoncd/operator/pull/3457"
+        },
+        {
+          "sha": "ab348d715679389e389dfffb8d3d9d0a15a77a35",
+          "message": "chore(deps): update Openshift images",
+          "author": "Andrew Thorp",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd/operator/pull/3458"
+        },
+        {
+          "sha": "6fd20a37d046b220885f89edaf94b9eea37c5105",
+          "message": "update the hub version to v1.23.11",
+          "author": "Shiv Verma",
+          "date": "2026-06-03",
+          "pr": "https://github.com/tektoncd/operator/pull/3465"
+        },
+        {
+          "sha": "9d408fc5b1117adfb067886d2e196c23572b26ee",
+          "message": "Feat: Console Plugin Image should be picked conditionally based OCP Version",
+          "author": "Pramod Bindal",
+          "date": "2026-04-30",
+          "pr": "https://github.com/tektoncd/operator/pull/3467",
+          "original_pr": "https://github.com/tektoncd/operator/pull/3386",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11927",
+          "release_note": {
+            "text": "Added support for conditionally picking the console-plugin image on openshift.\nOCP version older than 4.22 pick the legacy console plugin\nNewer version pick the last console plugin image",
+            "type": "Enhancement",
+            "status": "Proposed"
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "48b496c9e406490d9cdbbe61bba40c87a953875e",
+          "message": "fix(cve): Update Go 1.25.10 \u2192 1.25.11 to fix stdlib CVEs",
+          "author": "Jawed Khelil",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd/operator/pull/3470"
+        },
+        {
+          "sha": "d2771d515c78be57d9e4e467430abe004f888bc9",
+          "message": "chore(deps): update openshift images sha",
+          "author": "Shiv Verma",
+          "date": "2026-06-21",
+          "pr": "https://github.com/tektoncd/operator/pull/3515"
+        },
+        {
+          "sha": "3fe2d619b299c3605dc8cb10f5d1ad483756eb38",
+          "message": "bump(deps): bump PAC, Pipeline and Hub version",
+          "author": "Shiv Verma",
+          "date": "2026-06-21",
+          "pr": "https://github.com/tektoncd/operator/pull/3513"
+        },
+        {
+          "sha": "45607f1ea996c3b5d2ff63ec8936fe577ec80f75",
+          "message": "chore(deps): bump golangci/golangci-lint-action from 9.2.0 to 9.2.1",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3545"
+        },
+        {
+          "sha": "a0862d5da7521ac5f78cdb38018c49c345e3db0c",
+          "message": "chore(deps): bump peter-evans/create-pull-request from 7.0.8 to 7.0.11",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3544"
+        },
+        {
+          "sha": "0ed8b0035d394506b992f597b12ba65aa1474316",
+          "message": "chore(deps): bump github/codeql-action from 4.31.2 to 4.31.11",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3541"
+        },
+        {
+          "sha": "1b7867e14c9794c1e592d8e3fed676c2eedb87fd",
+          "message": "chore(deps): bump chainguard-dev/actions from 1.5.11 to 1.5.16",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3542"
+        },
+        {
+          "sha": "674d9b84cc98fb9e8403907934b4acdf9f57b180",
+          "message": "chore(deps): bump step-security/harden-runner from 2.13.2 to 2.13.3",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3543"
+        },
+        {
+          "sha": "8ef8dd08733f52dec6e302b54fddae27c0ba38d4",
+          "message": "refactor: simplify update-image-sha.sh script",
+          "author": "Shiv Verma",
+          "date": "2026-06-21",
+          "pr": "https://github.com/tektoncd/operator/pull/3586",
+          "original_pr": "https://github.com/tektoncd/operator/pull/3516"
+        },
+        {
+          "sha": "84c7e7fe08eecab32243615d442c59ce543f9482",
+          "message": "ci(e2e): fix ko >=v0.19 SBOM push failure on plain-HTTP registry",
+          "author": "Jawed khelil",
+          "date": "2026-06-30",
+          "pr": "https://github.com/tektoncd/operator/pull/3642",
+          "original_pr": "https://github.com/tektoncd/operator/pull/3621"
+        },
+        {
+          "sha": "edc4c796d4291143f655102dab2301f74bf8d348",
+          "message": "chore(deps): bump actions/checkout from 5.0.0 to 5.0.1",
+          "author": "dependabot[bot]",
+          "date": "2026-07-01",
+          "pr": "https://github.com/tektoncd/operator/pull/3604"
+        },
+        {
+          "sha": "bc78223fbdc66a83765bc214c2614abfebd89690",
+          "message": "chore(deps): bump github.com/sigstore/cosign/v2 from 2.6.2 to 2.6.3",
+          "author": "dependabot[bot]",
+          "date": "2026-06-23",
+          "pr": "https://github.com/tektoncd/operator/pull/3546"
+        },
+        {
+          "sha": "9bcf791020d954b98f3f2a030d5b0c82388d51e4",
+          "message": "chore(deps): bump github.com/tektoncd/pipeline from 1.6.3 to 1.6.4",
+          "author": "dependabot[bot]",
+          "date": "2026-07-01",
+          "pr": "https://github.com/tektoncd/operator/pull/3607"
+        }
+      ]
+    },
+    {
+      "name": "manual-approval-gate",
+      "upstream": "openshift-pipelines/manual-approval-gate",
+      "downstream": "openshift-pipelines/p12n-manual-approval-gate",
+      "upstream_branch": "release-v0.7.0",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "47e1ce91fc5b9d756db98cd7f5c4c03c23886160",
+      "to_sha": "f9ccb2662067cc889f50fb05cf95116a491e827a",
+      "commits": [
+        {
+          "sha": "2399dc6ee931c6f19a643c878fbd3d915a1e9fc1",
+          "message": "[Release-v0.7.0] Fix CVE-2026-33211: bump tektoncd/pipeline to v1.0.2",
+          "author": "infernus01",
+          "date": "2026-05-21",
+          "pr": "https://github.com/openshift-pipelines/manual-approval-gate/pull/980"
+        },
+        {
+          "sha": "2f91dd631d255f1aa6e1a3ef6ea16ca3a6d2fdb3",
+          "message": "fix(cve): CVE-2026-33186 - google.golang.org/grpc (release-v0.7.0)",
+          "author": "Divyanshu Agrawal",
+          "date": "2026-06-02",
+          "pr": "https://github.com/openshift-pipelines/manual-approval-gate/pull/988",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11741",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Fixes CVE-2026-33186 (High severity) by updating google.golang.org/grpc to v1.79.3, resolving an authorization bypass vulnerability where a missing leading slash in the :path header could allow attackers to bypass gRPC server authorization checks.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "f9ccb2662067cc889f50fb05cf95116a491e827a",
+          "message": "fix(cve): CVE-2026-39821 + CVE-2026-33814 - Upgrade Go 1.24.0 \u2192 1.25.11, x/net v0.48.0 \u2192 v0.55.0",
+          "author": "Divyanshu Agrawal",
+          "date": "2026-06-04",
+          "pr": "https://github.com/openshift-pipelines/manual-approval-gate/pull/1000",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12342",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes CVE-2026-39821 and CVE-2026-33814 by upgrading golang.org/x/net to v0.55.0 and Go to 1.25.11. This resolves an ASCII-only Punycode label rejection bypass in x/net/idna and an HTTP/2 infinite loop caused by bad SETTINGS_MAX_FRAME_SIZE values.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        }
+      ]
+    },
+    {
+      "name": "pipelines-as-code",
+      "upstream": "tektoncd/pipelines-as-code",
+      "downstream": "openshift-pipelines/pac-downstream",
+      "upstream_branch": "release-v0.39.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "8b79f2d53f9995b5ba0888dd64284ee0bc845f89",
+      "to_sha": "6acde9dbaa6da67cfbd67b14b9e0c0a2043c32bb",
+      "commits": [
+        {
+          "sha": "6d5125bb669915c2f531aab74ad63c549ed99ef8",
+          "message": "chore(deps): update grpc to v1.79.3",
+          "author": "Akshay Pant",
+          "date": "2026-04-16",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2730"
+        },
+        {
+          "sha": "652421a35f7f687c68d81d4d06590ceb1003da40",
+          "message": "fix(deps): update go-jose to fix GHSA-78h2-9frx-2jm8",
+          "author": "Akshay Pant",
+          "date": "2026-05-14",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2730"
+        },
+        {
+          "sha": "68d2f42a947662bc6248644c43c0a7c15f8422d5",
+          "message": "perf(informer): add TransformFuncs to reduce cache memory usage",
+          "author": "Akshay Pant",
+          "date": "2026-04-09",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2730"
+        },
+        {
+          "sha": "632c9a5b908333265e816eefb3a98b9c029a554a",
+          "message": "chore(deps): bump tektoncd/pipeline to v1.6.2",
+          "author": "Akshay Pant",
+          "date": "2026-05-14",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2730"
+        },
+        {
+          "sha": "95ae7a88ae4fe85e124d06e131c5d7052f1a720d",
+          "message": "fix(reconciler): skip watcher status updates",
+          "author": "Chmouel Boudjnah",
+          "date": "2026-05-19",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2730"
+        },
+        {
+          "sha": "d1f9603a50c11e5b91b75dca87761a1edd9f9175",
+          "message": "fix(ci): skip TLS verification for gosmee client in e2e tests",
+          "author": "Zaki Shaikh",
+          "date": "2026-06-08"
+        },
+        {
+          "sha": "e0c4a11ea3800ab9d26cf3a8ae92b74cf18527c3",
+          "message": "fix(security): backport app token safeguards",
+          "author": "Chmouel Boudjnah",
+          "date": "2026-06-03",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12241",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "GitHub App installation tokens are now scoped to the triggering repository, preventing unauthorized access to private repositories via remote task resolution.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "591a50f5033af5fabb014990720a4d5834378ecd",
+          "message": "build(lint): pin golangci toolchain",
+          "author": "Chmouel Boudjnah",
+          "date": "2026-06-03",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762"
+        },
+        {
+          "sha": "64673d3069c9c2f68d0a163d86f948d448dde7d7",
+          "message": "chore(deps): bump go-jose v4 to v4.1.4",
+          "author": "Chmouel Boudjnah",
+          "date": "2026-06-03",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762"
+        },
+        {
+          "sha": "c85286ef2d7e62997460c43b1df9c6b97b685484",
+          "message": "fix(security): redact query string from incoming webhook log",
+          "author": "Shubham Bhardwaj",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762"
+        },
+        {
+          "sha": "402ae2c29823a559a62407562e10e83bbab8b89f",
+          "message": "ci: rewrite e2e script for main's matrix",
+          "author": "Akshay Pant",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762"
+        },
+        {
+          "sha": "f5e54cda2e7e8ae96bb4c8c3a006ec395a6e1a7b",
+          "message": "fix(gitea): add nil-safety and Forgejo compat",
+          "author": "Akshay Pant",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762"
+        },
+        {
+          "sha": "af48fc833cddd3f4dc8fe315cfa3cf17148e1668",
+          "message": "test: rename bitbucket DC env vars to match main",
+          "author": "Akshay Pant",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2762"
+        },
+        {
+          "sha": "27f3ec4876bad5cecc21a809c5b8fb2f626f4491",
+          "message": "Release yaml generated from https://github.com/tektoncd/pipelines-as-code/commit/af48fc833cddd3f4dc8fe315cfa3cf17148e1668 for release v0.39.6",
+          "author": "Pipelines as Code CI Robot",
+          "date": "2026-06-08"
+        },
+        {
+          "sha": "aec194eba2150dfaf4f001af55471e8c2370edfc",
+          "message": "fix(webhook): prevent duplicate repository CR on trailing slash",
+          "author": "Zaki Shaikh",
+          "date": "2026-04-14",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2772",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11295",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Pipelines as Code webhook no longer creates duplicate Repository custom resources when the repository URL contains a trailing slash.",
+            "type": "Bug Fix",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "6acde9dbaa6da67cfbd67b14b9e0c0a2043c32bb",
+          "message": "Release yaml generated from https://github.com/tektoncd/pipelines-as-code/commit/aec194eba2150dfaf4f001af55471e8c2370edfc for release v0.39.7",
+          "author": "Pipelines as Code CI Robot",
+          "date": "2026-06-09"
+        }
+      ]
+    },
+    {
+      "name": "tektoncd-cli",
+      "upstream": "tektoncd/cli",
+      "downstream": "openshift-pipelines/tektoncd-cli",
+      "upstream_branch": "release-v0.43.2",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "9374f6241cc9e1b41887425fc92bc4ad5ad45d35",
+      "to_sha": "db2b9a10b000a53d7b9d0c69587fb1e8dfceb9a4",
+      "commits": [
+        {
+          "sha": "a9857c4929da5dc8a04a211d4d9cdd67f6018e5a",
+          "message": "Add CI summary job to the github workflows",
+          "author": "divyansh42",
+          "date": "2026-04-22",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        },
+        {
+          "sha": "bf5ea189e8c8e19ef79e0c7660761906ae85d897",
+          "message": "Update grpc to v1.80.0 to fix CVE-2026-33186",
+          "author": "divyansh42",
+          "date": "2026-04-21",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        },
+        {
+          "sha": "e931087abc1865fa636973a3566901fc5df9455c",
+          "message": "Bump pipelines to 1.6.1 to fix CVE CVE-2026-33211",
+          "author": "divyansh42",
+          "date": "2026-04-29",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        },
+        {
+          "sha": "14893d7eab8ee41bdab5d919d156da1e292bd9a2",
+          "message": "fix(cve): CVE-2026-34986 - go-jose/go-jose/v4",
+          "author": "Divyanshu Agrawal",
+          "date": "2026-05-13",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        },
+        {
+          "sha": "cf1e983e38cc31671cd1d65dfd0aabf25c980466",
+          "message": "fix(cve): CVE-2026-24051 - bump go.opentelemetry.io/otel to v1.40.0 [release-v0.43.1]",
+          "author": "divyansh42",
+          "date": "2026-05-18",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        },
+        {
+          "sha": "ca98f6a427750a51cbc089a293b3f39dd540c4e0",
+          "message": "fix(cve): CVE-2026-40938, CVE-2026-40161 - github.com/tektoncd/pipeline",
+          "author": "divyansh42",
+          "date": "2026-05-20",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        },
+        {
+          "sha": "db2b9a10b000a53d7b9d0c69587fb1e8dfceb9a4",
+          "message": "New version v0.43.2",
+          "author": "Shiv Verma",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd/cli/pull/2912"
+        }
+      ]
+    },
+    {
+      "name": "console-plugin-pf5",
+      "upstream": "openshift-pipelines/console-plugin",
+      "downstream": "openshift-pipelines/p12n-console-plugin-pf5",
+      "upstream_branch": "release-v1.21.x",
+      "downstream_branch": "release-v1.21.x",
+      "error": "new component \u2014 not present in old snapshot"
+    },
+    {
+      "name": "tektoncd-triggers",
+      "upstream": "tektoncd/triggers",
+      "downstream": "openshift-pipelines/tektoncd-triggers",
+      "upstream_branch": "release-v0.34.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "a20439b6891999c1d9b0d8a9ef8216f7b5dbce5e",
+      "to_sha": "a20439b6891999c1d9b0d8a9ef8216f7b5dbce5e"
+    },
+    {
+      "name": "git-init",
+      "upstream": "tektoncd-catalog/git-clone",
+      "downstream": "openshift-pipelines/tektoncd-git-clone",
+      "upstream_branch": "main",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "5df1573ceb240f9cb31bde0ccf6bc964c9488e94",
+      "to_sha": "523d1fedbfc51935fe8f886e2b7a7b7dd74690d6",
+      "commits": [
+        {
+          "sha": "a5c243d719d42941916e72b8d049b1744f11466e",
+          "message": "build(deps): bump actions/setup-go from 6.3.0 to 6.4.0",
+          "author": "dependabot[bot]",
+          "date": "2026-03-30",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/95"
+        },
+        {
+          "sha": "6880bcf62a3101800377edc7128ede4b79a1b734",
+          "message": "build(deps): bump sigstore/cosign-installer from 4.0.0 to 4.1.1",
+          "author": "dependabot[bot]",
+          "date": "2026-03-26",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/94"
+        },
+        {
+          "sha": "a2dd81492d93730eb5ce60564ee0e8f87ae4c84c",
+          "message": "build(deps): bump goreleaser/goreleaser-action from 6.4.0 to 7.0.0",
+          "author": "dependabot[bot]",
+          "date": "2026-02-23",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/89"
+        },
+        {
+          "sha": "feed9a5185917d30921a76e9fad080495707b469",
+          "message": "Add user-friendly error messages for git-clone failures (enabled by default)",
+          "author": "Chmouel Boudjnah",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/104"
+        },
+        {
+          "sha": "61d5b52f3d0fa867b1bcd3726992f6e4e8a0ad97",
+          "message": "fix: golangci-lint fixes",
+          "author": "Chmouel Boudjnah",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/104"
+        },
+        {
+          "sha": "f25250167e548833aeda8d3bf4720487f6857abd",
+          "message": "build(deps): bump actions/checkout from 6.0.1 to 6.0.3",
+          "author": "dependabot[bot]",
+          "date": "2026-06-03",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/105"
+        },
+        {
+          "sha": "b8c3981e36a821ec98c216365d90ba0bb22e731b",
+          "message": "build(deps): bump sigstore/cosign-installer from 4.1.1 to 4.1.2",
+          "author": "dependabot[bot]",
+          "date": "2026-05-07",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/100"
+        },
+        {
+          "sha": "42df32ca4ac3a884cb4c9156bc433a481818c7fe",
+          "message": "build(deps): bump goreleaser/goreleaser-action from 7.0.0 to 7.2.2",
+          "author": "dependabot[bot]",
+          "date": "2026-05-19",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/101"
+        },
+        {
+          "sha": "7a79b10453678a3d8bdfb26e0679804ad9d4c321",
+          "message": "build(deps): bump github.com/tektoncd/pipeline in /image/git-init",
+          "author": "dependabot[bot]",
+          "date": "2026-05-22",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/102"
+        },
+        {
+          "sha": "f536add934f96865f5fca8c8fdb6e4188ec8c6d8",
+          "message": "build(deps): bump imjasonh/setup-crane from 0.5 to 0.6",
+          "author": "dependabot[bot]",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/103"
+        },
+        {
+          "sha": "75241a82b4889dd8193835282880f5c32bd454bf",
+          "message": "docs: rewrite README with proper project documentation",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/106"
+        },
+        {
+          "sha": "5954a23b5b33f816b09c6853a042fc5670310800",
+          "message": "chore: update Go to 1.25 and tektoncd/pipeline to v1.12.0 LTS",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/107"
+        },
+        {
+          "sha": "afe2eb7d678835bb07de49243ce675ef56eccdfa",
+          "message": "chore: drop tektoncd/pipeline dependency",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/108"
+        },
+        {
+          "sha": "f12396a7b26d24e7b5bc85eaf97e3ebf0661b7c1",
+          "message": "ci: fix release workflow failures",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/109"
+        },
+        {
+          "sha": "aad26bf55d4d358c78142f4416b66e53cd9b95c3",
+          "message": "chore: bump version to v1.3.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "f7bbf6865be8d94336c206c0ff4af5d53d5eb421",
+          "message": "fix: replace kodata LICENSE symlink with copy",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "f8e4874e3d96c0bd0bbe9b8fad63bfff2beb56bd",
+          "message": "chore: add Artifact Hub metadata and catalog annotations",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "a35d22472f8d858a5d1d0315360131f5284e8739",
+          "message": "chore: set Artifact Hub repository ID",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "6e3f196714366115b06b01ae45a87dde60535b1d",
+          "message": "docs: add Artifact Hub badge to README",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "520317d191a386980c1f267e01ebd109ee2af793",
+          "message": "chore: add Artifact Hub annotations for richer package listing",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "2d927c2155f067fee79586e2301fe665c52d804c",
+          "message": "fix: update task API version from v1beta1 to v1",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "6a00bdd337e48a64df7a062fcf68d0ec23be89b3",
+          "message": "chore: bump version to v1.4.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "81189e71196802a363618ecdf8cf9e2afccc8c95",
+          "message": "chore: bump minVersion, add PR template, fix CI tests",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/110"
+        },
+        {
+          "sha": "0ffda8e5c83594bc7811973ac48e0431338c39f3",
+          "message": "fix: use chainguard/git base image for releases",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/112"
+        },
+        {
+          "sha": "54d4b67f92c4d5e8189efc3162a7fb8c49dec755",
+          "message": "ci: add e2e tests with Kind cluster",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/111"
+        },
+        {
+          "sha": "e35ff2c93ac15d3bad4b8c9953b26f578c64019a",
+          "message": "feat: publish Tekton Bundle on release",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/115"
+        },
+        {
+          "sha": "b5e1f95bb2b222fe4f90a4e63b91812ad1ffd837",
+          "message": "feat: add custom base image with git-lfs, openssh, uid 65532",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/116"
+        },
+        {
+          "sha": "768795f715e7f7704d05b413f51b2161b99f78aa",
+          "message": "chore: add release script",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/120"
+        },
+        {
+          "sha": "79406577e81a4950bd2dd523646694781a4b9157",
+          "message": "build(deps): bump helm/kind-action from 1.12.0 to 1.14.0",
+          "author": "dependabot[bot]",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/117"
+        },
+        {
+          "sha": "b78789425da8252f1e87627de2b02155e0e4e08f",
+          "message": "build(deps): bump docker/build-push-action from 6.16.0 to 7.2.0",
+          "author": "dependabot[bot]",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/118"
+        },
+        {
+          "sha": "b5c97096a1bf2bb43c1b2198d9aca5d515ffa4e1",
+          "message": "build(deps): bump docker/login-action from 3.4.0 to 4.2.0",
+          "author": "dependabot[bot]",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/119"
+        },
+        {
+          "sha": "4011f7e69a09e2b97f9ae6455f739856ede65eed",
+          "message": "chore: bump version to v1.5.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "7d3edaf397a814416b832870f3ee6fa89f49a97a",
+          "message": "chore: add task signing public key",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "2e43d8a382e0b0ce5b03ff777bb0c8c475144152",
+          "message": "feat: add git-clone StepAction, generated from Task",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/121"
+        },
+        {
+          "sha": "bf7d27e6b3a223e4d97c98c10ff1a18c571a8256",
+          "message": "docs: update READMEs for Artifact Hub and StepAction",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/121"
+        },
+        {
+          "sha": "8be4f219f344f8690db4f08e6c11497a7b26fa18",
+          "message": "feat: stepaction tests, bundle publishing, release integration",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/121"
+        },
+        {
+          "sha": "72fde74d7cf34befef5e7aa8637046ae9d106a96",
+          "message": "docs: add parameters and results tables to StepAction README",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/121"
+        },
+        {
+          "sha": "cea7dec79eabbd560006fefc8b461cb4367d4674",
+          "message": "chore: add task signing to release script",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "97ba0b1842135ade958dff54a406bd0be71a5e4a",
+          "message": "fix: release script backtick stripping in changelog normalization",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "1a89de8e06783720b05d0c2e8cae4ed06c2cc52d",
+          "message": "chore: bump version to v1.6.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "cf24a584782d15a24a327cc3cc1412e5fe7a2af7",
+          "message": "chore: add Artifact Hub metadata for StepAction repository",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "de06b44c1fee1788604f0c57afe5b0602a71fdff",
+          "message": "chore: set Artifact Hub repository ID for StepAction",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "b756d3883ca3a395d7ccb4ec214c5cc797a1ce37",
+          "message": "fix: strip spurious resources: {} from signed task YAML",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "e9cb6de4bc24e8a5b7802b618917ed18ec84cce0",
+          "message": "fix: strip spurious resources: {} from signed task YAMLs",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "e082053cfcbf3608bf10e282e80711e15c5a2d67",
+          "message": "fix: release script version detection and signing",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "d8879cc055b9ea66ff85d6ae697f681b9c24460d",
+          "message": "fix: release script signing and bundle workflow",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "bd41a2cfcc649fa4497b16aa35a257817012dae3",
+          "message": "chore: bump version to v1.6.1",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "744f8adc06a9456588c317b7862a76e0fdfba64e",
+          "message": "fix: rewrite StepAction generator with pyyaml",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "d20cd45b17e4dfd18d4639c15eafa5fcb88f2210",
+          "message": "fix: reset version to v1.5.0 for v1.6.0 re-release",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "59b4802a91bd78451990803f4a50157c6376a036",
+          "message": "chore: bump version to v1.6.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "54d6e0b473bb8e235b8186c543ed2471c5d58085",
+          "message": "fix: quote special characters in artifacthub changelog annotation",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "0caea16b2013f3a2774519bae1841e610aefdf31",
+          "message": "fix: reset version for v1.6.0 re-release (pyyaml generator)",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "dd1d541905d039ec84da8e9843cdbce853431729",
+          "message": "chore: bump version to v1.6.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "9c96850be4082baf9f8fcfd5d0a3e4ba0a1f7c3a",
+          "message": "fix: sanitize special YAML chars in changelog descriptions",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "b5b6070c19fab81011af69623d01fb7ef3bb19d6",
+          "message": "chore: bump version to v1.6.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "303b9f6accc3f3184f64c16ff1eaf4cd888f3400",
+          "message": "fix: quote descriptions containing colons in changelog",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "4be0731833ec323b580890d75c2d94c65bd2af29",
+          "message": "chore: bump version to v1.6.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "59623d0e819a226bff0c3331b51389bbd47e13c3",
+          "message": "fix: always quote descriptions in AH changelog",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "8b26e19cd45823ba0331238ae09b2430c6fde16a",
+          "message": "chore: bump version to v1.6.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-04"
+        },
+        {
+          "sha": "05651c495d55a935eabde180f6fc62676d2472bb",
+          "message": "ci: build base image for multi-architecture",
+          "author": "Vincent Demeester",
+          "date": "2026-06-05"
+        },
+        {
+          "sha": "c166e56217829ecc2062059030a8a0fcc0e1a88f",
+          "message": "chore: bump version to v1.7.0",
+          "author": "Vincent Demeester",
+          "date": "2026-06-05"
+        },
+        {
+          "sha": "8f19a963ca0c96d4baae265e86d62a3b88ff05e3",
+          "message": "chore: drop Trusted Resources signature from release",
+          "author": "Vincent Demeester",
+          "date": "2026-06-05"
+        },
+        {
+          "sha": "6c4b259f77a06d9bfeedc6e91ffbfae4d67687b5",
+          "message": "build(deps): bump docker/setup-qemu-action from 3.6.0 to 4.1.0",
+          "author": "dependabot[bot]",
+          "date": "2026-06-05",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/123"
+        },
+        {
+          "sha": "dd6b8cfaf4cd20b4c5379f88436254d5b2a62ff9",
+          "message": "build(deps): bump docker/setup-buildx-action from 3.10.0 to 4.1.0",
+          "author": "dependabot[bot]",
+          "date": "2026-06-05",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/124"
+        },
+        {
+          "sha": "577fd3d77ca2262cc97fcb629524bd9f17a10031",
+          "message": "docs: add DEVELOPMENT.md, CONTRIBUTING.md, and AGENTS.md",
+          "author": "Vincent Demeester",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/126"
+        },
+        {
+          "sha": "d364aa7612b77d3073c2a38c6ffb0486fc92d418",
+          "message": "docs: address review feedback",
+          "author": "Vincent Demeester",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/126"
+        },
+        {
+          "sha": "a962c330f344f94bc1fb2b8badf21272a464f292",
+          "message": "ci: make e2e tests more robust against flakes",
+          "author": "Vincent Demeester",
+          "date": "2026-06-08",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/127"
+        },
+        {
+          "sha": "e03aee423140c7046376edad5e15737b9ebdc91e",
+          "message": "docs: add Artifact Hub StepActions badge and browse links",
+          "author": "Vincent Demeester",
+          "date": "2026-06-08"
+        },
+        {
+          "sha": "c3498c69cf6de9583e1c667e723fd8626af1b33c",
+          "message": "build(deps): bump alpine/git from v2.52.0 to v2.54.0 in /image/base",
+          "author": "dependabot[bot]",
+          "date": "2026-06-18",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/130"
+        },
+        {
+          "sha": "9615a0e826a7219af608dd22482917474613312a",
+          "message": "build(deps): bump actions/setup-go from 6.4.0 to 6.5.0",
+          "author": "dependabot[bot]",
+          "date": "2026-06-24",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/132"
+        },
+        {
+          "sha": "38a254200760ef94aef293c6a5857798109a0648",
+          "message": "build(deps): bump imjasonh/setup-crane from 0.6 to 0.7",
+          "author": "dependabot[bot]",
+          "date": "2026-06-29",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/134"
+        },
+        {
+          "sha": "93ba94db54998b1ff1fe229787b3235d793957f7",
+          "message": "build(deps): bump ko-build/setup-ko from 0.9 to 0.10",
+          "author": "dependabot[bot]",
+          "date": "2026-06-29",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/135"
+        },
+        {
+          "sha": "d018713db760d3e2103889f88b88f386c035b676",
+          "message": "build(deps): bump alpine/git from `113d991` to `8d6ede0` in /image/base",
+          "author": "dependabot[bot]",
+          "date": "2026-06-25",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/133"
+        },
+        {
+          "sha": "1633742ee917ba7d726ddb0672ea7bd4e03043bf",
+          "message": "build(deps): bump goreleaser/goreleaser-action from 7.2.2 to 7.2.3",
+          "author": "dependabot[bot]",
+          "date": "2026-06-30",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/136"
+        },
+        {
+          "sha": "c4614b4362a2a11cb73490809c1086d9642e008d",
+          "message": "build(deps): bump actions/checkout from 6.0.3 to 7.0.0",
+          "author": "dependabot[bot]",
+          "date": "2026-07-01",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/131"
+        },
+        {
+          "sha": "27c670bf8ef38d8b1f1163b4c184689968ed7120",
+          "message": "chore: group dependabot updates and fix gomod path",
+          "author": "Vincent Demeester",
+          "date": "2026-07-01",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/137"
+        },
+        {
+          "sha": "523d1fedbfc51935fe8f886e2b7a7b7dd74690d6",
+          "message": "build(deps): bump alpine/git in /image/base in the docker group",
+          "author": "dependabot[bot]",
+          "date": "2026-07-01",
+          "pr": "https://github.com/tektoncd-catalog/git-clone/pull/138"
+        }
+      ]
+    },
+    {
+      "name": "tekton-caches",
+      "upstream": "openshift-pipelines/tekton-caches",
+      "downstream": "openshift-pipelines/p12n-tekton-caches",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "4cdb9fad1f66da787f7f3ffc45dd5a5cdbe25d7c",
+      "to_sha": "768eb9ad44621a4c899e93e490bc0b1aef5b8865",
+      "commits": [
+        {
+          "sha": "80d513d3ac0161fb347266c44f6cbde043984714",
+          "message": "[bot:release-v0.3.x] update konflux configuration",
+          "author": "openshift-pipelines-bot",
+          "date": "2026-03-20",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/708"
+        },
+        {
+          "sha": "6f8e0519f636bae5ebb3e9f1e4fd3425972bb9bf",
+          "message": "Fix CVE: CVE-2026-33186 openshift-pipelines/pipelines-cache-rhel9: gRPC-Go: Authorization bypass due to improper HTTP/2 path validation",
+          "author": "Pramod Bindal",
+          "date": "2026-04-15",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/725",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12040",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes CVE-2026-33186, a gRPC-Go vulnerability that allows authorization bypass due to improper HTTP/2 path validation in the Tekton Caches component.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "27ef971e8fd2610f8a3de5bc1221ffc47963b88c",
+          "message": "Cleanup konflux",
+          "author": "Pramod Bindal",
+          "date": "2026-04-15",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/725",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12040",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Internal Konflux build configuration cleanup.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "0d3e9dfae8ac747ca8156854f36d626614517a3c",
+          "message": "Upgrade Pipelines",
+          "author": "Pramod Bindal",
+          "date": "2026-04-15",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/725",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12040",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Internal pipeline dependency upgrade as part of CVE remediation.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "208a38a0fa5c0745065f110e8866b728c814ef2c",
+          "message": "Fix lint issues",
+          "author": "Pramod Bindal",
+          "date": "2026-04-16",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/725",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12040",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Internal lint issue fixes.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "2450f243f5e79b8e9b668b9c23af08a5967d3a3c",
+          "message": "Security: Fix CVE-2026-34986 (go-jose/go-jose/v4)",
+          "author": "Pramod Bindal",
+          "date": "2026-05-14",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/729"
+        },
+        {
+          "sha": "2a6450268c385ce5eb03d45f0084d799118e7401",
+          "message": "bump otel and pipeline version for CVE fixes",
+          "author": "Pramod Bindal",
+          "date": "2026-06-11",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/736"
+        },
+        {
+          "sha": "5d6871a9bea2f19d34107de7689d50e8dfa985e9",
+          "message": "cve: Fix GHSA-xmrv-pmrh-hhx2",
+          "author": "Pramod Bindal",
+          "date": "2026-06-12",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/739"
+        },
+        {
+          "sha": "768eb9ad44621a4c899e93e490bc0b1aef5b8865",
+          "message": "Add Agentic Contexts and CI Workflows",
+          "author": "Pramod Bindal",
+          "date": "2026-06-04",
+          "pr": "https://github.com/openshift-pipelines/tekton-caches/pull/739",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11823",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Adds agentic context files and CI workflows to the tekton-caches repository for improved developer tooling.",
+            "type": "Release Notes Not Required",
+            "status": ""
+          },
+          "rn_source": "generated"
+        }
+      ]
+    },
+    {
+      "name": "tektoncd-hub",
+      "upstream": "openshift-pipelines/hub",
+      "downstream": "openshift-pipelines/tektoncd-hub",
+      "upstream_branch": "release-v1.23.12",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "974a10662414ac7d7161a44957391230e4efa7cc",
+      "to_sha": "f7d1f0b9f25b1c9b51d35944903722a671f3338a",
+      "commits": [
+        {
+          "sha": "74023f0242c2be8c2f56c2ec7e0f8351e6b6180e",
+          "message": "bump google.golang.org/grpc to version 1.79.3",
+          "author": "Shiv Verma",
+          "date": "2026-04-02",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12037",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Updates the gRPC-Go dependency to version 1.79.3 to fix an authorization bypass vulnerability caused by a missing leading slash in the :path header.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "eb086e1fe36153a7364dd894d6f802ddeccc462f",
+          "message": "bump tektoncd/pipeline version 1.9.2",
+          "author": "Shiv Verma",
+          "date": "2026-04-02"
+        },
+        {
+          "sha": "c79258f31206144684357447b12621e2a67338a7",
+          "message": "bump UI and swagger packages to fix the CVEs",
+          "author": "Shiv Verma",
+          "date": "2026-04-27"
+        },
+        {
+          "sha": "382b33a3f4a51166437ce5160d55cf65c91c92a9",
+          "message": "bump tektoncd/pipeline version 1.9.3 to fix CVE-2026-40938",
+          "author": "Shiv Verma",
+          "date": "2026-06-02"
+        },
+        {
+          "sha": "4f994d25d33d0f1e28442e0aec9b3a44d75fa71c",
+          "message": "bump  github.com/jackc/pgx/v5 to version 5.9.0 to fix CVE-2026-33816",
+          "author": "Shiv Verma",
+          "date": "2026-06-02"
+        },
+        {
+          "sha": "1aa97354f581065fdf55f4248aa19386086e4e40",
+          "message": "bump golang.org/x/net and golang.org/x/crypto package",
+          "author": "Shiv Verma",
+          "date": "2026-06-11"
+        },
+        {
+          "sha": "2a203c07b2329c1dc0a5b133820566a62932e80c",
+          "message": "bump github.com/go-jose/go-jose to v4.1.4",
+          "author": "Shiv Verma",
+          "date": "2026-06-11"
+        },
+        {
+          "sha": "f04ddb073c8c025ff6385ce7c08b48ac4ec38f28",
+          "message": "update go version to 1.25.10",
+          "author": "Shiv Verma",
+          "date": "2026-06-11"
+        },
+        {
+          "sha": "f7d1f0b9f25b1c9b51d35944903722a671f3338a",
+          "message": "update the api and db dockerfile",
+          "author": "Shiv Verma",
+          "date": "2026-06-11"
+        }
+      ]
+    },
+    {
+      "name": "tektoncd-results",
+      "upstream": "tektoncd/results",
+      "downstream": "openshift-pipelines/tektoncd-results",
+      "upstream_branch": "release-v0.17.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "8d158f8afbdd0b239b814cb1bf980145fe761e93",
+      "to_sha": "ae090bc5f39ceb131f4a3b9d6f2e15ee357fef07",
+      "commits": [
+        {
+          "sha": "bd87be2b8182bc6d07374a5d63bba6dcdab36490",
+          "message": "Bump google.golang.org/grpc to v1.80.0",
+          "author": "Emil Natan",
+          "date": "2026-04-20",
+          "pr": "https://github.com/tektoncd/results/pull/1308"
+        },
+        {
+          "sha": "00afe86998622f58a7c9b59ff1f0a5d9832c0850",
+          "message": "Merge pull request #1308 from enarha/update-release-v0.17.x",
+          "author": "Emil Natan",
+          "date": "2026-04-27",
+          "pr": "https://github.com/tektoncd/results/pull/1308"
+        },
+        {
+          "sha": "4f55175ccb228f24e9ba139f3c1dc8740be1f4f4",
+          "message": "Update tektoncd/pipeline and go-jose modules",
+          "author": "Emil Natan",
+          "date": "2026-05-05",
+          "pr": "https://github.com/tektoncd/results/pull/1323"
+        },
+        {
+          "sha": "d9a85961789298691cfd7ae980142e9d51f19ef8",
+          "message": "Merge pull request #1323 from enarha/update-pipeline-release-v0.17.x",
+          "author": "Emil Natan",
+          "date": "2026-05-06",
+          "pr": "https://github.com/tektoncd/results/pull/1323"
+        },
+        {
+          "sha": "508cc32af3bb32b5fb193c4f7a73b3579ff61fc6",
+          "message": "[v0.17.x] Fix CVE issues",
+          "author": "Emil Natan",
+          "date": "2026-06-01",
+          "pr": "https://github.com/tektoncd/results/pull/1346"
+        },
+        {
+          "sha": "56d6a87822c7e4bf832feb6ab7dd8c0f198303cb",
+          "message": "Bump golangci-lint version to support Go 1.25",
+          "author": "Emil Natan",
+          "date": "2026-06-01",
+          "pr": "https://github.com/tektoncd/results/pull/1346"
+        },
+        {
+          "sha": "306ee40450727d0423b1a6ddeb70485ea9be5acf",
+          "message": "Fix race condition in the TestController",
+          "author": "Emil Natan",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd/results/pull/1346"
+        },
+        {
+          "sha": "4afeda9b804f7f59a33f4b3ba263bdfd55f8b8a3",
+          "message": "Merge pull request #1346 from enarha/update-1.21-cves-release-v0.17.x",
+          "author": "Emil Natan",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd/results/pull/1346"
+        },
+        {
+          "sha": "8cda1d8673fb278b41dab55b07b02c86463b31a3",
+          "message": "perf(cli): use exact match for describe/logs command",
+          "author": "divyansh42",
+          "date": "2026-03-31",
+          "pr": "https://github.com/tektoncd/results/pull/1336",
+          "original_pr": "https://github.com/tektoncd/results/pull/1283",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11380",
+          "release_note": {
+            "text": "Enhacement: Improved performance for `describe` and `logs` commands with optimized filtering; when multiple runs share the same name, the most recent one is returned (use `--uid` to  target a specific run) ",
+            "type": "Enhancement",
+            "status": "Proposed"
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "ae090bc5f39ceb131f4a3b9d6f2e15ee357fef07",
+          "message": "Merge pull request #1336 from divyansh42/cherrypick-11380-0.17",
+          "author": "Emil Natan",
+          "date": "2026-06-25",
+          "pr": "https://github.com/tektoncd/results/pull/1336",
+          "original_pr": "https://github.com/tektoncd/results/pull/1283",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-11380",
+          "release_note": {
+            "text": "Enhacement: Improved performance for `describe` and `logs` commands with optimized filtering; when multiple runs share the same name, the most recent one is returned (use `--uid` to  target a specific run) ",
+            "type": "Enhancement",
+            "status": "Proposed"
+          },
+          "rn_source": "extracted"
+        }
+      ]
+    },
+    {
+      "name": "tektoncd-pruner",
+      "upstream": "tektoncd/pruner",
+      "downstream": "openshift-pipelines/tektoncd-pruner",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "3a1779e6db52fcf7a311bd52862dbe9ec889ed37",
+      "to_sha": "0715ff1e0a8a4757391de2cf4f0d0c4831ea1c55",
+      "commits": [
+        {
+          "sha": "18903cd4af51b0b441228d1edb12169a0befda14",
+          "message": "(CVE-2026-40938) PR to fix update pipelines to v1.6.2",
+          "author": "Naomi Gelman",
+          "date": "2026-04-30",
+          "pr": "https://github.com/tektoncd/pruner/pull/267"
+        },
+        {
+          "sha": "a32f9cb3fe15e2489494c7cac9ef9147fdc9e205",
+          "message": "fix(security): patch three OpenTelemetry Go CVEs on release-v0.3.x",
+          "author": "Shubham Bhardwaj",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd/pruner/pull/310"
+        },
+        {
+          "sha": "0715ff1e0a8a4757391de2cf4f0d0c4831ea1c55",
+          "message": "fix(cve): bump OTel SDK to v1.43.0 to fix GHSA-9h8m-3fm2-qjrq and GHSA-hfvc-g4fc-pqhx",
+          "author": "Shubham Bhardwaj",
+          "date": "2026-06-02",
+          "pr": "https://github.com/tektoncd/pruner/pull/311"
+        }
+      ]
+    },
+    {
+      "name": "tektoncd-chains",
+      "upstream": "tektoncd/chains",
+      "downstream": "openshift-pipelines/tektoncd-chains",
+      "upstream_branch": "release-v0.26.x",
+      "downstream_branch": "release-v1.21.x",
+      "from_sha": "bee7519eb20a587f8e063ff2016725970c1d1b7c",
+      "to_sha": "50dacd20fcab14ff58234437bfd276bf114cfa32",
+      "commits": [
+        {
+          "sha": "7d7d31665cc23ad3b043ead8fd5976e5e92dd4af",
+          "message": "fix ci workflow to include CI summary (#1633)",
+          "author": "Anitha Natarajan",
+          "date": "2026-04-16",
+          "pr": "https://github.com/tektoncd/chains/pull/1633"
+        },
+        {
+          "sha": "868c35984fad32b206cbf119e05b84af3453f900",
+          "message": "fix: CVE-2026-34986, CVE-2026-33211, & CVE-2026-33186 (#1630)",
+          "author": "Shubham Bhardwaj",
+          "date": "2026-04-16",
+          "pr": "https://github.com/tektoncd/chains/pull/1630",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12344",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes CVE-2026-34986, CVE-2026-33211, and CVE-2026-33186 by updating vulnerable Go dependencies in the Chains controller.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "a51457de691e0edb45a4588a8e0c85cfa9df16eb",
+          "message": "fix: update pipelines to v1.6.2 (#1649)",
+          "author": "Anitha Natarajan",
+          "date": "2026-05-05",
+          "pr": "https://github.com/tektoncd/chains/pull/1649",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12344",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes CVE-2026-40938 and CVE-2026-40161 by updating the Tekton Pipelines dependency to v1.6.2 in the Chains controller.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "dbad7be669c3ad3150d8863e63b703e2e96ec815",
+          "message": "fix(cve): CVE-2026-33814 - golang.org/x/net HTTP/2 infinite loop (#1670)",
+          "author": "khelil",
+          "date": "2026-05-14",
+          "pr": "https://github.com/tektoncd/chains/pull/1670",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12344",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes CVE-2026-33814, a high-severity vulnerability in golang.org/x/net that could cause an infinite loop in HTTP/2 transport, leading to unbounded CPU consumption.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "881f5e9c57b9b1c403de909db0216b39e3762661",
+          "message": "fix(deps): bump Go modules to address CVEs (#1703)",
+          "author": "khelil",
+          "date": "2026-06-12",
+          "pr": "https://github.com/tektoncd/chains/pull/1703",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12344",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Remediates multiple critical and important CVEs by updating Go dependencies including Tekton Pipeline, golang.org/x/crypto, golang.org/x/net, OpenTelemetry, Sigstore, and other modules in the Chains controller.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "ac5a570e18d08fae082229f543b779061064a02f",
+          "message": "chore(deps): bump the all group with 14 updates (#1728)",
+          "author": "dependabot[bot]",
+          "date": "2026-06-24",
+          "pr": "https://github.com/tektoncd/chains/pull/1725"
+        },
+        {
+          "sha": "a422ae96775d664cde6154d768702c2b3738f757",
+          "message": "chore(deps): bump github.com/tektoncd/pipeline in the all group (#1729)",
+          "author": "dependabot[bot]",
+          "date": "2026-06-29",
+          "pr": "https://github.com/tektoncd/chains/pull/1725"
+        },
+        {
+          "sha": "50dacd20fcab14ff58234437bfd276bf114cfa32",
+          "message": "chore(deps): bump github/codeql-action/analyze from 3.30.7 to 3.30.9 (#1734)",
+          "author": "dependabot[bot]",
+          "date": "2026-06-29",
+          "pr": "https://github.com/tektoncd/chains/pull/1725"
+        }
+      ]
+    }
+  ],
+  "unmatched_jiras": [
+    {
+      "key": "SRVKP-12589",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12589",
+      "summary": "CLI testing",
+      "status": "Backlog"
+    },
+    {
+      "key": "SRVKP-12588",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12588",
+      "summary": "UI Regression testing",
+      "status": "Backlog"
+    },
+    {
+      "key": "SRVKP-12587",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12587",
+      "summary": "Acceptance test",
+      "status": "Backlog",
+      "components": [
+        "QA"
+      ]
+    },
+    {
+      "key": "SRVKP-12586",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12586",
+      "summary": "Upgrade test",
+      "status": "Backlog",
+      "components": [
+        "QA"
+      ]
+    },
+    {
+      "key": "SRVKP-12585",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12585",
+      "summary": "Test Openshift Pipelines 1.21.3",
+      "status": "Backlog",
+      "components": [
+        "QA"
+      ]
+    },
+    {
+      "key": "SRVKP-12574",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12574",
+      "summary": "OSP 1.21.3 patch release",
+      "status": "New"
+    },
+    {
+      "key": "SRVKP-12552",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12552",
+      "summary": "OSP 1.21.3 release configuration ",
+      "status": "In Progress"
+    },
+    {
+      "key": "SRVKP-9448",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-9448",
+      "summary": "[UI] Current status overlaps in Approvals list view",
+      "status": "Dev Complete",
+      "components": [
+        "QA",
+        "UI"
+      ]
+    }
+  ],
+  "skill_progress": {
+    "processed_components": [
+      "console-plugin-pf5",
+      "tektoncd-triggers",
+      "manual-approval-gate",
+      "tektoncd-pruner",
+      "tektoncd-cli",
+      "tektoncd-chains",
+      "tekton-caches",
+      "tektoncd-hub",
+      "tektoncd-results",
+      "pipelines-as-code",
+      "operator",
+      "tektoncd-pipeline",
+      "git-init",
+      "console-plugin"
+    ],
+    "report_generated": true
+  }
+}
