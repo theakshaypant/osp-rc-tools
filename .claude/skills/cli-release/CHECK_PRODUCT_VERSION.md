@@ -41,7 +41,8 @@ releaseDate: "2026-03-01"
 Check:
 - `versionName` matches `VERSION`
 - `ga` — report the value (user decides correctness)
-- `invisible` — for initial CDN release this should be `true` to prevent public visibility before QA sign-off. Report the current value.
+- `hidden` — should be `false` (matches hack repo generator default)
+- `invisible` — should be `false` (matches hack repo generator default). The `ga` flag controls GA vs non-GA visibility, not `invisible`.
 - `releaseDate` — report the value
 
 ### Present results
@@ -55,19 +56,21 @@ NEXT ACTION: Add product version configuration to konflux-release-data.
 Create a new file at:
   data/external/developer-portal/openshift-pipelines/${VERSION}.yaml
 
-With content:
+With content (matching hack repo generator output):
 ---
 versionName: "${VERSION}"
 ga: false
 termsAndConditions: "Anonymous Download"
 hidden: false
-invisible: true
+invisible: false
 releaseDate: "${TODAY}"
 
 Notes:
 - ga: Set to false for patch versions. Set to true for minor releases and
   patches on the latest minor release.
-- invisible: Set to true initially. Change to false after QA sign-off.
+- hidden: Always false. Controls developer portal version list visibility.
+- invisible: Always false. The `ga` flag controls GA vs non-GA distinction,
+  not `invisible`. All prior versions use invisible: false.
 - releaseDate: Set to the actual release date.
 
 Reference MR: https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/14753
