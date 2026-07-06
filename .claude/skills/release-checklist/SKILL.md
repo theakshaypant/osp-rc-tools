@@ -57,7 +57,7 @@ Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KON
 </step>
 
 <step name="check_components">
-**Steps 6–8: Component PRs, upstream sync, and nudges.**
+**Steps 6–8: Component PRs, OLM bundle version, upstream sync, and nudges.**
 
 Read and follow the instructions in `CHECK_COMPONENTS.md`.
 
@@ -78,7 +78,7 @@ Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KON
 </step>
 
 <step name="check_olm">
-**Steps 11–12: OLM config and code freeze.**
+**Steps 11–12: OLM render/index status and code freeze.**
 
 Read and follow the instructions in `CHECK_OLM.md`.
 

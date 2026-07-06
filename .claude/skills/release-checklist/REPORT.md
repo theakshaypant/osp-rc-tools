@@ -10,14 +10,14 @@ Each CHECK file owns specific step numbers and detail sections. Only update rows
 |-----------|-------------|----------------|
 | CHECK_HACK | 1, 2 | (none) |
 | CHECK_KONFLUX_CONFIG | 3, 3b, 4, 5 | `## Konflux Config Details` |
-| CHECK_COMPONENTS | 6, 7, 8 | `## Component Details` |
+| CHECK_COMPONENTS | 6, 6b, 7, 8 | `## Component Details` |
 | CHECK_BUILDS | 9, 9b, 10 | `## Build Validation Details` |
 | CHECK_OLM | 11, 12 | `## OLM and Code Freeze Details` |
 | CHECK_RELEASES | 13, 14, 15, 16 | `## Release Status Details` |
 
 ## Step Number Ordering
 
-When inserting rows, maintain this canonical order: 1, 2, 3, 3b, 4, 5, 6, 7, 8, 9, 9b, 10, 11, 12, 13, 14, 15, 16.
+When inserting rows, maintain this canonical order: 1, 2, 3, 3b, 4, 5, 6, 6b, 7, 8, 9, 9b, 10, 11, 12, 13, 14, 15, 16.
 
 ## Creating a New Report
 
