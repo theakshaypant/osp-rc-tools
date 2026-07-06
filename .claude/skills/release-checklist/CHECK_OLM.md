@@ -22,9 +22,44 @@ gh api repos/openshift-pipelines/operator/contents/olm/config.yaml?ref=${RELEASE
   --jq '.content' | base64 -d
 ```
 
-Verify the config lists the current release version. The order of bundles matters — the current release should be the **last entry**.
+Parse the `bundles:` list and extract all `version:` values. The last bundle entry should be the current release version (`VERSION`). For patch releases within the same minor (e.g. `1.21.2` → `1.21.3`), the previous patch version is **replaced** — not kept alongside the new one.
 
-If the config needs updating, a manual PR is required (like #24571 `update-olm-config-${VERSION}`).
+- If `VERSION` is the last bundle entry → **DONE**
+- If `VERSION` is **not present** → **ACTION NEEDED** — this is a **hard blocker**. Without it, `render-olm-catalog` will not render a catalog for the current release. The `update-olm-bundle.sh` script only processes bundle versions listed in this config. If the current version is missing, the render will either use a stale bundle image (which may not exist in the target registry) or skip the version entirely, producing **empty catalog.json files** that break all index builds.
+
+If the config needs updating, create a PR on `${RELEASE_BRANCH}` that:
+1. Replaces the previous patch version with `VERSION` in the `version:` field
+2. Keeps the existing `image:` line unchanged (the `operator-update-images` workflow overwrites it later)
+3. Removes the previous patch version entry entirely — only `VERSION` should remain (alongside any older cross-minor entries like `1.18.0`)
+
+The `render-catalog.sh` CI check will automatically run on the PR and push additional commits that update all `catalog-template.json` files across every OCP version (v4.14+). It inserts the new version into the OLM upgrade chains and adjusts `replaces` references. It may also re-add the previous patch version entry to `olm/config.yaml` — if so, remove it again.
+
+CI will show a `render-catalog.sh` failure for the initial commit (the image SHA is stale until the workflow updates it). This is expected and does not block merging.
+
+```
+NEXT ACTION: Update olm/config.yaml bundle version to ${VERSION}.
+
+The olm/config.yaml on ${RELEASE_BRANCH} has version ${PREVIOUS_VERSION}
+as the last bundle entry. It must be ${VERSION} for render-olm-catalog
+to produce a valid catalog.
+
+Create a PR on ${RELEASE_BRANCH} to:
+1. Replace ${PREVIOUS_VERSION} with ${VERSION}, keeping the existing
+   image reference (a workflow updates it later)
+2. Remove the ${PREVIOUS_VERSION} entry entirely
+
+Result should look like:
+  bundles:
+    - version: 1.18.0
+      tag: 1.18.0
+    - version: ${VERSION}
+      image: <kept from ${PREVIOUS_VERSION} entry>
+
+The render-catalog.sh CI will auto-update catalog-template.json files.
+If it re-adds ${PREVIOUS_VERSION}, remove it again.
+
+Reference: https://github.com/openshift-pipelines/operator/commit/3bc737e023a9
+```
 
 ### 11b. Check render-olm-catalog workflow
 
