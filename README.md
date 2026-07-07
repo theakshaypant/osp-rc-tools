@@ -1,6 +1,6 @@
 # osp-release-audit
 
-CLI tool that audits OpenShift Pipelines releases by collecting commits across all components, linking them to Jira tickets, and surfacing missing release notes.
+Toolkit for auditing and managing OpenShift Pipelines releases. Combines Go CLI tools for commit/Jira analysis with Claude Code skills that automate the full release verification workflow — from hack repo config through stage/production releases and QA handover.
 
 ## How it works
 
@@ -129,7 +129,50 @@ What the skill adds:
 
 Each component is processed by an isolated subagent to keep context manageable for large releases. Results are written back to the JSON incrementally with provenance fields (`jira_source`, `rn_source`) so the report generator can annotate confidence without re-deriving it.
 
+## Claude Code skills
+
+Beyond the Go CLI, most of the release workflow is driven by Claude Code skills invoked via slash commands:
+
+### Release checklist (`/release-checklist {version}`)
+
+A 16-step sequential release verification workflow. Queries GitHub, GitLab, Konflux cluster, and Jira to validate each step — from hack repo config through production release and advisory. Stops at the first step that needs action and generates a report at `reports/checklist-{version}.md`.
+
+Can also be run by individual step group:
+
+| Command | Steps | What it checks |
+|---------|-------|----------------|
+| `/release-checklist:check-hack` | 1-2 | Hack repo release config |
+| `/release-checklist:check-konflux-config` | 3-5 | Konflux cluster config, RPA, Pyxis |
+| `/release-checklist:check-components` | 6-8 | Component PRs, OLM bundle version, upstream sync, nudges |
+| `/release-checklist:check-builds` | 9-10 | Operator version, build SHA validation |
+| `/release-checklist:check-olm` | 11-12 | OLM catalog render, index images, code freeze |
+| `/release-checklist:check-releases` | 13-16 | Stage/prod releases, QA handover, advisory |
+
+### Other skills
+
+| Command | Description |
+|---------|-------------|
+| `/audit-release` | Enrich audit JSON with Jira links, release notes, and markdown report |
+| `/build-diff` | Compare two Konflux snapshots side by side |
+| `/new-build` | Verify build health and generate diff for QE |
+| `/jira-gaps` | Identify Jiras missing fixVersion or release note fields |
+| `/cli-release` | Track CLI release progress (serve-tkn-cli binaries to CDN) |
+
+## External systems
+
+| System | Access | Credentials |
+|--------|--------|-------------|
+| GitHub | Read/write | `gh` CLI auth |
+| GitLab (`gitlab.cee.redhat.com`) | Read-only | `GITLAB_URL` + `GITLAB_TOKEN` in `.env` |
+| Konflux cluster | Read-only | `KONFLUX_SERVER` + `KONFLUX_TOKEN` in `.env` |
+| Jira | Read-only | `JIRA_URL` + `JIRA_EMAIL` + `JIRA_TOKEN` in `.env` |
+
+All Konflux operations target the `tekton-ecosystem-tenant` namespace.
+
 ## Sample reports
 
-- **Patch release (1.22.4):** [JSON](reports/release_1.22.4.json) | [Markdown](reports/audit-release-1.22.4.md)
-- **Minor release (1.23.0):** [JSON](reports/release_1.23.0.json) | [Markdown](reports/audit-release-1.23.0.md)
+- **Release checklist:** [1.21.3](reports/checklist-1.21.3.md) | [1.22.4](reports/checklist-1.22.4.md)
+- **Audit (patch):** [1.22.4 JSON](reports/release_1.22.4.json) | [1.22.4 Markdown](reports/audit-release-1.22.4.md)
+- **Audit (minor):** [1.23.0 JSON](reports/release_1.23.0.json) | [1.23.0 Markdown](reports/audit-release-1.23.0.md)
+- **Jira gaps:** [1.21.3](reports/jira-gaps-1.21.3.md)
+- **CLI release:** [1.21.3](reports/cli-release-1.21.3.md)
