@@ -47,6 +47,14 @@ JIRA_PR_FIELD=customfield_10875
 JIRA_RN_TEXT_FIELD=customfield_10783
 JIRA_RN_TYPE_FIELD=customfield_10785
 JIRA_RN_STATUS_FIELD=customfield_10807
+
+# Konflux cluster (for one-click-release snapshot verification)
+KONFLUX_SERVER=https://api-toolchain-host-operator.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com
+KONFLUX_TOKEN=sha256~...    # get token: https://oauth-openshift.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com/oauth/token/display
+
+# GitLab (for RPA/Pyxis verification — read-only)
+GITLAB_URL=https://gitlab.cee.redhat.com
+GITLAB_TOKEN=glpat-...
 ```
 
 Source it before running:
@@ -148,6 +156,10 @@ Can also be run by individual step group:
 | `/release-checklist:check-olm` | 11-12 | OLM catalog render, index images, code freeze |
 | `/release-checklist:check-releases` | 13-16 | Stage/prod releases, QA handover, advisory |
 
+### One-click release (`/one-click-release {version}`)
+
+Walks through the release workflow in stages with both **verify** (read-only, automatic) and **execute** (write, requires approval) commands. Currently implements Config Stage (steps 1.1–1.8) and Build Stage (steps 2.1–2.6) — from hack repo config through snapshot verification, OLM catalog render, and code freeze. See [docs/skills/one-click-release.md](docs/skills/one-click-release.md) for full details.
+
 ### Other skills
 
 | Command | Description |
@@ -164,7 +176,7 @@ Can also be run by individual step group:
 |--------|--------|-------------|
 | GitHub | Read/write | `gh` CLI auth |
 | GitLab (`gitlab.cee.redhat.com`) | Read-only | `GITLAB_URL` + `GITLAB_TOKEN` in `.env` |
-| Konflux cluster | Read-only | `KONFLUX_SERVER` + `KONFLUX_TOKEN` in `.env` |
+| Konflux cluster | Read-only | `KONFLUX_SERVER` + `KONFLUX_TOKEN` in `.env` ([get token](https://oauth-openshift.apps.kflux-prd-rh02.0fk9.p1.openshiftapps.com/oauth/token/display)) |
 | Jira | Read-only | `JIRA_URL` + `JIRA_EMAIL` + `JIRA_TOKEN` in `.env` |
 
 All Konflux operations target the `tekton-ecosystem-tenant` namespace.
@@ -176,3 +188,4 @@ All Konflux operations target the `tekton-ecosystem-tenant` namespace.
 - **Audit (minor):** [1.23.0 JSON](reports/release_1.23.0.json) | [1.23.0 Markdown](reports/audit-release-1.23.0.md)
 - **Jira gaps:** [1.21.3](reports/jira-gaps-1.21.3.md)
 - **CLI release:** [1.21.3](reports/cli-release-1.21.3.md)
+
