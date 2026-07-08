@@ -1,0 +1,565 @@
+# Stage 1: Config
+
+Everything needed before builds can start. Steps run sequentially — stop at the first step that requires action (unless the user approves execution).
+
+**Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `CURRENT_RELEASE_TAG`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `GITLAB_URL`, `GITLAB_TOKEN`, `TZ_FMT`
+
+**Constraints:**
+- Konflux cluster: **READ-ONLY** for verify commands (`oc get`/`kubectl get` only)
+- GitLab: **READ-ONLY** for verify commands (`GET` requests only)
+- Execute commands require explicit user approval before running
+
+**Formatting:**
+- PR links: `[#NUM](https://github.com/OWNER/REPO/pull/NUM)`
+- SHA links: `[SHORT](https://github.com/OWNER/REPO/commit/FULL)` (12-char short)
+- Timestamps: absolute local time with timezone (e.g. `2026-07-08 14:30 IST`)
+
+---
+
+## Step 1.1: Create new patch version
+
+The hack repo's `release-tag` field must match `VERSION`. The `create-new-patch` function increments the last number (e.g. `1.21.2` → `1.21.3`) and resets `code-freeze: false`.
+
+**Verify:**
+```bash
+CURRENT_RELEASE_TAG=$(gh api repos/openshift-pipelines/hack/contents/config/downstream/releases/${MAJOR_MINOR}.yaml \
+  --jq '.content' | base64 -d | grep 'release-tag:' | awk '{print $2}')
+echo "release-tag: ${CURRENT_RELEASE_TAG} (expected: ${VERSION})"
+```
+
+**Collect links:**
+```bash
+gh run list --repo openshift-pipelines/hack \
+  --workflow=release-new-patch.yaml \
+  --limit 3 \
+  --json databaseId,status,conclusion,createdAt,displayTitle,url \
+  | python3 -c "
+import sys, json
+runs = json.load(sys.stdin)
+for r in runs:
+    if '${MAJOR_MINOR}' in r.get('displayTitle',''):
+        print(f\"Workflow: {r['url']}  ({r['status']}/{r.get('conclusion','pending')})\")
+        break
+else:
+    if runs:
+        print(f\"Latest run: {runs[0]['url']}  ({runs[0]['status']}/{runs[0].get('conclusion','pending')})\")
+    else:
+        print('No workflow runs found')
+"
+```
+
+Report the workflow run URL in the summary.
+
+**Expected when DONE:** `release-tag` equals `VERSION`.
+
+**If not done — Execute (requires approval):**
+```bash
+gh workflow run release-new-patch.yaml \
+  --repo openshift-pipelines/hack \
+  -f version=${MAJOR_MINOR}
+```
+
+This triggers the `release-new-patch` workflow which creates a PR on branch `actions/main/new-patch-${MAJOR_MINOR}` with label `automated`. The PR must be merged (step 1.2) before proceeding.
+
+---
+
+## Step 1.2: Merge release-manager PR
+
+The `release-new-patch` workflow creates a PR titled `[bot: ${MAJOR_MINOR}] Release Action: new-patch`.
+
+**Verify:**
+```bash
+gh pr list --repo openshift-pipelines/hack \
+  --head "actions/main/new-patch-${MAJOR_MINOR}" \
+  --state all --limit 5 \
+  --json number,title,state,mergedAt,url
+```
+
+**Collect links:** Extract the PR URL from the verify output. Report as `[#NUM](URL)` in the summary. The PR is on `openshift-pipelines/hack`.
+
+**Expected when DONE:** Most recent PR has `state: "MERGED"`. Show merge time:
+```bash
+MERGED_AT=$(gh pr list --repo openshift-pipelines/hack \
+  --head "actions/main/new-patch-${MAJOR_MINOR}" \
+  --state merged --limit 1 \
+  --json mergedAt --jq '.[0].mergedAt')
+date -d "${MERGED_AT}" +"${TZ_FMT}"
+```
+
+**If PR is open — Execute (requires approval):**
+```bash
+PR_NUMBER=$(gh pr list --repo openshift-pipelines/hack \
+  --head "actions/main/new-patch-${MAJOR_MINOR}" \
+  --state open --limit 1 \
+  --json number --jq '.[0].number')
+gh pr merge --repo openshift-pipelines/hack ${PR_NUMBER} --rebase
+```
+
+**If no PR exists:** The workflow from step 1.1 may still be running or hasn't been triggered. Wait or re-trigger step 1.1.
+
+---
+
+## Step 1.3: Konflux config PR merged
+
+After the release-manager PR merges (step 1.2), the `generate-konflux` workflow runs automatically on push to main. It creates a PR for Konflux config updates.
+
+**Verify:**
+```bash
+gh pr list --repo openshift-pipelines/hack \
+  --head "actions/update/hack-update-konflux-main-${MAJOR_MINOR}" \
+  --state all --limit 3 \
+  --json number,title,state,mergedAt,url
+```
+
+**Collect links:** Extract the PR URL from the verify output. Report as `[#NUM](URL)` in the summary. Also collect the `generate-konflux` workflow run:
+```bash
+gh run list --repo openshift-pipelines/hack \
+  --workflow=generate-konflux.yaml \
+  --limit 3 \
+  --json databaseId,status,conclusion,createdAt,displayTitle,url \
+  | python3 -c "
+import sys, json
+runs = json.load(sys.stdin)
+for r in runs:
+    if '${MAJOR_MINOR}' in r.get('displayTitle','') or r.get('status') in ('completed','in_progress'):
+        print(f\"Workflow: {r['url']}  ({r['status']}/{r.get('conclusion','pending')})\")
+        break
+"
+```
+
+Report both the PR link and the workflow run URL in the summary.
+
+**Expected when DONE:** Most recent PR has `state: "MERGED"`.
+
+**If PR is open — Execute (requires approval):**
+
+The `merge-hack-pull-requests` workflow runs hourly and auto-merges PRs with the `hack` label. To merge immediately:
+```bash
+PR_NUMBER=$(gh pr list --repo openshift-pipelines/hack \
+  --head "actions/update/hack-update-konflux-main-${MAJOR_MINOR}" \
+  --state open --limit 1 \
+  --json number --jq '.[0].number')
+gh pr merge --repo openshift-pipelines/hack ${PR_NUMBER} --rebase
+```
+
+**If no PR exists:** The `generate-konflux` workflow may still be running. Check:
+```bash
+gh run list --repo openshift-pipelines/hack \
+  --workflow=generate-konflux.yaml \
+  --limit 5 \
+  --json databaseId,status,conclusion,createdAt,displayTitle,url
+```
+
+---
+
+## Step 1.4: Konflux config applied on cluster
+
+The generated configuration from the hack repo must be applied to the Konflux cluster. This step verifies that Applications and Components on the cluster match what the hack repo generated.
+
+### 1.4a: Compare Applications
+
+**Verify:**
+```bash
+# Expected applications from hack repo
+EXPECTED_APPS=$(gh api repos/openshift-pipelines/hack/contents/.konflux/openshift-pipelines/${MM_DASHED} \
+  --jq '[.[] | select(.type == "dir") | .name] | sort[]')
+echo "Expected applications:"
+echo "$EXPECTED_APPS"
+
+# Actual applications on cluster
+ACTUAL_APPS=$(oc get applications.appstudio.redhat.com -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify -o json 2>/dev/null \
+  | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+mm = '${MM_DASHED}'
+apps = sorted([i['metadata']['name'] for i in data['items'] if mm in i['metadata']['name']])
+for a in apps:
+    print(a)
+")
+echo "Actual applications on cluster:"
+echo "$ACTUAL_APPS"
+```
+
+**Expected when DONE:** Every hack repo directory has a matching cluster application (dots in OCP versions become dashes: `index-4.17` → `index-4-17`).
+
+### 1.4b: Compare Components per Application
+
+**Verify:**
+
+For each application directory in hack repo:
+```bash
+APP_DIR="<application-directory-name>"
+CLUSTER_APP_NAME="<cluster-application-name>"
+
+# Expected components from hack repo
+gh api repos/openshift-pipelines/hack/contents/.konflux/openshift-pipelines/${MM_DASHED}/${APP_DIR} \
+  --jq '[.[] | select(.type == "dir") | .name] | sort[]'
+
+# Actual components on cluster for this application
+oc get components -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify -o json 2>/dev/null \
+  | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+app = '${CLUSTER_APP_NAME}'
+comps = sorted([i['metadata']['name'] for i in data['items']
+    if i['spec'].get('application','') == app])
+for c in comps:
+    print(c)
+"
+```
+
+Report as table:
+```
+| Application | Hack Repo Components | Cluster Components | Status |
+|-------------|---------------------|--------------------|--------|
+```
+
+Status values: `OK`, `DRIFT` (wrong assignment), `MISSING` (not on cluster).
+
+**Collect links:** No PRs or workflows for this step. Report the overall status (OK / DRIFT count / MISSING count) in the summary.
+
+**If DRIFT or MISSING — Execute (requires approval):**
+
+```bash
+# Clone hack repo and apply config (excluding RBAC resources)
+git clone --depth 1 https://github.com/openshift-pipelines/hack.git /tmp/hack-config
+cd /tmp/hack-config
+
+# Apply a specific drifted application:
+find .konflux/openshift-pipelines/${MM_DASHED}/${DRIFTED_APP_DIR}/ -name '*.yaml' \
+  ! -name 'role.yaml' ! -name 'service-account.yaml' \
+  -exec kubectl apply --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify -n ${KONFLUX_NS} -f {} +
+
+# Or apply ALL config for this release:
+find .konflux/openshift-pipelines/${MM_DASHED}/ -name '*.yaml' \
+  ! -name 'role.yaml' ! -name 'service-account.yaml' \
+  -exec kubectl apply --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify -n ${KONFLUX_NS} -f {} +
+
+rm -rf /tmp/hack-config
+```
+
+`role.yaml` and `service-account.yaml` are excluded — they require elevated RBAC and are one-time admin resources.
+
+**IMPORTANT:** Do NOT merge component PRs in downstream repos (step 2.1) before this config is applied — pipelines triggered by those PRs will fail without it.
+
+---
+
+## Step 1.5: RPA in konflux-release-data
+
+ReleasePlanAdmission YAML files must exist in the `konflux-release-data` GitLab repo for this version. Expected RPAs: core, bundle, fbc, cdn (each for stage + prod).
+
+**Verify:**
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/repository/tree?path=config/kflux-prd-rh02.0fk9.p1/product/ReleasePlanAdmission/tekton-ecosystem&ref=main&per_page=100" \
+  2>/dev/null | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+mm = '${MM_DASHED}'
+if isinstance(data, list):
+    matches = sorted([f['name'] for f in data if mm in f['name']])
+    if matches:
+        for m in matches:
+            print(m)
+    else:
+        print('NO_RPA_FOUND')
+else:
+    print('ERROR: unexpected response')
+"
+```
+
+**Fallback if no GitLab token:**
+```bash
+gh search code "openshift-pipelines" \
+  --repo redhat-appstudio/konflux-release-data \
+  --json path --limit 20 2>/dev/null | python3 -c "
+import sys, json
+results = json.load(sys.stdin)
+mm = '${MM_DASHED}'
+matches = [r['path'] for r in results if mm in r['path']]
+for m in sorted(matches):
+    print(m)
+"
+```
+
+**Expected when DONE:** RPA files exist for core, bundle, fbc, cdn.
+
+**Collect links:** If RPA files exist, report as DONE with the count. If a GitLab MR was used, capture its URL:
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/merge_requests?state=merged&search=openshift-pipelines+${MM_DASHED}&per_page=5" \
+  2>/dev/null | python3 -c "
+import sys, json
+mrs = json.load(sys.stdin)
+mm = '${MM_DASHED}'
+if isinstance(mrs, list):
+    for mr in mrs:
+        if mm in mr.get('title',''):
+            print(f\"MR: {mr['web_url']}  ({mr['state']})\")
+    if not any(mm in mr.get('title','') for mr in mrs):
+        print('No matching MR found')
+else:
+    print('ERROR: unexpected response')
+"
+```
+
+Report the GitLab MR URL (if found) in the summary.
+
+**If not found — Execute:** MANUAL. Copy RPAs from hack repo `.konflux/` directory to konflux-release-data GitLab repo via merge request.
+
+Reference MR: `https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/10083/diffs`
+
+---
+
+## Step 1.6: Pyxis config
+
+Pyxis repo configs must exist for `openshift-pipelines` images. Only needed if new component images are being shipped (not required for most patch releases).
+
+**Verify:**
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fpyxis-repo-configs/search?scope=blobs&search=openshift-pipelines&per_page=5" \
+  2>/dev/null | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+if isinstance(data, list) and len(data) > 0:
+    print(f'Found {len(data)} Pyxis config entries')
+    for d in data[:3]:
+        print(f'  {d.get(\"filename\", \"unknown\")}')
+else:
+    print('NO_PYXIS_CONFIG_FOUND')
+"
+```
+
+**Expected when DONE:** Config exists under `products/openshift-pipelines/`. For patch releases, existing config is sufficient.
+
+**Collect links:** If a GitLab MR was used, capture its URL:
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fpyxis-repo-configs/merge_requests?state=merged&search=openshift-pipelines&per_page=5" \
+  2>/dev/null | python3 -c "
+import sys, json
+mrs = json.load(sys.stdin)
+if isinstance(mrs, list):
+    for mr in mrs:
+        if 'openshift-pipelines' in mr.get('title','').lower():
+            print(f\"MR: {mr['web_url']}  ({mr['state']})\")
+            break
+    else:
+        print('No matching MR found (may not be needed for patch releases)')
+else:
+    print('ERROR: unexpected response')
+"
+```
+
+Report the GitLab MR URL (if found) in the summary.
+
+**If not found — Execute:** MANUAL. Copy Pyxis configuration from hack repo to `https://gitlab.cee.redhat.com/releng/pyxis-repo-configs/`.
+
+---
+
+## Step 1.7: OLM bundle version in olm/config.yaml
+
+The `olm/config.yaml` on the release branch lists bundle versions that `render-olm-catalog` processes. `VERSION` **must** be the last bundle entry. Without it, `render-olm-catalog` produces empty `catalog.json` files that break all index builds.
+
+**Verify:**
+```bash
+OLM_CONFIG=$(gh api repos/openshift-pipelines/operator/contents/olm/config.yaml?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d)
+echo "$OLM_CONFIG"
+
+# Extract the last bundle version
+LAST_BUNDLE_VERSION=$(echo "$OLM_CONFIG" | grep 'version:' | tail -1 | awk '{print $2}')
+echo "Last bundle version: ${LAST_BUNDLE_VERSION} (expected: ${VERSION})"
+```
+
+**Expected when DONE:** `LAST_BUNDLE_VERSION` equals `VERSION`.
+
+**Collect links:** Check for an existing or merged PR for this OLM bump:
+```bash
+gh pr list --repo openshift-pipelines/operator \
+  --base ${RELEASE_BRANCH} \
+  --search "OLM bundle version ${VERSION} in:title" \
+  --state all --limit 3 \
+  --json number,title,state,mergedAt,url
+```
+
+Report the PR as `[#NUM](URL)` in the summary. If no PR exists and the version already matches, report as "already set".
+
+**If not done — Execute (requires approval):**
+
+Determine the previous version to replace:
+```bash
+PREVIOUS_VERSION=$(echo "$OLM_CONFIG" | grep 'version:' | tail -1 | awk '{print $2}')
+```
+
+Create a PR on `${RELEASE_BRANCH}` that replaces `${PREVIOUS_VERSION}` with `${VERSION}`:
+
+```bash
+git clone --depth 1 -b ${RELEASE_BRANCH} \
+  https://github.com/openshift-pipelines/operator.git /tmp/operator-olm-bump
+cd /tmp/operator-olm-bump
+
+# Replace the previous patch version with VERSION in olm/config.yaml
+# Keep the existing image: line unchanged (operator-update-images workflow overwrites it later)
+# Remove the previous patch entry entirely — only VERSION should remain
+sed -i "s/version: ${PREVIOUS_VERSION}/version: ${VERSION}/" olm/config.yaml
+
+git checkout -b "release/${VERSION}/olm-config-bump"
+git add olm/config.yaml
+git commit -m "[bot:${MAJOR_MINOR}] Update OLM bundle version to ${VERSION}"
+git push origin "release/${VERSION}/olm-config-bump"
+
+gh pr create --repo openshift-pipelines/operator \
+  --base ${RELEASE_BRANCH} \
+  --head "release/${VERSION}/olm-config-bump" \
+  --title "[bot:${MAJOR_MINOR}] Update OLM bundle version to ${VERSION}" \
+  --body "Updates olm/config.yaml bundle version from ${PREVIOUS_VERSION} to ${VERSION}.
+
+The render-catalog.sh CI check will auto-update catalog-template.json files.
+If it re-adds ${PREVIOUS_VERSION}, remove it again.
+
+This must be done BEFORE code freeze." \
+  --label automated
+
+rm -rf /tmp/operator-olm-bump
+```
+
+The `render-catalog.sh` CI check will automatically push additional commits updating `catalog-template.json` files. It may re-add the old version — if so, remove it again. Initial CI failure on a stale image SHA is expected.
+
+**IMPORTANT:** Must be done BEFORE code freeze. The `update-sources` workflow is disabled during freeze (`if: false`), so missing this requires manual re-enabling of the workflow.
+
+---
+
+## Step 1.8: Operator project.yaml version
+
+The operator's `project.yaml` on the release branch has `versions.current` which must match `VERSION` before images are built — otherwise the operator image ships with the wrong version string.
+
+**Verify:**
+```bash
+PROJECT_YAML=$(gh api repos/openshift-pipelines/operator/contents/project.yaml?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d)
+CURRENT_VERSION=$(echo "$PROJECT_YAML" | grep 'current:' | head -1 | awk '{print $2}')
+PREVIOUS_VERSION_FIELD=$(echo "$PROJECT_YAML" | grep 'previous:' | head -1 | awk '{print $2}')
+echo "current: ${CURRENT_VERSION} (expected: ${VERSION})"
+echo "previous: ${PREVIOUS_VERSION_FIELD}"
+```
+
+**Expected when DONE:** `current` equals `VERSION`.
+
+**Collect links:** Check for an existing or merged PR for this version bump:
+```bash
+gh pr list --repo openshift-pipelines/operator \
+  --base ${RELEASE_BRANCH} \
+  --search "project.yaml version ${VERSION} in:title" \
+  --state all --limit 3 \
+  --json number,title,state,mergedAt,url
+```
+
+Report the PR as `[#NUM](URL)` in the summary. If no PR exists and the version already matches, report as "already set".
+
+**If not done — Execute (requires approval):**
+
+Determine the correct previous version (the current `current` becomes `previous`):
+```bash
+NEW_PREVIOUS=${CURRENT_VERSION}
+```
+
+```bash
+git clone --depth 1 -b ${RELEASE_BRANCH} \
+  https://github.com/openshift-pipelines/operator.git /tmp/operator-version-bump
+cd /tmp/operator-version-bump
+
+# Update project.yaml
+sed -i "s/current: ${CURRENT_VERSION}/current: ${VERSION}/" project.yaml
+sed -i "s/previous: ${PREVIOUS_VERSION_FIELD}/previous: ${NEW_PREVIOUS}/" project.yaml
+
+git checkout -b "release/${VERSION}/project-yaml-version-bump"
+git add project.yaml
+git commit -m "[bot:${MAJOR_MINOR}] Update project.yaml version to ${VERSION}"
+git push origin "release/${VERSION}/project-yaml-version-bump"
+
+gh pr create --repo openshift-pipelines/operator \
+  --base ${RELEASE_BRANCH} \
+  --head "release/${VERSION}/project-yaml-version-bump" \
+  --title "[bot:${MAJOR_MINOR}] Update project.yaml version to ${VERSION}" \
+  --body "Updates project.yaml versions:
+  current: ${CURRENT_VERSION} → ${VERSION}
+  previous: ${PREVIOUS_VERSION_FIELD} → ${NEW_PREVIOUS}
+
+This must be merged BEFORE triggering the final image rebuild." \
+  --label automated
+
+rm -rf /tmp/operator-version-bump
+```
+
+**This step must complete before build validation.** Any images built with the wrong version will ship incorrect version strings.
+
+---
+
+## Report Output
+
+After processing all steps, write the stage report to `${REPORT_BASE}/config/report_${REPORT_TIMESTAMP}.md`.
+
+**Report format:**
+
+```markdown
+# Config Stage Report — ${VERSION}
+
+**Generated:** ${REPORT_TIMESTAMP}
+**Release:** ${VERSION} (${MAJOR_MINOR})
+**Branch:** ${RELEASE_BRANCH}
+
+## Summary
+
+| Step | Title | Status | Details | Links |
+|------|-------|--------|---------|-------|
+| 1.1 | Create new patch version | {status} | {details} | {links} |
+| 1.2 | Merge release-manager PR | {status} | {details} | {links} |
+| 1.3 | Konflux config PR merged | {status} | {details} | {links} |
+| 1.4 | Konflux config on cluster | {status} | {details} | {links} |
+| 1.5 | RPA in konflux-release-data | {status} | {details} | {links} |
+| 1.6 | Pyxis config | {status} | {details} | {links} |
+| 1.7 | OLM bundle version | {status} | {details} | {links} |
+| 1.8 | Operator project.yaml version | {status} | {details} | {links} |
+
+## Step Details
+
+### Step 1.1: Create new patch version
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **release-tag:** {value}
+- **Workflow:** [{workflow-name}]({url}) ({status}/{conclusion})
+
+### Step 1.2: Merge release-manager PR
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **PR:** hack [#{number}]({url}) — {state}
+- **Merged:** {timestamp}
+
+{...repeat for each step checked...}
+
+## Blocking Step
+
+{If stopped early, show which step blocked and why. Omit if all steps DONE.}
+```
+
+**Column values:**
+
+- **Status:** `DONE`, `ACTION NEEDED`, `SKIPPED`
+- **Details:** one-line summary (e.g. `release-tag: 1.21.3`, `merged 2026-07-08 10:30 IST`, `5 apps OK`)
+- **Links:** all links collected for that step:
+  - GitHub PRs: `hack [#NUM](URL)`, `operator [#NUM](URL)`
+  - Workflow runs: `[workflow-name](URL)`
+  - GitLab MRs: `[MR](URL)`
+  - Multiple links separated by `, `
+  - No links: `—`
+
+Write the report file and print the path to the user:
+```
+Report written to: reports/${MAJOR_MINOR}/${VERSION}/config/report_${REPORT_TIMESTAMP}.md
+```
