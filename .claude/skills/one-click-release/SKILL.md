@@ -51,6 +51,21 @@ For each step:
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `CURRENT_RELEASE_TAG`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `GITLAB_URL`, `GITLAB_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`.
 </step>
 
+<step name="stage_build">
+**Stage 2: Build — process PRs, verify snapshots, and code freeze.**
+
+Read and follow the instructions in `STAGE_BUILD.md`.
+
+For each step:
+1. Run the **Verify** command
+2. If DONE → report status, move to next step
+3. If not done → show the **Execute** command and ask: "Step X.Y: [description]. Execute?"
+4. If user approves → run the execute command, then re-verify
+5. If user declines → stop and report the blocking step
+
+Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`.
+</step>
+
 <step name="summary">
 **Write the stage report and print the summary.**
 
