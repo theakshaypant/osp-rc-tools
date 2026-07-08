@@ -412,7 +412,91 @@ After pushing, wait for Konflux pipelines to complete, then re-verify snapshots.
 
 ---
 
-## Step 2.6: Code freeze
+## Step 2.6: CDN production release
+
+After the core snapshot is verified (step 2.2), CLI binaries can be released to CDN. This step creates a Konflux Release CR targeting the CDN release plan.
+
+Stage release of the binaries requires manual product version configuration in stage CDN, so go directly to production release while keeping the `invisible` flag set to `true` in the product version YAML.
+
+**Requires:** `KONFLUX_SERVER` and `KONFLUX_TOKEN`. If missing, SKIP this step.
+
+### Verify
+
+Check for existing CDN releases:
+```bash
+oc get releases -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify 2>&1 | grep -E "${MM_DASHED}.*(cdn-prod)"
+```
+
+If a CDN release exists, check its status (look for `Succeeded` vs `Failed`).
+
+Get the latest core snapshot:
+```bash
+oc get snapshot -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath="{range .items[*]} {.metadata.creationTimestamp}{'\t'} {.metadata.labels.pac\.test\.appstudio\.openshift\.io\/event-type}{'\t'} {.metadata.name} {'\n'}{end}" \
+  --sort-by=.metadata.creationTimestamp \
+  -l "pac.test.appstudio.openshift.io/event-type=push,appstudio.openshift.io/application=openshift-pipelines-core-${MM_DASHED}" \
+  2>/dev/null | tail -5
+```
+
+**Collect links:** Report the latest snapshot name and any existing CDN release status.
+
+**Expected when DONE:** A CDN production release exists with status `Succeeded`.
+
+### If not done — Execute (requires approval)
+
+Generate a Release YAML file. **Do not run `oc create` directly** — the Konflux cluster is read-only. Save the YAML and show the user the apply command.
+
+```bash
+LATEST_SNAPSHOT=$(oc get snapshots -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -l "pac.test.appstudio.openshift.io/event-type=push,appstudio.openshift.io/application=openshift-pipelines-core-${MM_DASHED}" \
+  --sort-by=.metadata.creationTimestamp \
+  -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | awk '{print $NF}')
+```
+
+Write the Release YAML to `release-${VERSION}-cdn-prod.yaml`:
+```yaml
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Release
+metadata:
+  labels:
+    appstudio.openshift.io/application: openshift-pipelines-core-${MM_DASHED}
+  generateName: openshift-pipelines-${MM_DASHED}-core-cdn-prod-release-
+  namespace: tekton-ecosystem-tenant
+spec:
+  data:
+  gracePeriodDays: 10
+  releasePlan: openshift-pipelines-${MM_DASHED}-core-cdn-prod
+  snapshot: ${LATEST_SNAPSHOT}
+```
+
+Show the user:
+```
+Release YAML written to: release-${VERSION}-cdn-prod.yaml
+
+To apply:
+  oc create -f release-${VERSION}-cdn-prod.yaml \
+    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+    --insecure-skip-tls-verify
+
+To monitor:
+  oc get releases -n tekton-ecosystem-tenant \
+    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+    --insecure-skip-tls-verify 2>&1 | grep "${MM_DASHED}.*cdn-prod"
+
+After the release succeeds, update the product version YAML to set invisible: false.
+```
+
+Use `oc create -f`, not `oc apply -f` — the YAML uses `generateName`.
+
+---
+
+## Step 2.7: Code freeze
 
 The `code-freeze` field in the hack release config should be set to `true` when builds are complete and index images are ready for QE testing. The `create-new-patch` workflow resets `code-freeze: false` when bumping the version, so it must be manually set back to `true`.
 
@@ -499,7 +583,8 @@ After processing all steps, write the stage report to `${REPORT_BASE}/build/repo
 | 2.3 | Process nudge PRs | {status} | {details} | {links} |
 | 2.4 | OLM catalog render | {status} | {details} | {links} |
 | 2.5 | Wait for FBC build | {status} | {details} | {links} |
-| 2.6 | Code freeze | {status} | {details} | {links} |
+| 2.6 | CDN production release | {status} | {details} | {links} |
+| 2.7 | Code freeze | {status} | {details} | {links} |
 
 ## Step Details
 
@@ -538,7 +623,12 @@ After processing all steps, write the stage report to `${REPORT_BASE}/build/repo
 |-----------|----------|--------|
 | {app} | {name} | {CURRENT/STALE/EXPECTED (no components)} |
 
-### Step 2.6: Code freeze
+### Step 2.6: CDN production release
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **CDN release:** {name} — {Succeeded/Failed/not found}
+- **Snapshot:** {name}
+
+### Step 2.7: Code freeze
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **code-freeze:** {true/false}
 - **PR:** hack [#{number}]({url}) — {state}

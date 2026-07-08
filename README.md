@@ -158,7 +158,7 @@ Can also be run by individual step group:
 
 ### One-click release (`/one-click-release {version}`)
 
-Walks through the release workflow in stages with both **verify** (read-only, automatic) and **execute** (write, requires approval) commands. Currently implements Config Stage (steps 1.1–1.8) and Build Stage (steps 2.1–2.6) — from hack repo config through snapshot verification, OLM catalog render, and code freeze. See [docs/skills/one-click-release.md](docs/skills/one-click-release.md) for full details.
+Walks through the release workflow in stages with both **verify** (read-only, automatic) and **execute** (write, requires approval) commands. Currently implements Config (steps 1.1–1.13), Build (steps 2.1–2.7), and Image Copy (steps 3.1–3.2) stages — from hack repo config through CLI version bumps, snapshot verification, CDN release, code freeze, and index image copy to quay.io. See [docs/skills/one-click-release.md](docs/skills/one-click-release.md) for full details.
 
 ### Other skills
 

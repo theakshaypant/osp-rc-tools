@@ -503,6 +503,300 @@ rm -rf /tmp/operator-version-bump
 
 ---
 
+## Step 1.9: OPC version.json
+
+The OPC `pkg/version.json` on the release branch tracks upstream CLI component versions (pac, tkn, results, manualapprovalgate, assist) and the OPC version itself. All must be current before CLI binaries are built.
+
+**Verify:**
+```bash
+OPC_VERSIONS=$(gh api repos/openshift-pipelines/opc/contents/pkg/version.json?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d)
+echo "$OPC_VERSIONS"
+```
+
+Compare each component against its latest upstream release:
+```bash
+PAC_LATEST=$(gh api repos/openshift-pipelines/pipelines-as-code/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
+TKN_LATEST=$(gh api repos/tektoncd/cli/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
+RESULTS_LATEST=$(gh api repos/tektoncd/results/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
+MAG_LATEST=$(gh api repos/openshift-pipelines/manual-approval-gate/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
+ASSIST_LATEST=$(gh api repos/openshift-pipelines/tekton-assist/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
+echo "pac: ${PAC_LATEST}, tkn: ${TKN_LATEST}, results: ${RESULTS_LATEST}, manualapprovalgate: ${MAG_LATEST}, assist: ${ASSIST_LATEST}"
+```
+
+Parse version.json and compare each field. Strip `v` prefix from upstream tags before comparison.
+
+If the upstream latest is a different major/minor series than what's in version.json (e.g. version.json has `0.42.x` but upstream is `0.43.x`), flag as **REVIEW** instead of **OUTDATED** — it may be intentional for this release branch.
+
+Report a table:
+```
+| Component | version.json | Latest upstream | Status |
+|-----------|-------------|-----------------|--------|
+```
+
+**Collect links:** Check for existing PRs:
+```bash
+gh pr list --repo openshift-pipelines/opc \
+  --base ${RELEASE_BRANCH} \
+  --state all --limit 5 \
+  --json number,title,state,mergedAt,url
+```
+
+**Expected when DONE:** All components are CURRENT and `opc` field equals `VERSION`.
+
+**If not done — Execute:** MANUAL. The user must update `pkg/version.json` on the release branch, update corresponding `go.mod` dependencies, run `go mod tidy && go mod vendor`, and create a PR targeting `${RELEASE_BRANCH}`.
+
+Repository: `https://github.com/openshift-pipelines/opc/tree/${RELEASE_BRANCH}/pkg`
+
+---
+
+## Step 1.10: p12n-opc sync
+
+The `p12n-opc` repo mirrors OPC under its `upstream/` directory. The `upstream/pkg/version.json` must match OPC's `pkg/version.json` on the release branch.
+
+**Verify:**
+```bash
+OPC_VERSION=$(gh api repos/openshift-pipelines/opc/contents/pkg/version.json?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d)
+P12N_VERSION=$(gh api repos/openshift-pipelines/p12n-opc/contents/upstream/pkg/version.json?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d)
+echo "OPC version.json: ${OPC_VERSION}"
+echo "p12n-opc version.json: ${P12N_VERSION}"
+```
+
+Compare HEADs:
+```bash
+OPC_HEAD=$(gh api repos/openshift-pipelines/opc/commits/${RELEASE_BRANCH} --jq '.sha')
+P12N_OPC_HEAD=$(gh api repos/openshift-pipelines/p12n-opc/commits/${RELEASE_BRANCH} --jq '.sha')
+echo "OPC HEAD: ${OPC_HEAD:0:12}"
+echo "p12n-opc HEAD: ${P12N_OPC_HEAD:0:12}"
+```
+
+**Collect links:**
+```bash
+gh pr list --repo openshift-pipelines/p12n-opc \
+  --base "${RELEASE_BRANCH}" \
+  --state all --limit 5 \
+  --json number,title,state,mergedAt,url
+```
+
+**Expected when DONE:** `version.json` files match.
+
+**If not done — Execute:** MANUAL. Sync the `upstream/` directory in p12n-opc to match OPC on `${RELEASE_BRANCH}`. Create a PR targeting `${RELEASE_BRANCH}`.
+
+Repository: `https://github.com/openshift-pipelines/p12n-opc/tree/${RELEASE_BRANCH}`
+
+---
+
+## Step 1.11: serve-tkn-cli submodules
+
+The `serve-tkn-cli` repo uses git submodules under `sources/` to track upstream repos. Each submodule's SHA must match the HEAD of its tracking branch.
+
+**Verify:**
+
+Fetch `.gitmodules` to get tracking branches:
+```bash
+gh api repos/openshift-pipelines/serve-tkn-cli/contents/.gitmodules?ref=${RELEASE_BRANCH} \
+  --jq '.content' | base64 -d
+```
+
+Fetch actual submodule SHAs:
+```bash
+gh api repos/openshift-pipelines/serve-tkn-cli/contents/sources?ref=${RELEASE_BRANCH} \
+  --jq '.[] | "\(.name) \(.sha)"'
+```
+
+For each submodule, compare against its tracking branch HEAD. Use the repo URL from `.gitmodules` (PAC points to downstream `openshift-pipelines/pipelines-as-code`, not upstream):
+```bash
+# sources/cli → tektoncd/cli
+CLI_HEAD=$(gh api repos/tektoncd/cli/commits/${CLI_BRANCH} --jq '.sha' 2>/dev/null)
+
+# sources/opc → openshift-pipelines/opc
+OPC_HEAD=$(gh api repos/openshift-pipelines/opc/commits/${RELEASE_BRANCH} --jq '.sha' 2>/dev/null)
+
+# sources/pac → openshift-pipelines/pipelines-as-code (downstream)
+PAC_HEAD=$(gh api repos/openshift-pipelines/pipelines-as-code/commits/${PAC_BRANCH} --jq '.sha' 2>/dev/null)
+```
+
+Report a table:
+```
+| Submodule | Repo | Branch | Submodule SHA | Branch HEAD | Status |
+|-----------|------|--------|---------------|-------------|--------|
+```
+
+**Collect links:**
+```bash
+gh pr list --repo openshift-pipelines/serve-tkn-cli \
+  --base "${RELEASE_BRANCH}" \
+  --state all --limit 5 \
+  --json number,title,state,mergedAt,url
+```
+
+**Expected when DONE:** All submodules are CURRENT.
+
+**If not done — Execute:** MANUAL. Update submodules on `${RELEASE_BRANCH}`:
+```
+git checkout ${RELEASE_BRANCH}
+git submodule update --init --remote --force --checkout
+git add sources/
+git commit -m "Update submodules"
+```
+
+Note: plain `git submodule update` checks out the currently recorded SHA (yields "already up to date"). The `--remote --force --checkout` flags fetch from the tracking branch and force-checkout the new HEAD.
+
+Create a PR targeting `${RELEASE_BRANCH}`.
+
+---
+
+## Step 1.12: CLI product version config
+
+The product version configuration must exist in the `konflux-release-data` GitLab repo before CDN RP/RPA can be created (step 1.13).
+
+**Verify:**
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/repository/files/data%2Fexternal%2Fdeveloper-portal%2Fopenshift-pipelines%2F${VERSION}.yaml/raw?ref=main" \
+  2>/dev/null
+```
+
+If the file exists, validate:
+- `versionName` matches `VERSION`
+- `ga` — report value (`false` for patches, `true` for minor releases and patches on latest minor)
+- `hidden` — should be `false`
+- `invisible` — should be `false`
+- `releaseDate` — report value
+
+**Collect links:**
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/merge_requests?state=merged&search=openshift-pipelines+${VERSION}&per_page=5" \
+  2>/dev/null | python3 -c "
+import sys, json
+mrs = json.load(sys.stdin)
+if isinstance(mrs, list):
+    for mr in mrs:
+        if '${VERSION}' in mr.get('title',''):
+            print(f\"MR: {mr['web_url']}  ({mr['state']})\")
+"
+```
+
+**Expected when DONE:** File exists with correct `versionName`.
+
+**If not done — Execute:** MANUAL. Create a GitLab MR to add the product version YAML:
+
+File path: `data/external/developer-portal/openshift-pipelines/${VERSION}.yaml`
+
+Content:
+```yaml
+---
+versionName: "${VERSION}"
+ga: false
+termsAndConditions: "Anonymous Download"
+hidden: false
+invisible: false
+releaseDate: "${TODAY}"
+```
+
+Notes:
+- `ga`: `false` for patch versions, `true` for minor releases and patches on latest minor
+- `releaseDate`: set to actual release date
+
+Reference MR: `https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/14753`
+
+**IMPORTANT:** This PR must be merged BEFORE creating the RP/RPA in step 1.13.
+
+If `GITLAB_TOKEN` is not set, SKIP this step.
+
+---
+
+## Step 1.13: CLI CDN RP/RPA
+
+CDN releases require dedicated ReleasePlanAdmission and ReleasePlan resources in the `konflux-release-data` GitLab repo, separate from the image-based ones used in the main pipeline.
+
+**Verify:**
+
+Check ReleasePlanAdmission:
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/repository/tree?path=config/kflux-prd-rh02.0fk9.p1/product/ReleasePlanAdmission/tekton-ecosystem&ref=main&per_page=100" \
+  2>/dev/null | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+if isinstance(data, list):
+    matches = [f['name'] for f in data if '${MM_DASHED}' in f['name'] and 'cdn' in f['name']]
+    for m in sorted(matches):
+        print(m)
+    if not matches:
+        print('NO_CDN_RPA_FOUND')
+"
+```
+
+Check ReleasePlan (tenant config):
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/repository/tree?path=tenants-config/cluster/kflux-prd-rh02/tenants/tekton-ecosystem-tenant&ref=main&per_page=100" \
+  2>/dev/null | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+if isinstance(data, list):
+    matches = [f['name'] for f in data if '${MM_DASHED}' in f['name'] and 'cdn' in f['name']]
+    for m in sorted(matches):
+        print(m)
+    if not matches:
+        print('NO_CDN_RP_FOUND')
+"
+```
+
+Check auto-generated ReleasePlan:
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/repository/tree?path=tenants-config/auto-generated/cluster/kflux-prd-rh02/tenants/tekton-ecosystem-tenant&ref=main&per_page=100" \
+  2>/dev/null | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+if isinstance(data, list):
+    matches = [f['name'] for f in data if '${MM_DASHED}' in f['name'] and 'cdn' in f['name']]
+    for m in sorted(matches):
+        print(m)
+    if not matches:
+        print('NO_AUTO_GEN_CDN_RP_FOUND')
+"
+```
+
+Expected CDN RPAs: `openshift-pipelines-${MM_DASHED}-core-cdn-prod.yaml`, `openshift-pipelines-${MM_DASHED}-core-cdn-stage.yaml`
+
+Report a table:
+```
+| Resource | Type | File | Status |
+|----------|------|------|--------|
+```
+
+**Collect links:**
+```bash
+curl -s --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+  "$GITLAB_URL/api/v4/projects/releng%2Fkonflux-release-data/merge_requests?state=merged&search=openshift-pipelines+cdn+${MM_DASHED}&per_page=5" \
+  2>/dev/null | python3 -c "
+import sys, json
+mrs = json.load(sys.stdin)
+if isinstance(mrs, list):
+    for mr in mrs:
+        if '${MM_DASHED}' in mr.get('title','') or 'cdn' in mr.get('title','').lower():
+            print(f\"MR: {mr['web_url']}  ({mr['state']})\")
+"
+```
+
+**Expected when DONE:** All required CDN RP/RPA files exist.
+
+**If not done — Execute:** MANUAL. Copy RP/RPA from a previous version and update version numbers.
+
+Reference MR: `https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/14754/diffs`
+
+**IMPORTANT:** The product version configuration (step 1.12) must be merged first — ReleasePlanAdmission cannot reference a version that is not defined.
+
+If `GITLAB_TOKEN` is not set, SKIP this step.
+
+---
+
 ## Report Output
 
 After processing all steps, write the stage report to `${REPORT_BASE}/config/report_${REPORT_TIMESTAMP}.md`.
@@ -528,6 +822,11 @@ After processing all steps, write the stage report to `${REPORT_BASE}/config/rep
 | 1.6 | Pyxis config | {status} | {details} | {links} |
 | 1.7 | OLM bundle version | {status} | {details} | {links} |
 | 1.8 | Operator project.yaml version | {status} | {details} | {links} |
+| 1.9 | OPC version.json | {status} | {details} | {links} |
+| 1.10 | p12n-opc sync | {status} | {details} | {links} |
+| 1.11 | serve-tkn-cli submodules | {status} | {details} | {links} |
+| 1.12 | CLI product version config | {status} | {details} | {links} |
+| 1.13 | CLI CDN RP/RPA | {status} | {details} | {links} |
 
 ## Step Details
 
@@ -540,6 +839,38 @@ After processing all steps, write the stage report to `${REPORT_BASE}/config/rep
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **PR:** hack [#{number}]({url}) — {state}
 - **Merged:** {timestamp}
+
+### Step 1.9: OPC version.json
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **Version comparison:**
+
+| Component | version.json | Latest upstream | Status |
+|-----------|-------------|-----------------|--------|
+| {component} | {version} | {latest} | {CURRENT/OUTDATED/REVIEW} |
+
+### Step 1.10: p12n-opc sync
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **OPC HEAD:** [{short}]({url})
+- **p12n-opc HEAD:** [{short}]({url})
+
+### Step 1.11: serve-tkn-cli submodules
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **Submodule comparison:**
+
+| Submodule | Repo | Branch | Submodule SHA | Branch HEAD | Status |
+|-----------|------|--------|---------------|-------------|--------|
+| {submodule} | {repo} | {branch} | [{short}]({url}) | [{short}]({url}) | {CURRENT/OUTDATED} |
+
+### Step 1.12: CLI product version config
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **versionName:** {value}
+- **ga:** {value}
+- **releaseDate:** {value}
+
+### Step 1.13: CLI CDN RP/RPA
+- **Status:** {DONE | ACTION NEEDED | SKIPPED}
+- **CDN RPAs:** {count} found
+- **CDN RPs:** {count} found
 
 {...repeat for each step checked...}
 
