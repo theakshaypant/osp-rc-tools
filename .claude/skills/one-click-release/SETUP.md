@@ -74,12 +74,12 @@ REPORT_TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S_%Z')
 Stage report paths (created by each stage file):
 - Config: `${REPORT_BASE}/config/report_${REPORT_TIMESTAMP}.md`
 - Build: `${REPORT_BASE}/build/report_${REPORT_TIMESTAMP}.md`
-- Test: `${REPORT_BASE}/test/report_${REPORT_TIMESTAMP}.md`
+- Image Copy: `${REPORT_BASE}/image-copy/report_${REPORT_TIMESTAMP}.md`
 - Release: `${REPORT_BASE}/release/report_${REPORT_TIMESTAMP}.md`
 
 Create the directories at setup time:
 ```bash
-mkdir -p "${REPORT_BASE}/config" "${REPORT_BASE}/build" "${REPORT_BASE}/test" "${REPORT_BASE}/release"
+mkdir -p "${REPORT_BASE}/config" "${REPORT_BASE}/build" "${REPORT_BASE}/image-copy" "${REPORT_BASE}/release"
 ```
 
 ## Return

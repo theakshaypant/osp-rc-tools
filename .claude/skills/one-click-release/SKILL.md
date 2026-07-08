@@ -66,6 +66,21 @@ For each step:
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`.
 </step>
 
+<step name="stage_image_copy">
+**Stage 3: Image Copy — copy FBC index images to quay.io for QE.**
+
+Read and follow the instructions in `STAGE_IMAGE_COPY.md`.
+
+For each step:
+1. Run the **Verify** command
+2. If DONE → report status, move to next step
+3. If not done → show the **Execute** command and ask: "Step X.Y: [description]. Execute?"
+4. If user approves → run the execute command, then re-verify
+5. If user declines → stop and report the blocking step
+
+Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`.
+</step>
+
 <step name="summary">
 **Write the stage report and print the summary.**
 
