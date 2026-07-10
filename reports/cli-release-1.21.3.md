@@ -1,38 +1,38 @@
 # CLI Release: 1.21.3
 
-**Generated:** 2026-07-06 16:04 IST
+**Generated:** 2026-07-09 15:56 IST
 **Release branch:** release-v1.21.x
 
 | # | Step | Status | Details |
 |---|------|--------|---------|
-| 1 | OPC version.json | DONE | All upstream versions current within pinned series |
-| 2 | p12n-opc sync | DONE | version.json matches OPC |
-| 3 | serve-tkn-cli submodules | DONE | All submodules current (after [#317](https://github.com/openshift-pipelines/serve-tkn-cli/pull/317)) |
-| 4 | Product version configuration | **ACTION NEEDED** | File not found in konflux-release-data |
+| 1 | OPC version.json | DONE | opc: 1.21.3, all upstream on expected branches |
+| 2 | p12n-opc sync | DONE | version.json match |
+| 3 | serve-tkn-cli submodules | DONE | All 3 submodules CURRENT |
+| 4 | Product version config | DONE | versionName: 1.21.3, releaseDate: 2026-07-09 |
+| 5 | CDN RP/RPA | DONE | RPAs + RPs exist (cluster names use `-rp` suffix) |
+| 6 | CDN production release | DONE | Succeeded 2026-07-09 15:27 IST |
 
-## Step 1: OPC version.json
+## Step Details
 
-All components in `pkg/version.json` on `release-v1.21.x` are current within their pinned upstream series:
+### Step 1: OPC version.json
 
-| Component | OPC version.json | Pinned series | Latest in series | Status |
-|-----------|-----------------|---------------|------------------|--------|
-| pac | 0.39.7 | release-v0.39.x | v0.39.7 | CURRENT |
-| tkn | 0.43.2 | release-v0.43.2 | v0.43.2 | CURRENT |
-| results | 0.17.2 | release-v0.17.x | v0.17.2 | CURRENT |
-| manualapprovalgate | 0.7.0 | release-v0.7.0 | v0.7.0 | CURRENT |
-| assist | 0.1.1 | main | v0.1.1 | CURRENT |
-| opc | 1.21.3 | (target) | 1.21.3 | CURRENT |
+| Component | version.json | Latest upstream | Status |
+|-----------|-------------|-----------------|--------|
+| pac | 0.39.7 | 0.49.0 | REVIEW (pinned to release-v0.39.x) |
+| tkn | 0.43.2 | 0.45.0 | REVIEW (pinned to release-v0.43.2) |
+| results | 0.17.2 | 0.19.0 | REVIEW (pinned to release-v0.17.x) |
+| manualapprovalgate | 0.7.0 | 0.9.0 | REVIEW (pinned to release-v0.7.0) |
+| assist | 0.1.1 | 0.1.1 | CURRENT |
+| opc | 1.21.3 | 1.21.3 (target) | CURRENT |
 
-## Step 2: p12n-opc sync
+### Step 2: p12n-opc sync
 
-`upstream/pkg/version.json` in p12n-opc matches OPC `pkg/version.json` on `release-v1.21.x`.
+- **OPC HEAD:** [b705f0fcdf32](https://github.com/openshift-pipelines/opc/commit/b705f0fcdf326ffbea6be481b9c84d656b0663d9)
+- **p12n-opc HEAD:** [d6f0567f7dce](https://github.com/openshift-pipelines/p12n-opc/commit/d6f0567f7dce37aaf650115efbfe27b732bfd9f0)
+- **version.json:** Match
+- **Latest sync PR:** [#272](https://github.com/openshift-pipelines/p12n-opc/pull/272) MERGED 2026-07-09 12:15 IST
 
-- OPC HEAD: [b705f0fcdf32](https://github.com/openshift-pipelines/opc/commit/b705f0fcdf326ffbea6be481b9c84d656b0663d9)
-- p12n-opc HEAD: [938f533cf53c](https://github.com/openshift-pipelines/p12n-opc/commit/938f533cf53c62b99879ea7579d2c0658077e96b)
-
-## Step 3: serve-tkn-cli submodules
-
-All submodules current after [#317](https://github.com/openshift-pipelines/serve-tkn-cli/pull/317) merged:
+### Step 3: serve-tkn-cli submodules
 
 | Submodule | Repo | Branch | Submodule SHA | Branch HEAD | Status |
 |-----------|------|--------|---------------|-------------|--------|
@@ -40,42 +40,27 @@ All submodules current after [#317](https://github.com/openshift-pipelines/serve
 | sources/opc | openshift-pipelines/opc | release-v1.21.x | [b705f0fcdf32](https://github.com/openshift-pipelines/opc/commit/b705f0fcdf326ffbea6be481b9c84d656b0663d9) | [b705f0fcdf32](https://github.com/openshift-pipelines/opc/commit/b705f0fcdf326ffbea6be481b9c84d656b0663d9) | CURRENT |
 | sources/pac | openshift-pipelines/pipelines-as-code | release-v0.39.x | [6acde9dbaa6d](https://github.com/openshift-pipelines/pipelines-as-code/commit/6acde9dbaa6da67cfbd67b14b9e0c0a2043c32bb) | [6acde9dbaa6d](https://github.com/openshift-pipelines/pipelines-as-code/commit/6acde9dbaa6da67cfbd67b14b9e0c0a2043c32bb) | CURRENT |
 
-## Next Action
+### Step 4: Product version config
 
-**Add product version configuration to konflux-release-data.**
+- **versionName:** 1.21.3
+- **ga:** false
+- **hidden:** false
+- **invisible:** false
+- **releaseDate:** 2026-07-09
 
-Create a new file at:
-```
-data/external/developer-portal/openshift-pipelines/1.21.3.yaml
-```
+### Step 5: CDN RP/RPA
 
-With content:
-```yaml
----
-versionName: "1.21.3"
-ga: false
-termsAndConditions: "Anonymous Download"
-hidden: false
-invisible: true
-releaseDate: "2026-07-06"
-```
+| Resource | Type | Location | Status |
+|----------|------|----------|--------|
+| openshift-pipelines-1-21-core-cdn-prod.yaml | RPA | GitLab config/ | FOUND |
+| openshift-pipelines-1-21-core-cdn-stage.yaml | RPA | GitLab config/ | FOUND |
+| openshift-pipelines-1-21-core-cdn-prod-rp | ReleasePlan | Cluster | FOUND |
+| openshift-pipelines-1-21-core-cdn-stage-rp | ReleasePlan | Cluster | FOUND |
 
-Notes:
-- `ga`: Set to `false` for patch versions on older minor releases.
-- `invisible`: Set to `true` initially. Change to `false` after QA sign-off.
-- `releaseDate`: Set to the actual release date.
+### Step 6: CDN production release
 
-Reference: previous version [1.21.2.yaml](https://gitlab.cee.redhat.com/releng/konflux-release-data/-/blob/main/data/external/developer-portal/openshift-pipelines/1.21.2.yaml)
-
-Reference MR: https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/14753
-
-Repository: https://gitlab.cee.redhat.com/releng/konflux-release-data
-
-**IMPORTANT:** The product version MR must be merged BEFORE creating the CDN release in step 6. ReleasePlanAdmission cannot reference a version that is not yet defined.
-
-## Remaining Steps
-
-| # | Step | Status |
-|---|------|--------|
-| 5 | ReleasePlan and ReleasePlanAdmission | Not checked (RP/RPA exist on cluster — likely DONE) |
-| 6 | CDN production release | Not checked |
+- **Release:** `openshift-pipelines-1-21-core-cdn-prod-release-s4bm6`
+- **Status:** Succeeded
+- **Completed:** 2026-07-09 15:27 IST
+- **Snapshot:** `openshift-pipelines-core-1-21-20260706-124700-000-at`
+- **ReleasePlan:** `openshift-pipelines-1-21-core-cdn-prod-rp`
