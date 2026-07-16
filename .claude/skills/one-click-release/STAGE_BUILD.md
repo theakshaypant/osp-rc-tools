@@ -7,7 +7,7 @@ Process release PRs, verify Konflux snapshots are current, merge nudge PRs, rend
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`
 
 **Constraints:**
-- Konflux cluster: **READ-ONLY** for verify commands (`oc get`/`kubectl get` only)
+- Konflux cluster: **READ-ONLY** for verify commands (`oc get`/`kubectl get` only). Release CRs may be created (`oc create -f`) as execute commands after user approval.
 - Execute commands require explicit user approval before running
 
 **Formatting:**
@@ -551,8 +551,9 @@ oc get snapshot -n ${KONFLUX_NS} \
 
 ### If not done — Execute (requires approval)
 
-Generate a Release YAML file. **Do not run `oc create` directly** — the Konflux cluster is read-only. Save the YAML and show the user the apply command.
+Generate and apply a Release CR.
 
+Get the latest core snapshot:
 ```bash
 LATEST_SNAPSHOT=$(oc get snapshots -n ${KONFLUX_NS} \
   --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
@@ -562,7 +563,7 @@ LATEST_SNAPSHOT=$(oc get snapshots -n ${KONFLUX_NS} \
   -o jsonpath='{.items[*].metadata.name}' 2>/dev/null | awk '{print $NF}')
 ```
 
-Write the Release YAML to `release-${VERSION}-cdn-prod.yaml`:
+Write the Release YAML to `${REPORT_BASE}/manifest/prod/release-${VERSION}-cdn-prod.yaml`:
 ```yaml
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Release
@@ -578,24 +579,34 @@ spec:
   snapshot: ${LATEST_SNAPSHOT}
 ```
 
-Show the user:
-```
-Release YAML written to: release-${VERSION}-cdn-prod.yaml
-
-To apply:
-  oc create -f release-${VERSION}-cdn-prod.yaml \
-    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify
-
-To monitor:
-  oc get releases -n tekton-ecosystem-tenant \
-    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify 2>&1 | grep "${MM_DASHED}.*cdn-prod"
-
-After the release succeeds, update the product version YAML to set invisible: false.
+Apply the Release CR (`oc create`, not `oc apply` — uses `generateName`):
+```bash
+RELEASE_NAME=$(oc create -f ${REPORT_BASE}/manifest/prod/release-${VERSION}-cdn-prod.yaml \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath='{.metadata.name}')
+echo "Created release: ${RELEASE_NAME}"
 ```
 
-Use `oc create -f`, not `oc apply -f` — the YAML uses `generateName`.
+Wait for the release to complete:
+```bash
+oc wait release/${RELEASE_NAME} -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  --for=condition=Released --timeout=300s 2>&1 || true
+```
+
+Check result:
+```bash
+oc get release ${RELEASE_NAME} -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath='Released={.status.conditions[?(@.type=="Released")].status} Reason={.status.conditions[?(@.type=="Released")].reason}'
+```
+
+If `Released=True` → DONE. If still in progress (condition not yet set or `Unknown`), report the release name and move on — the re-verify will catch it on the next run.
+
+After the release succeeds, update the product version YAML to set `invisible: false`.
 
 ---
 

@@ -76,10 +76,11 @@ Stage report paths (created by each stage file):
 - Build: `${REPORT_BASE}/build/report_${REPORT_TIMESTAMP}.md`
 - Image Copy: `${REPORT_BASE}/image-copy/report_${REPORT_TIMESTAMP}.md`
 - Release: `${REPORT_BASE}/release/report_${REPORT_TIMESTAMP}.md`
+- Manifests: `${REPORT_BASE}/manifest/stage/` and `${REPORT_BASE}/manifest/prod/`
 
 Create the directories at setup time:
 ```bash
-mkdir -p "${REPORT_BASE}/config" "${REPORT_BASE}/build" "${REPORT_BASE}/image-copy" "${REPORT_BASE}/release"
+mkdir -p "${REPORT_BASE}/config" "${REPORT_BASE}/build" "${REPORT_BASE}/image-copy" "${REPORT_BASE}/release" "${REPORT_BASE}/manifest/stage" "${REPORT_BASE}/manifest/prod"
 ```
 
 ## Return

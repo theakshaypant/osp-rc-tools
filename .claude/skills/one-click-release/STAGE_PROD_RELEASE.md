@@ -5,16 +5,16 @@ Release core, bundle, and index applications to production via Konflux Release C
 **Inputs:** `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`
 
 **Constraints:**
-- Konflux cluster: **READ-ONLY** for verify commands (`oc get`/`kubectl get` only)
-- Release CRs are **never applied by this skill** — generate YAML files and show the user the `oc create -f` command
-- Execute commands (GitHub workflows, PR merges) require explicit user approval before running
+- Konflux cluster: **READ-ONLY** for verify commands (`oc get`/`kubectl get` only). Release CRs may be created (`oc create -f`) as execute commands after user approval.
+- Release CR YAML files are saved to `${REPORT_BASE}/manifest/prod/` for reference before applying
+- Execute commands (GitHub workflows, PR merges, Release CR creation) require explicit user approval before running
 
 **Formatting:**
 - PR links: `[#NUM](https://github.com/OWNER/REPO/pull/NUM)`
 - SHA links: `[SHORT](https://github.com/OWNER/REPO/commit/FULL)` (12-char short)
 - Timestamps: absolute local time with timezone (e.g. `2026-07-08 14:30 IST`)
 
-**Release YAML storage:** All generated Release CR manifests are stored in `${REPORT_BASE}/release/`.
+**Release YAML storage:** All generated Release CR manifests are stored in `${REPORT_BASE}/manifest/prod/`.
 
 ---
 
@@ -165,9 +165,9 @@ echo "Snapshot: ${STAGE_CORE_SNAPSHOT}"
 
 Generate the Release YAML:
 ```bash
-mkdir -p "${REPORT_BASE}/release"
+mkdir -p "${REPORT_BASE}/manifest/prod"
 
-cat > "${REPORT_BASE}/release/release-${VERSION}-core-prod.yaml" <<EOF
+cat > "${REPORT_BASE}/manifest/prod/release-${VERSION}-core-prod.yaml" <<EOF
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Release
 metadata:
@@ -181,24 +181,32 @@ spec:
 EOF
 ```
 
-Show the user:
-```
-Release YAML written to: ${REPORT_BASE}/release/release-${VERSION}-core-prod.yaml
-
-To apply:
-  oc create -f ${REPORT_BASE}/release/release-${VERSION}-core-prod.yaml \
-    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify
-
-To monitor:
-  oc get releases -n ${KONFLUX_NS} \
-    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify 2>&1 | grep "${MM_DASHED}.*core.*prod"
+Apply the Release CR (`oc create`, not `oc apply` — uses `generateName`):
+```bash
+RELEASE_NAME=$(oc create -f ${REPORT_BASE}/manifest/prod/release-${VERSION}-core-prod.yaml \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath='{.metadata.name}')
+echo "Created release: ${RELEASE_NAME}"
 ```
 
-Use `oc create -f`, not `oc apply -f` — the YAML uses `generateName`.
+Wait for the release to complete:
+```bash
+oc wait release/${RELEASE_NAME} -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  --for=condition=Released --timeout=300s 2>&1 || true
+```
 
-After the user confirms the release succeeded, proceed to step 4.3.
+Check result:
+```bash
+oc get release ${RELEASE_NAME} -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath='Released={.status.conditions[?(@.type=="Released")].status} Reason={.status.conditions[?(@.type=="Released")].reason}'
+```
+
+If `Released=True` → DONE, proceed to step 4.3. If still in progress, report the release name — the re-verify will catch it on the next run.
 
 ---
 
@@ -491,9 +499,9 @@ echo "Snapshot: ${LATEST_BUNDLE}"
 
 Generate the Release YAML:
 ```bash
-mkdir -p "${REPORT_BASE}/release"
+mkdir -p "${REPORT_BASE}/manifest/prod"
 
-cat > "${REPORT_BASE}/release/release-${VERSION}-bundle-prod.yaml" <<EOF
+cat > "${REPORT_BASE}/manifest/prod/release-${VERSION}-bundle-prod.yaml" <<EOF
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Release
 metadata:
@@ -507,24 +515,32 @@ spec:
 EOF
 ```
 
-Show the user:
-```
-Release YAML written to: ${REPORT_BASE}/release/release-${VERSION}-bundle-prod.yaml
-
-To apply:
-  oc create -f ${REPORT_BASE}/release/release-${VERSION}-bundle-prod.yaml \
-    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify
-
-To monitor:
-  oc get releases -n ${KONFLUX_NS} \
-    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify 2>&1 | grep "${MM_DASHED}.*bundle.*prod"
+Apply the Release CR (`oc create`, not `oc apply` — uses `generateName`):
+```bash
+RELEASE_NAME=$(oc create -f ${REPORT_BASE}/manifest/prod/release-${VERSION}-bundle-prod.yaml \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath='{.metadata.name}')
+echo "Created release: ${RELEASE_NAME}"
 ```
 
-Use `oc create -f`, not `oc apply -f` — the YAML uses `generateName`.
+Wait for the release to complete:
+```bash
+oc wait release/${RELEASE_NAME} -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  --for=condition=Released --timeout=300s 2>&1 || true
+```
 
-After the user confirms the release succeeded, proceed to step 4.7.
+Check result:
+```bash
+oc get release ${RELEASE_NAME} -n ${KONFLUX_NS} \
+  --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+  --insecure-skip-tls-verify \
+  -o jsonpath='Released={.status.conditions[?(@.type=="Released")].status} Reason={.status.conditions[?(@.type=="Released")].reason}'
+```
+
+If `Released=True` → DONE, proceed to step 4.7. If still in progress, report the release name — the re-verify will catch it on the next run.
 
 ---
 
@@ -738,7 +754,7 @@ for a in apps:
 
 For each index app, generate a Release YAML:
 ```bash
-mkdir -p "${REPORT_BASE}/release"
+mkdir -p "${REPORT_BASE}/manifest/prod"
 
 for INDEX_APP in ${INDEX_APPS}; do
   LATEST_SNAPSHOT=$(oc get snapshots -n ${KONFLUX_NS} \
@@ -774,7 +790,7 @@ for item in data['items']:
   # Derive OCP version from app name for filename
   OCP_VERSION=$(echo "${INDEX_APP}" | sed "s/openshift-pipelines-index-//" | sed "s/-${MM_DASHED}//")
 
-  cat > "${REPORT_BASE}/release/release-${VERSION}-index-${OCP_VERSION}-prod.yaml" <<EOF
+  cat > "${REPORT_BASE}/manifest/prod/release-${VERSION}-index-${OCP_VERSION}-prod.yaml" <<EOF
 apiVersion: appstudio.redhat.com/v1alpha1
 kind: Release
 metadata:
@@ -787,29 +803,47 @@ spec:
   snapshot: ${LATEST_SNAPSHOT}
 EOF
 
-  echo "Generated: ${REPORT_BASE}/release/release-${VERSION}-index-${OCP_VERSION}-prod.yaml (${INDEX_APP} → ${INDEX_PROD_RP})"
+  echo "Generated: ${REPORT_BASE}/manifest/prod/release-${VERSION}-index-${OCP_VERSION}-prod.yaml (${INDEX_APP} → ${INDEX_PROD_RP})"
 done
 ```
 
-Show the user:
-```
-Release YAMLs written to: ${REPORT_BASE}/release/release-${VERSION}-index-*-prod.yaml
-
-To apply all index releases:
-  for f in ${REPORT_BASE}/release/release-${VERSION}-index-*-prod.yaml; do
-    echo "Applying: $f"
-    oc create -f "$f" \
-      --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-      --insecure-skip-tls-verify
-  done
-
-To monitor:
-  oc get releases -n ${KONFLUX_NS} \
+Apply all index Release CRs (`oc create`, not `oc apply` — uses `generateName`):
+```bash
+RELEASE_NAMES=""
+for f in ${REPORT_BASE}/manifest/prod/release-${VERSION}-index-*-prod.yaml; do
+  RNAME=$(oc create -f "$f" \
     --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
-    --insecure-skip-tls-verify 2>&1 | grep "${MM_DASHED}.*index.*prod"
+    --insecure-skip-tls-verify \
+    -o jsonpath='{.metadata.name}')
+  echo "Created release: ${RNAME}"
+  RELEASE_NAMES="${RELEASE_NAMES} ${RNAME}"
+done
 ```
 
-Use `oc create -f`, not `oc apply -f` — the YAMLs use `generateName`.
+Wait for all index releases to complete:
+```bash
+for RNAME in ${RELEASE_NAMES}; do
+  echo "Waiting for ${RNAME}..."
+  oc wait release/${RNAME} -n ${KONFLUX_NS} \
+    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+    --insecure-skip-tls-verify \
+    --for=condition=Released --timeout=300s 2>&1 || true
+done
+```
+
+Check results:
+```bash
+for RNAME in ${RELEASE_NAMES}; do
+  echo -n "${RNAME}: "
+  oc get release ${RNAME} -n ${KONFLUX_NS} \
+    --server="$KONFLUX_SERVER" --token="$KONFLUX_TOKEN" \
+    --insecure-skip-tls-verify \
+    -o jsonpath='Released={.status.conditions[?(@.type=="Released")].status} Reason={.status.conditions[?(@.type=="Released")].reason}'
+  echo
+done
+```
+
+If all `Released=True` → DONE. If any are still in progress, report which ones — the re-verify will catch them on the next run.
 
 ---
 

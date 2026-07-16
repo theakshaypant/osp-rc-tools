@@ -116,10 +116,10 @@ After writing the report file, print the path and the summary table to the user.
 - [ ] Steps checked sequentially — stopped at first blocking step (unless user executed fix)
 - [ ] All Konflux verify commands target `tekton-ecosystem-tenant` namespace
 - [ ] GitLab and Konflux verify commands are READ-ONLY
-- [ ] Konflux Release CRs are never applied by the skill — YAML files generated, `oc create -f` shown to user
+- [ ] Konflux Release CRs applied via `oc create -f` only after explicit user approval — YAML files also saved to reports dir
 - [ ] All PR numbers rendered as markdown links
 - [ ] All timestamps use absolute local time with timezone
 - [ ] Stage report written to `reports/{MAJOR_MINOR}/{VERSION}/{stage}/report_{timestamp}.md`
-- [ ] Release manifests written to `reports/{MAJOR_MINOR}/{VERSION}/release/`
+- [ ] Release manifests written to `reports/{MAJOR_MINOR}/{VERSION}/manifest/{stage|prod}/`
 - [ ] Report includes workflow run URLs and PR/MR links for every step
 </success_criteria>
