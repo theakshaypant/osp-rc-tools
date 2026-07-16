@@ -233,22 +233,50 @@ gh pr comment "${PR_URL}" --body "/retest"
 
 After merging, re-verify to confirm no open nudge PRs remain.
 
+**Auto-trigger hazard after nudge PRs merge:** Merging nudge PRs updates `project.yaml` with new image SHAs. On release branches, this push auto-triggers `operator-update-images` (with empty environment → `devel`), which updates the CSV with devel registry references and creates an auto-merge PR. When that PR merges, the push to `olm/` auto-triggers `render-olm-catalog` (also `devel`), writing devel registry references into the catalog JSONs. **These devel auto-triggers produce wrong catalogs for the build stage — staging environment is required.** Step 2.4 handles dispatching the correct staging runs.
+
 ---
 
 ## Step 2.4: OLM catalog render
 
-After nudge PRs merge and CSV is regenerated, the `render-olm-catalog` workflow renders catalog JSONs for each supported OCP version. These catalog JSON updates trigger index image builds. This step verifies the render workflow has succeeded.
+After nudge PRs merge, `project.yaml` push auto-triggers `operator-update-images` and subsequently `render-olm-catalog` — but both auto-triggered runs use devel environment (empty `github.event.inputs.environment`), which writes devel registry references into the CSV and catalogs. **The build stage targets staging, so explicit `workflow_dispatch` with `environment: staging` is required for both workflows.**
+
+**Auto-trigger hazard:**
+- `operator-update-images` auto-triggers on `project.yaml` push (release branches only). The devel auto-trigger creates a CSV PR with devel registry references — this PR must NOT be merged. Instead, dispatch with `environment: staging`.
+- `render-olm-catalog` auto-triggers when `bundle.yaml` or `olm/**` files are pushed. Also runs daily at 1 AM UTC from `main` (dispatches to all release branches). The devel auto-trigger writes wrong catalog JSONs and can trigger bad FBC index builds.
+- **Always wait for any in-progress devel auto-triggers to finish before dispatching staging runs.** The staging runs overwrite the devel catalogs.
 
 **Pipeline source:** `one-click-release/README.md` Build Stage — "Update OLM config with latest bundle image, Render OLM, Build Index Images."
 
 ### Verify
+
+Check for the auto-triggered `operator-update-images` CSV PR (should be auto-merged):
+```bash
+gh pr list --repo openshift-pipelines/operator \
+  --head "actions/update/operator-update-images-${RELEASE_BRANCH}" \
+  --state all --limit 5 \
+  --json number,title,state,mergedAt,url
+```
 
 Check recent `render-olm-catalog` workflow runs on the operator repo:
 ```bash
 gh run list --repo openshift-pipelines/operator \
   --workflow=render-olm-catalog.yaml \
   --limit 10 \
-  --json databaseId,headBranch,status,conclusion,createdAt,displayTitle,url
+  --json databaseId,headBranch,status,conclusion,createdAt,displayTitle,url,event \
+  | python3 -c "
+import sys, json
+runs = json.load(sys.stdin)
+branch = '${RELEASE_BRANCH}'
+for r in runs:
+    if branch in r.get('displayTitle', '') or branch in r.get('headBranch', ''):
+        event = r.get('event', 'unknown')
+        trigger = 'auto-trigger' if event == 'push' else ('dispatch' if event == 'workflow_dispatch' else event)
+        print(f\"Run: {r['url']}\")
+        print(f\"Trigger: {trigger}  Status: {r['status']}/{r.get('conclusion', 'pending')}\")
+        print(f\"Created: {r['createdAt']}\")
+        print()
+"
 ```
 
 Filter for runs on `${RELEASE_BRANCH}` or dispatched runs (which target all release branches). Show `createdAt` timestamps as absolute local time.
@@ -259,20 +287,95 @@ gh api repos/openshift-pipelines/operator/commits?sha=${RELEASE_BRANCH}\&per_pag
   --jq '.[] | select(.commit.message | test("catalog|render|OCP catalog")) | "\(.sha[:12]) \(.commit.message | split("\n")[0])"'
 ```
 
-**Collect links:** Report the most recent successful workflow run URL as `[render-olm-catalog](URL)`.
+**Collect links:** Report the most recent successful `workflow_dispatch` run URL as `[render-olm-catalog](URL)`. Also report the CSV PR as `operator [#NUM](URL)` if found.
 
-**Expected when DONE:** A `render-olm-catalog` run completed successfully after the latest nudge PRs merged. Catalog JSON commits are present on the release branch.
+**Expected when DONE:** A staging `operator-update-images` `workflow_dispatch` run completed. The staging CSV PR is merged with all images pointing to the staging registry. A staging `render-olm-catalog` `workflow_dispatch` run completed successfully after the CSV merge. Catalog JSON commits are present on the release branch.
 
 ### If not done — Execute (requires approval)
 
-Trigger the render-olm-catalog workflow:
+**Step 1:** Wait for any in-progress devel auto-triggered runs to finish before dispatching staging:
+```bash
+DEVEL_RUN_ID=$(gh run list --repo openshift-pipelines/operator \
+  --workflow=operator-update-images.yaml \
+  --limit 5 \
+  --json databaseId,status,event \
+  --jq '[.[] | select(.status == "in_progress" or .status == "queued")] | .[0].databaseId // empty')
+
+if [ -n "${DEVEL_RUN_ID}" ]; then
+  echo "Waiting for in-progress operator-update-images run ${DEVEL_RUN_ID}..."
+  gh run watch --repo openshift-pipelines/operator ${DEVEL_RUN_ID}
+fi
+```
+
+If a devel CSV PR was auto-created, close it — do NOT merge it:
+```bash
+DEVEL_PR=$(gh pr list --repo openshift-pipelines/operator \
+  --head "actions/update/operator-update-images-${RELEASE_BRANCH}" \
+  --state open --limit 1 \
+  --json number --jq '.[0].number // empty')
+
+if [ -n "${DEVEL_PR}" ]; then
+  echo "Closing devel CSV PR #${DEVEL_PR}..."
+  gh pr close --repo openshift-pipelines/operator ${DEVEL_PR}
+fi
+```
+
+**Step 2:** Dispatch `operator-update-images` with staging environment:
+```bash
+gh workflow run operator-update-images.yaml \
+  --repo openshift-pipelines/operator \
+  -f branch=${RELEASE_BRANCH} \
+  -f environment=staging
+```
+
+Wait for the workflow to complete and the staging CSV PR to appear:
+```bash
+gh run list --repo openshift-pipelines/operator \
+  --workflow=operator-update-images.yaml \
+  --limit 3 \
+  --json databaseId,status,conclusion,createdAt,displayTitle
+```
+
+Verify the staging CSV PR — ALL images must point to the staging registry (no quay.io or devel references):
+```bash
+PR_NUMBER=$(gh pr list --repo openshift-pipelines/operator \
+  --head "actions/update/operator-update-images-${RELEASE_BRANCH}" \
+  --state open --limit 1 \
+  --json number --jq '.[0].number')
+
+gh pr diff --repo openshift-pipelines/operator ${PR_NUMBER} 2>/dev/null \
+  | grep -E '^\+.*image:' \
+  | head -20
+```
+
+Merge the staging CSV PR:
+```bash
+gh pr edit --repo openshift-pipelines/operator ${PR_NUMBER} --add-label "lgtm,approved,one-click-release"
+gh pr review --approve --repo openshift-pipelines/operator ${PR_NUMBER}
+gh pr merge --repo openshift-pipelines/operator ${PR_NUMBER} -d -r --auto
+```
+
+**Step 3:** Wait for any devel auto-triggered `render-olm-catalog` run to finish (merging the staging CSV PR will auto-trigger one):
+```bash
+DEVEL_RENDER_ID=$(gh run list --repo openshift-pipelines/operator \
+  --workflow=render-olm-catalog.yaml \
+  --limit 5 \
+  --json databaseId,status,event \
+  --jq '[.[] | select(.status == "in_progress" or .status == "queued")] | .[0].databaseId // empty')
+
+if [ -n "${DEVEL_RENDER_ID}" ]; then
+  echo "Waiting for in-progress render-olm-catalog run ${DEVEL_RENDER_ID}..."
+  gh run watch --repo openshift-pipelines/operator ${DEVEL_RENDER_ID}
+fi
+```
+
+Then dispatch the staging render:
 ```bash
 gh workflow run render-olm-catalog.yaml \
   --repo openshift-pipelines/operator \
-  -f branch=${RELEASE_BRANCH}
+  -f branch=${RELEASE_BRANCH} \
+  -f environment=staging
 ```
-
-The workflow runs daily at 1 AM UTC and dispatches to all release branches. To target just this release branch, pass the branch parameter.
 
 After triggering, wait for the workflow to complete:
 ```bash
