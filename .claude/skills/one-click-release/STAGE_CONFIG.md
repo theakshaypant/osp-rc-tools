@@ -507,6 +507,55 @@ rm -rf /tmp/operator-version-bump
 
 The OPC `pkg/version.json` on the release branch tracks upstream CLI component versions (pac, tkn, results, manualapprovalgate, assist) and the OPC version itself. All must be current before CLI binaries are built.
 
+### Step 1.9a: Check for open component update PRs
+
+Component updates may be automated, so check for existing open PRs with title pattern `[release-vX.Y.x] Update component versions` before creating new ones.
+
+**Verify:**
+```bash
+gh pr list --repo openshift-pipelines/opc \
+  --base ${RELEASE_BRANCH} \
+  --state open \
+  --search "Update component versions in:title" \
+  --json number,title,labels,mergeable,mergeStateStatus,url
+```
+
+This searches for PRs with titles like `[release-v1.20.x] Update component versions`.
+
+For each open PR, check CI status:
+```bash
+gh pr view "${PR_URL}" --json mergeable,mergeStateStatus,statusCheckRollup
+```
+
+Classify each PR:
+- `mergeable: CONFLICTING` or `mergeStateStatus: DIRTY` → **CONFLICT**
+- `mergeStateStatus: BEHIND` → **BEHIND** (needs rebase)
+- CI checks failing → **CI FAILING**
+- CI checks pending → **CI PENDING**
+- All checks pass and mergeable → **READY TO MERGE**
+
+**Collect links:** Report each PR as `opc [#NUM](URL)` with its status.
+
+**If PRs are READY TO MERGE — Execute (requires approval):**
+```bash
+gh pr edit "${PR_URL}" --add-label "lgtm,approved,one-click-release"
+gh pr review --approve "${PR_URL}"
+gh pr merge "${PR_URL}" -d -r --auto
+```
+
+**If PRs are BEHIND — Execute (requires approval):**
+```bash
+gh pr update-branch "${PR_URL}" --rebase
+```
+
+**If PRs have CI FAILING:** Report the failing checks. The user must investigate.
+
+**If PRs have CI PENDING:** Wait and re-check after a few minutes.
+
+After merging any PRs, wait a moment for branch to update, then proceed to verify version.json.
+
+### Step 1.9b: Verify version.json
+
 **Verify:**
 ```bash
 OPC_VERSIONS=$(gh api repos/openshift-pipelines/opc/contents/pkg/version.json?ref=${RELEASE_BRANCH} \
@@ -514,39 +563,179 @@ OPC_VERSIONS=$(gh api repos/openshift-pipelines/opc/contents/pkg/version.json?re
 echo "$OPC_VERSIONS"
 ```
 
-Compare each component against its latest upstream release:
+For each component, find the tracking branch from hack repo release config, then get the latest release in that series:
+
 ```bash
-PAC_LATEST=$(gh api repos/openshift-pipelines/pipelines-as-code/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
-TKN_LATEST=$(gh api repos/tektoncd/cli/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
-RESULTS_LATEST=$(gh api repos/tektoncd/results/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
-MAG_LATEST=$(gh api repos/openshift-pipelines/manual-approval-gate/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
-ASSIST_LATEST=$(gh api repos/openshift-pipelines/tekton-assist/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
-echo "pac: ${PAC_LATEST}, tkn: ${TKN_LATEST}, results: ${RESULTS_LATEST}, manualapprovalgate: ${MAG_LATEST}, assist: ${ASSIST_LATEST}"
+# Get tracking branches from hack repo config
+RELEASE_CFG=$(gh api repos/openshift-pipelines/hack/contents/config/downstream/releases/${MAJOR_MINOR}.yaml \
+  --jq '.content' | base64 -d)
+
+# Extract upstream branches for each component
+PAC_BRANCH=$(echo "$RELEASE_CFG" | grep -A1 'pipelines-as-code:' | grep 'upstream:' | awk '{print $2}')
+TKN_BRANCH=$(echo "$RELEASE_CFG" | grep -A1 'tektoncd-cli:' | grep 'upstream:' | awk '{print $2}')
+RESULTS_BRANCH=$(echo "$RELEASE_CFG" | grep -A1 'tektoncd-results:' | grep 'upstream:' | awk '{print $2}')
+MAG_BRANCH=$(echo "$RELEASE_CFG" | grep -A1 'manual-approval-gate:' | grep 'upstream:' | awk '{print $2}')
+
+# For each component, find latest version matching the tracked series (major.minor)
+# Check both releases AND tags since some versions may be tagged but not yet released
+# Example: if tracking release-v0.27.x, find latest v0.27.* version
+get_latest_in_series() {
+  local repo=$1
+  local series_prefix=$2  # e.g. "0.27" extracted from "release-v0.27.x"
+  
+  # Try releases first (includes published releases)
+  local latest_release=$(gh api "repos/${repo}/releases?per_page=100" 2>/dev/null \
+    | jq -r "[.[] | select(.tag_name | startswith(\"v${series_prefix}.\"))] | .[0].tag_name // \"\"" \
+    | sed 's/^v//')
+  
+  # Also check tags (may include unreleased tagged versions)
+  local latest_tag=$(gh api "repos/${repo}/git/refs/tags" --paginate 2>/dev/null \
+    | jq -r "[.[] | select(.ref | contains(\"${series_prefix}.\")) | .ref] | sort | .[-1] // \"\"" \
+    | sed 's|refs/tags/v||' | sed 's|refs/tags/||')
+  
+  # Use the newer of the two (semver comparison)
+  if [ -z "$latest_release" ]; then
+    echo "$latest_tag"
+  elif [ -z "$latest_tag" ]; then
+    echo "$latest_release"
+  else
+    # Simple version comparison - take the one that sorts last
+    printf "%s\n%s" "$latest_release" "$latest_tag" | sort -V | tail -1
+  fi
+}
+
+# Extract series prefix from each tracked branch
+PAC_SERIES=$(echo "$PAC_BRANCH" | sed 's/release-v//' | sed 's/\.x$//')
+TKN_SERIES=$(echo "$TKN_BRANCH" | sed 's/release-v//' | sed 's/\.x$//')
+RESULTS_SERIES=$(echo "$RESULTS_BRANCH" | sed 's/release-v//' | sed 's/\.x$//')
+MAG_SERIES=$(echo "$MAG_BRANCH" | sed 's/release-v//' | sed 's/\.x$//')
+
+PAC_LATEST=$(get_latest_in_series "openshift-pipelines/pipelines-as-code" "$PAC_SERIES")
+TKN_LATEST=$(get_latest_in_series "tektoncd/cli" "$TKN_SERIES")
+RESULTS_LATEST=$(get_latest_in_series "tektoncd/results" "$RESULTS_SERIES")
+MAG_LATEST=$(get_latest_in_series "openshift-pipelines/manual-approval-gate" "$MAG_SERIES")
+
+echo "Latest in tracked series:"
+echo "  pac (${PAC_BRANCH}): ${PAC_LATEST}"
+echo "  tkn (${TKN_BRANCH}): ${TKN_LATEST}"
+echo "  results (${RESULTS_BRANCH}): ${RESULTS_LATEST}"
+echo "  manualapprovalgate (${MAG_BRANCH}): ${MAG_LATEST}"
 ```
 
-Parse version.json and compare each field. Strip `v` prefix from upstream tags before comparison.
-
-If the upstream latest is a different major/minor series than what's in version.json (e.g. version.json has `0.42.x` but upstream is `0.43.x`), flag as **REVIEW** instead of **OUTDATED** — it may be intentional for this release branch.
+Parse version.json and compare each field against the latest in its tracked series. Strip `v` prefix before comparison.
 
 Report a table:
 ```
-| Component | version.json | Latest upstream | Status |
-|-----------|-------------|-----------------|--------|
+| Component | Tracked Series | version.json | Latest in Series | Status |
+|-----------|---------------|--------------|------------------|--------|
 ```
 
-**Collect links:** Check for existing PRs:
+Status values:
+- **CURRENT**: version.json matches latest released version in the tracked series
+- **AHEAD**: version.json is newer than latest release (unreleased version, acceptable if intentional)
+- **OUTDATED**: newer patch version available in the same series that should be adopted
+- **UNKNOWN**: could not determine latest in series (check manually)
+
+**Collect links:** Report any open PRs from step 1.9a, and check for recently merged PRs:
 ```bash
 gh pr list --repo openshift-pipelines/opc \
   --base ${RELEASE_BRANCH} \
-  --state all --limit 5 \
-  --json number,title,state,mergedAt,url
+  --state merged --limit 5 \
+  --json number,title,mergedAt,url
 ```
 
-**Expected when DONE:** All components are CURRENT and `opc` field equals `VERSION`.
+**Expected when DONE:** No open PRs requiring action (step 1.9a), all components are CURRENT (matching latest in their tracked series), and `opc` field equals `VERSION`.
 
-**If not done — Execute:** MANUAL. The user must update `pkg/version.json` on the release branch, update corresponding `go.mod` dependencies, run `go mod tidy && go mod vendor`, and create a PR targeting `${RELEASE_BRANCH}`.
+**If not done — Execute (requires approval):**
 
-Repository: `https://github.com/openshift-pipelines/opc/tree/${RELEASE_BRANCH}/pkg`
+If only the `opc` field needs updating, create an automated PR:
+
+```bash
+TMP_DIR=$(mktemp -d)
+gh repo clone openshift-pipelines/opc "${TMP_DIR}" -- -b ${RELEASE_BRANCH} --depth 1 --quiet
+cd "${TMP_DIR}"
+
+# Get user git credentials from .env
+source "${OLDPWD}/.env"
+GIT_USER="${GITHUB_USER}"
+GIT_EMAIL="${GITHUB_EMAIL}"
+
+if [ -z "${GIT_USER}" ] || [ -z "${GIT_EMAIL}" ]; then
+  echo "ERROR: GITHUB_USER and GITHUB_EMAIL must be set in .env"
+  exit 1
+fi
+
+git config user.name "${GIT_USER}"
+git config user.email "${GIT_EMAIL}"
+
+# Update the opc version in pkg/version.json
+CURRENT_OPC_VERSION=$(jq -r '.opc' pkg/version.json)
+jq --arg version "${VERSION}" '.opc = $version' pkg/version.json > pkg/version.json.tmp
+mv pkg/version.json.tmp pkg/version.json
+
+git checkout -b "release/${VERSION}/opc-version-bump"
+git add pkg/version.json
+git commit -m "[bot:${MAJOR_MINOR}] Update OPC version to ${VERSION}
+
+Signed-off-by: ${GIT_USER} <${GIT_EMAIL}>"
+git push origin "release/${VERSION}/opc-version-bump" --quiet
+
+gh pr create --repo openshift-pipelines/opc \
+  --base ${RELEASE_BRANCH} \
+  --head "release/${VERSION}/opc-version-bump" \
+  --title "[bot:${MAJOR_MINOR}] Update OPC version to ${VERSION}" \
+  --body "Updates pkg/version.json opc version from ${CURRENT_OPC_VERSION} to ${VERSION}.
+
+This must be merged before CLI binaries are built." \
+  --label automated
+
+cd -
+rm -rf "${TMP_DIR}"
+```
+
+**If component versions are OUTDATED:**
+
+Report the mismatches to the user and provide manual update instructions:
+
+```
+ACTION NEEDED: Component versions need manual update.
+
+The following components need updating to the latest in their tracked series:
+- pac (tracking ${PAC_BRANCH}): ${CURRENT_PAC} → ${PAC_LATEST}
+- tkn (tracking ${TKN_BRANCH}): ${CURRENT_TKN} → ${TKN_LATEST}
+- results (tracking ${RESULTS_BRANCH}): ${CURRENT_RESULTS} → ${RESULTS_LATEST}
+- manualapprovalgate (tracking ${MAG_BRANCH}): ${CURRENT_MAG} → ${MAG_LATEST}
+- assist: ${CURRENT_ASSIST} → ${ASSIST_LATEST}
+
+Manual steps required:
+1. Clone the repo:
+   git clone -b ${RELEASE_BRANCH} https://github.com/openshift-pipelines/opc.git /tmp/opc-update
+   cd /tmp/opc-update
+
+2. Update pkg/version.json with the new component versions
+
+3. Update go.mod dependencies:
+   go get github.com/openshift-pipelines/pipelines-as-code@v${PAC_LATEST}
+   go get github.com/tektoncd/cli@v${TKN_LATEST}
+   go get github.com/tektoncd/results@v${RESULTS_LATEST}
+   go get github.com/openshift-pipelines/manual-approval-gate@v${MAG_LATEST}
+   go get github.com/openshift-pipelines/tekton-assist@v${ASSIST_LATEST}
+
+4. Tidy and vendor:
+   go mod tidy
+   go mod vendor
+
+5. Create PR:
+   git checkout -b "release/${VERSION}/component-version-bump"
+   git add pkg/version.json go.mod go.sum vendor/
+   git commit -m "[bot:${MAJOR_MINOR}] Update component versions for ${VERSION}"
+   git push origin "release/${VERSION}/component-version-bump"
+   gh pr create --base ${RELEASE_BRANCH} --title "[bot:${MAJOR_MINOR}] Update component versions for ${VERSION}"
+
+Repository: https://github.com/openshift-pipelines/opc/tree/${RELEASE_BRANCH}/pkg
+```
+
+**Note:** Component version updates require updating go.mod dependencies and running `go mod vendor`. The automated PR only handles the `opc` version field. User git credentials (`GITHUB_USER`/`GIHUB_USER` and `GITHUB_EMAIL`) are sourced from `.env` for commit authorship.
 
 ---
 

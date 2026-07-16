@@ -28,6 +28,7 @@ Required variables and what they gate:
 | Variable | Required For |
 |----------|-------------|
 | `GITHUB_TOKEN` or `gh auth` | All steps — GitHub API |
+| `GITHUB_USER` + `GITHUB_EMAIL` | Git commit authorship for automated PRs (Step 1.9: OPC version.json) |
 | `KONFLUX_SERVER` + `KONFLUX_TOKEN` | Steps that query Konflux cluster |
 | `GITLAB_URL` + `GITLAB_TOKEN` | Steps that query GitLab (RPA, Pyxis) |
 | `JIRA_URL` + `JIRA_EMAIL` + `JIRA_TOKEN` | Audit and Jira steps |

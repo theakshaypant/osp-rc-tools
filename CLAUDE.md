@@ -49,7 +49,7 @@ Standalone skills: `audit-release`, `build-diff`, `new-build`, `jira-gaps`, `cli
 
 Credentials live in `.env`. The following systems are used:
 
-- **GitHub**: `gh` CLI with existing auth — read/write
+- **GitHub**: `gh` CLI with existing auth — read/write. Also requires `GITHUB_USER` + `GITHUB_EMAIL` for git commit authorship in automated PRs.
 - **GitLab** (`gitlab.cee.redhat.com`): `GITLAB_URL` + `GITLAB_TOKEN` — **READ-ONLY only**
 - **Konflux cluster**: `KONFLUX_SERVER` + `KONFLUX_TOKEN` — **READ-ONLY only** (`oc get`/`kubectl get`, never `apply`/`create`/`delete`)
 - **Jira**: `JIRA_URL` + `JIRA_EMAIL` + `JIRA_TOKEN`
