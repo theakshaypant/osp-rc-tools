@@ -81,6 +81,25 @@ For each step:
 Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`.
 </step>
 
+<step name="stage_prod_release">
+**Stage 4: Production Release — release core, bundle, and index to production.**
+
+**This stage requires explicit user approval before starting.** After Image Copy completes, ask:
+"All builds verified and images copied. Ready to start production release? (yes/no)"
+Do NOT proceed unless the user confirms.
+
+Read and follow the instructions in `STAGE_PROD_RELEASE.md`.
+
+For each step:
+1. Run the **Verify** command
+2. If DONE → report status, move to next step
+3. If not done → show the **Execute** command and ask: "Step X.Y: [description]. Execute?"
+4. If user approves → run the execute command, then re-verify
+5. If user declines → stop and report the blocking step
+
+Pass `VERSION`, `MAJOR_MINOR`, `MM_DASHED`, `RELEASE_BRANCH`, `KONFLUX_NS`, `KONFLUX_SERVER`, `KONFLUX_TOKEN`, `TZ_FMT`, `REPORT_BASE`, `REPORT_TIMESTAMP`.
+</step>
+
 <step name="summary">
 **Write the stage report and print the summary.**
 
@@ -93,11 +112,14 @@ After writing the report file, print the path and the summary table to the user.
 <success_criteria>
 - [ ] All verify commands execute successfully
 - [ ] Execute commands only run after explicit user approval
+- [ ] Production release stage only starts after explicit user confirmation
 - [ ] Steps checked sequentially — stopped at first blocking step (unless user executed fix)
 - [ ] All Konflux verify commands target `tekton-ecosystem-tenant` namespace
 - [ ] GitLab and Konflux verify commands are READ-ONLY
+- [ ] Konflux Release CRs are never applied by the skill — YAML files generated, `oc create -f` shown to user
 - [ ] All PR numbers rendered as markdown links
 - [ ] All timestamps use absolute local time with timezone
 - [ ] Stage report written to `reports/{MAJOR_MINOR}/{VERSION}/{stage}/report_{timestamp}.md`
+- [ ] Release manifests written to `reports/{MAJOR_MINOR}/{VERSION}/release/`
 - [ ] Report includes workflow run URLs and PR/MR links for every step
 </success_criteria>
