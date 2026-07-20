@@ -823,17 +823,75 @@ gh pr list --repo openshift-pipelines/serve-tkn-cli \
 
 **Expected when DONE:** All submodules are CURRENT.
 
-**If not done — Execute:** MANUAL. Update submodules on `${RELEASE_BRANCH}`:
+**If PR is open — check CI before merging:**
+
+```bash
+PR_URL=$(gh pr list --repo openshift-pipelines/serve-tkn-cli \
+  --head "release/${VERSION}/update-submodules" \
+  --state open --limit 1 \
+  --json url --jq '.[0].url')
+gh pr view "${PR_URL}" --json mergeable,mergeStateStatus,statusCheckRollup
 ```
-git checkout ${RELEASE_BRANCH}
-git submodule update --init --remote --force --checkout
-git add sources/
-git commit -m "Update submodules"
+
+Classify:
+- All checks pass and mergeable → **READY TO MERGE**
+- CI checks with `bucket: pending` → **CI PENDING** — report and wait, re-check later
+- CI checks with `bucket: fail` → **CI FAILING** — report failing checks, do not merge
+- `mergeStateStatus: BEHIND` → **BEHIND** — rebase with `gh pr update-branch "${PR_URL}" --rebase`
+
+**If READY TO MERGE — Execute (requires approval):**
+```bash
+PR_NUMBER=$(gh pr list --repo openshift-pipelines/serve-tkn-cli \
+  --head "release/${VERSION}/update-submodules" \
+  --state open --limit 1 \
+  --json number --jq '.[0].number')
+gh pr merge --repo openshift-pipelines/serve-tkn-cli ${PR_NUMBER} --rebase
 ```
+
+**If no PR exists — Execute (requires approval):**
 
 Note: plain `git submodule update` checks out the currently recorded SHA (yields "already up to date"). The `--remote --force --checkout` flags fetch from the tracking branch and force-checkout the new HEAD.
 
-Create a PR targeting `${RELEASE_BRANCH}`.
+```bash
+git clone -b ${RELEASE_BRANCH} \
+  https://github.com/openshift-pipelines/serve-tkn-cli.git /tmp/serve-tkn-cli-submodule-update
+cd /tmp/serve-tkn-cli-submodule-update
+
+# Ensure .gitmodules tracking branches use the .x format (not pinned versions).
+# Compare each branch against the hack repo config and fix mismatches.
+RELEASE_CFG=$(gh api repos/openshift-pipelines/hack/contents/config/downstream/releases/${MAJOR_MINOR}.yaml \
+  --jq '.content' | base64 -d)
+
+# Fix cli branch: hack config has the canonical upstream branch
+CLI_UPSTREAM=$(echo "$RELEASE_CFG" | python3 -c "
+import sys, yaml
+cfg = yaml.safe_load(sys.stdin)
+print(cfg['branches']['tektoncd-cli']['upstream'])
+")
+sed -i "/sources\/cli/,/branch =/{s|branch = .*|branch = ${CLI_UPSTREAM}|}" .gitmodules
+
+git submodule update --init --remote --force --checkout
+
+git checkout -b "release/${VERSION}/update-submodules"
+git add .gitmodules sources/
+git commit -m "[bot:${MAJOR_MINOR}] Update submodules to latest upstream"
+git push origin "release/${VERSION}/update-submodules"
+
+gh pr create --repo openshift-pipelines/serve-tkn-cli \
+  --base ${RELEASE_BRANCH} \
+  --head "release/${VERSION}/update-submodules" \
+  --title "[bot:${MAJOR_MINOR}] Update submodules to latest upstream" \
+  --body "Updates git submodules to their latest tracking branch HEADs:
+- sources/cli
+- sources/opc
+- sources/pac
+
+Also fixes .gitmodules tracking branches to use the .x format per hack repo config." \
+  --label automated
+
+cd -
+rm -rf /tmp/serve-tkn-cli-submodule-update
+```
 
 ---
 
