@@ -823,17 +823,74 @@ gh pr list --repo openshift-pipelines/serve-tkn-cli \
 
 **Expected when DONE:** All submodules are CURRENT.
 
-**If not done — Execute:** MANUAL. Update submodules on `${RELEASE_BRANCH}`:
-```
-git checkout ${RELEASE_BRANCH}
+**If not done — Execute (requires approval):**
+
+Create an automated PR to update submodules:
+
+```bash
+TMP_DIR=$(mktemp -d)
+gh repo clone openshift-pipelines/serve-tkn-cli "${TMP_DIR}" -- -b ${RELEASE_BRANCH} --recurse-submodules --depth 1 --quiet
+cd "${TMP_DIR}"
+
+# Get user git credentials from .env
+source "${OLDPWD}/.env"
+GIT_USER="${GITHUB_USER}"
+GIT_EMAIL="${GITHUB_EMAIL}"
+
+if [ -z "${GIT_USER}" ] || [ -z "${GIT_EMAIL}" ]; then
+  echo "ERROR: GITHUB_USER and GITHUB_EMAIL must be set in .env"
+  exit 1
+fi
+
+git config user.name "${GIT_USER}"
+git config user.email "${GIT_EMAIL}"
+
+# Update submodules to their tracking branch HEADs
+# --remote: fetch latest from tracking branch
+# --force: discard local changes in submodules
+# --checkout: checkout the commit (not detached HEAD)
 git submodule update --init --remote --force --checkout
+
+# Check if there are changes
+if git diff --quiet sources/; then
+  echo "No submodule updates needed (already current)"
+  cd -
+  rm -rf "${TMP_DIR}"
+  exit 0
+fi
+
+# Get list of updated submodules for commit message
+SUBMODULE_UPDATES=$(git diff --submodule=short sources/ | grep -E "^-Subproject|^\+Subproject" | \
+  awk '{print $2, $3}' | paste - - | \
+  awk '{printf "- %s: %s → %s\n", $1, substr($2,1,12), substr($4,1,12)}')
+
+git checkout -b "release/${VERSION}/submodule-update"
 git add sources/
-git commit -m "Update submodules"
+git commit -m "[bot:${MAJOR_MINOR}] Update submodules for ${VERSION}
+
+Updated submodules to latest commits on their tracking branches:
+${SUBMODULE_UPDATES}
+
+Signed-off-by: ${GIT_USER} <${GIT_EMAIL}>"
+git push origin "release/${VERSION}/submodule-update" --quiet
+
+gh pr create --repo openshift-pipelines/serve-tkn-cli \
+  --base ${RELEASE_BRANCH} \
+  --head "release/${VERSION}/submodule-update" \
+  --title "[bot:${MAJOR_MINOR}] Update submodules for ${VERSION}" \
+  --body "Updates git submodules to latest commits on their tracking branches.
+
+Changes:
+${SUBMODULE_UPDATES}
+
+This must be merged before CLI binaries are built." \
+  --label automated
+
+cd -
+rm -rf "${TMP_DIR}"
 ```
 
-Note: plain `git submodule update` checks out the currently recorded SHA (yields "already up to date"). The `--remote --force --checkout` flags fetch from the tracking branch and force-checkout the new HEAD.
-
-Create a PR targeting `${RELEASE_BRANCH}`.
+**Note:** The `--remote --force --checkout` flags are critical. Plain `git submodule update` checks out the currently recorded SHA (yields "already up to date"), while these flags fetch from the tracking branch and force-checkout the new HEAD.
 
 ---
 
