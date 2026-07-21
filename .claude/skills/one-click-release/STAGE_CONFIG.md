@@ -364,80 +364,7 @@ Report the GitLab MR URL (if found) in the summary.
 
 ---
 
-## Step 1.7: OLM bundle version in olm/config.yaml
-
-The `olm/config.yaml` on the release branch lists bundle versions that `render-olm-catalog` processes. `VERSION` **must** be the last bundle entry. Without it, `render-olm-catalog` produces empty `catalog.json` files that break all index builds.
-
-**Verify:**
-```bash
-OLM_CONFIG=$(gh api repos/openshift-pipelines/operator/contents/olm/config.yaml?ref=${RELEASE_BRANCH} \
-  --jq '.content' | base64 -d)
-echo "$OLM_CONFIG"
-
-# Extract the last bundle version
-LAST_BUNDLE_VERSION=$(echo "$OLM_CONFIG" | grep 'version:' | tail -1 | awk '{print $2}')
-echo "Last bundle version: ${LAST_BUNDLE_VERSION} (expected: ${VERSION})"
-```
-
-**Expected when DONE:** `LAST_BUNDLE_VERSION` equals `VERSION`.
-
-**Collect links:** Check for an existing or merged PR for this OLM bump:
-```bash
-gh pr list --repo openshift-pipelines/operator \
-  --base ${RELEASE_BRANCH} \
-  --search "OLM bundle version ${VERSION} in:title" \
-  --state all --limit 3 \
-  --json number,title,state,mergedAt,url
-```
-
-Report the PR as `[#NUM](URL)` in the summary. If no PR exists and the version already matches, report as "already set".
-
-**If not done — Execute (requires approval):**
-
-Determine the previous version to replace:
-```bash
-PREVIOUS_VERSION=$(echo "$OLM_CONFIG" | grep 'version:' | tail -1 | awk '{print $2}')
-```
-
-Create a PR on `${RELEASE_BRANCH}` that replaces `${PREVIOUS_VERSION}` with `${VERSION}`:
-
-```bash
-git clone --depth 1 -b ${RELEASE_BRANCH} \
-  https://github.com/openshift-pipelines/operator.git /tmp/operator-olm-bump
-cd /tmp/operator-olm-bump
-
-# Replace the previous patch version with VERSION in olm/config.yaml
-# Keep the existing image: line unchanged (operator-update-images workflow overwrites it later)
-# Remove the previous patch entry entirely — only VERSION should remain
-sed -i "s/version: ${PREVIOUS_VERSION}/version: ${VERSION}/" olm/config.yaml
-
-git checkout -b "release/${VERSION}/olm-config-bump"
-git add olm/config.yaml
-git commit -m "[bot:${MAJOR_MINOR}] Update OLM bundle version to ${VERSION}"
-git push origin "release/${VERSION}/olm-config-bump"
-
-gh pr create --repo openshift-pipelines/operator \
-  --base ${RELEASE_BRANCH} \
-  --head "release/${VERSION}/olm-config-bump" \
-  --title "[bot:${MAJOR_MINOR}] Update OLM bundle version to ${VERSION}" \
-  --body "Updates olm/config.yaml bundle version from ${PREVIOUS_VERSION} to ${VERSION}.
-
-The render-catalog.sh CI check will auto-update catalog-template.json files.
-If it re-adds ${PREVIOUS_VERSION}, remove it again.
-
-This must be done BEFORE code freeze." \
-  --label automated
-
-rm -rf /tmp/operator-olm-bump
-```
-
-The `render-catalog.sh` CI check will automatically push additional commits updating `catalog-template.json` files. It may re-add the old version — if so, remove it again. Initial CI failure on a stale image SHA is expected.
-
-**IMPORTANT:** Must be done BEFORE code freeze. The `update-sources` workflow is disabled during freeze (`if: false`), so missing this requires manual re-enabling of the workflow.
-
----
-
-## Step 1.8: Operator project.yaml version
+## Step 1.7: Operator project.yaml version
 
 The operator's `project.yaml` on the release branch has `versions.current` which must match `VERSION` before images are built — otherwise the operator image ships with the wrong version string.
 
@@ -503,11 +430,11 @@ rm -rf /tmp/operator-version-bump
 
 ---
 
-## Step 1.9: OPC version.json
+## Step 1.8: OPC version.json
 
 The OPC `pkg/version.json` on the release branch tracks upstream CLI component versions (pac, tkn, results, manualapprovalgate, assist) and the OPC version itself. All must be current before CLI binaries are built.
 
-### Step 1.9a: Check for open component update PRs
+### Step 1.8a: Check for open component update PRs
 
 Component updates may be automated, so check for existing open PRs with title pattern `[release-vX.Y.x] Update component versions` before creating new ones.
 
@@ -554,7 +481,7 @@ gh pr update-branch "${PR_URL}" --rebase
 
 After merging any PRs, wait a moment for branch to update, then proceed to verify version.json.
 
-### Step 1.9b: Verify version.json
+### Step 1.8b: Verify version.json
 
 **Verify:**
 ```bash
@@ -636,7 +563,7 @@ Status values:
 - **OUTDATED**: newer patch version available in the same series that should be adopted
 - **UNKNOWN**: could not determine latest in series (check manually)
 
-**Collect links:** Report any open PRs from step 1.9a, and check for recently merged PRs:
+**Collect links:** Report any open PRs from step 1.8a, and check for recently merged PRs:
 ```bash
 gh pr list --repo openshift-pipelines/opc \
   --base ${RELEASE_BRANCH} \
@@ -644,7 +571,7 @@ gh pr list --repo openshift-pipelines/opc \
   --json number,title,mergedAt,url
 ```
 
-**Expected when DONE:** No open PRs requiring action (step 1.9a), all components are CURRENT (matching latest in their tracked series), and `opc` field equals `VERSION`.
+**Expected when DONE:** No open PRs requiring action (step 1.8a), all components are CURRENT (matching latest in their tracked series), and `opc` field equals `VERSION`.
 
 **If not done — Execute (requires approval):**
 
@@ -739,7 +666,7 @@ Repository: https://github.com/openshift-pipelines/opc/tree/${RELEASE_BRANCH}/pk
 
 ---
 
-## Step 1.10: p12n-opc sync
+## Step 1.9: p12n-opc sync
 
 The `p12n-opc` repo mirrors OPC under its `upstream/` directory. The `upstream/pkg/version.json` must match OPC's `pkg/version.json` on the release branch.
 
@@ -777,7 +704,7 @@ Repository: `https://github.com/openshift-pipelines/p12n-opc/tree/${RELEASE_BRAN
 
 ---
 
-## Step 1.11: serve-tkn-cli submodules
+## Step 1.10: serve-tkn-cli submodules
 
 The `serve-tkn-cli` repo uses git submodules under `sources/` to track upstream repos. Each submodule's SHA must match the HEAD of its tracking branch.
 
@@ -895,9 +822,9 @@ rm -rf /tmp/serve-tkn-cli-submodule-update
 
 ---
 
-## Step 1.12: CLI product version config
+## Step 1.11: CLI product version config
 
-The product version configuration must exist in the `konflux-release-data` GitLab repo before CDN RP/RPA can be created (step 1.13).
+The product version configuration must exist in the `konflux-release-data` GitLab repo before CDN RP/RPA can be created (step 1.12).
 
 **Verify:**
 ```bash
@@ -950,13 +877,13 @@ Notes:
 
 Reference MR: `https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/14753`
 
-**IMPORTANT:** This PR must be merged BEFORE creating the RP/RPA in step 1.13.
+**IMPORTANT:** This PR must be merged BEFORE creating the RP/RPA in step 1.12.
 
 If `GITLAB_TOKEN` is not set, SKIP this step.
 
 ---
 
-## Step 1.13: CLI CDN RP/RPA
+## Step 1.12: CLI CDN RP/RPA
 
 CDN releases require dedicated ReleasePlanAdmission and ReleasePlan resources in the `konflux-release-data` GitLab repo, separate from the image-based ones used in the main pipeline.
 
@@ -1038,7 +965,7 @@ if isinstance(mrs, list):
 
 Reference MR: `https://gitlab.cee.redhat.com/releng/konflux-release-data/-/merge_requests/14754/diffs`
 
-**IMPORTANT:** The product version configuration (step 1.12) must be merged first — ReleasePlanAdmission cannot reference a version that is not defined.
+**IMPORTANT:** The product version configuration (step 1.11) must be merged first — ReleasePlanAdmission cannot reference a version that is not defined.
 
 If `GITLAB_TOKEN` is not set, SKIP this step.
 
@@ -1067,13 +994,12 @@ After processing all steps, write the stage report to `${REPORT_BASE}/config/rep
 | 1.4 | Konflux config on cluster | {status} | {details} | {links} |
 | 1.5 | RPA in konflux-release-data | {status} | {details} | {links} |
 | 1.6 | Pyxis config | {status} | {details} | {links} |
-| 1.7 | OLM bundle version | {status} | {details} | {links} |
-| 1.8 | Operator project.yaml version | {status} | {details} | {links} |
-| 1.9 | OPC version.json | {status} | {details} | {links} |
-| 1.10 | p12n-opc sync | {status} | {details} | {links} |
-| 1.11 | serve-tkn-cli submodules | {status} | {details} | {links} |
-| 1.12 | CLI product version config | {status} | {details} | {links} |
-| 1.13 | CLI CDN RP/RPA | {status} | {details} | {links} |
+| 1.7 | Operator project.yaml version | {status} | {details} | {links} |
+| 1.8 | OPC version.json | {status} | {details} | {links} |
+| 1.9 | p12n-opc sync | {status} | {details} | {links} |
+| 1.10 | serve-tkn-cli submodules | {status} | {details} | {links} |
+| 1.11 | CLI product version config | {status} | {details} | {links} |
+| 1.12 | CLI CDN RP/RPA | {status} | {details} | {links} |
 
 ## Step Details
 
@@ -1087,7 +1013,7 @@ After processing all steps, write the stage report to `${REPORT_BASE}/config/rep
 - **PR:** hack [#{number}]({url}) — {state}
 - **Merged:** {timestamp}
 
-### Step 1.9: OPC version.json
+### Step 1.8: OPC version.json
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **Version comparison:**
 
@@ -1095,12 +1021,12 @@ After processing all steps, write the stage report to `${REPORT_BASE}/config/rep
 |-----------|-------------|-----------------|--------|
 | {component} | {version} | {latest} | {CURRENT/OUTDATED/REVIEW} |
 
-### Step 1.10: p12n-opc sync
+### Step 1.9: p12n-opc sync
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **OPC HEAD:** [{short}]({url})
 - **p12n-opc HEAD:** [{short}]({url})
 
-### Step 1.11: serve-tkn-cli submodules
+### Step 1.10: serve-tkn-cli submodules
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **Submodule comparison:**
 
@@ -1108,13 +1034,13 @@ After processing all steps, write the stage report to `${REPORT_BASE}/config/rep
 |-----------|------|--------|---------------|-------------|--------|
 | {submodule} | {repo} | {branch} | [{short}]({url}) | [{short}]({url}) | {CURRENT/OUTDATED} |
 
-### Step 1.12: CLI product version config
+### Step 1.11: CLI product version config
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **versionName:** {value}
 - **ga:** {value}
 - **releaseDate:** {value}
 
-### Step 1.13: CLI CDN RP/RPA
+### Step 1.12: CLI CDN RP/RPA
 - **Status:** {DONE | ACTION NEEDED | SKIPPED}
 - **CDN RPAs:** {count} found
 - **CDN RPs:** {count} found
