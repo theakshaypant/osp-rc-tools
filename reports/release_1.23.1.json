@@ -1,0 +1,559 @@
+{
+  "version": "1.23.1",
+  "previous": "1.23.0",
+  "from_date": "2026-07-21T02:35:21Z",
+  "to_date": "2026-07-27T16:58:56Z",
+  "released": false,
+  "components": [
+    {
+      "name": "operator",
+      "upstream": "tektoncd/operator",
+      "downstream": "openshift-pipelines/operator",
+      "upstream_branch": "release-v0.80.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "6f925706fa43acafd3f88a5b72ded32c4df413ac",
+      "to_sha": "793d41b09273c01dd65820cdc6aa085d648ba7fe",
+      "commits": [
+        {
+          "sha": "00a694401268432a68a14c9fe1f240148c9a32e9",
+          "message": "[release-v0.80.x] bump chainguard-dev/actions/kind-diag",
+          "author": "dependabot[bot]",
+          "date": "2026-07-21",
+          "pr": "https://github.com/tektoncd/operator/pull/3775"
+        },
+        {
+          "sha": "ca311009cf97d2e9eaa7ab70f1a77cb2f90a44d6",
+          "message": "chore: update third-party image digests",
+          "author": "Divyanshu Agrawal",
+          "date": "2026-07-21",
+          "pr": "https://github.com/tektoncd/operator/pull/3778"
+        },
+        {
+          "sha": "b4cf798f9d9ae765190051ff7632573366086588",
+          "message": "chore: update third-party image digests",
+          "author": "Divyanshu Agrawal",
+          "date": "2026-07-22",
+          "pr": "https://github.com/tektoncd/operator/pull/3788"
+        },
+        {
+          "sha": "3648a8cccf02da6df76ed79f3f604ee8a8b66445",
+          "message": "chore: bump component versions",
+          "author": "Vincent Demeester",
+          "date": "2026-07-22",
+          "pr": "https://github.com/tektoncd/operator/pull/3759"
+        },
+        {
+          "sha": "793d41b09273c01dd65820cdc6aa085d648ba7fe",
+          "message": "chore: bump hub from v1.24.1 to v1.24.2",
+          "author": "Vincent Demeester",
+          "date": "2026-07-24",
+          "pr": "https://github.com/tektoncd/operator/pull/3806"
+        }
+      ],
+      "upstream_head": "793d41b09273c01dd65820cdc6aa085d648ba7fe"
+    },
+    {
+      "name": "opc",
+      "upstream": "openshift-pipelines/opc",
+      "downstream": "openshift-pipelines/p12n-opc",
+      "upstream_branch": "release-v1.23.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "b9be14633f84aeb8ebd8a311a93c8e1b63b029d7",
+      "to_sha": "2524083719f88a4efe20c578591cb510c53f647c",
+      "commits": [
+        {
+          "sha": "6879310f4173be31c191e10cf2b04e565287e381",
+          "message": "[bot:1.23] Update OPC version to 1.23.1",
+          "author": "github-actions[bot]",
+          "date": "2026-07-21",
+          "pr": "https://github.com/openshift-pipelines/opc/pull/502"
+        },
+        {
+          "sha": "2524083719f88a4efe20c578591cb510c53f647c",
+          "message": "Update component versions for release-v1.23.x",
+          "author": "github-actions[bot]",
+          "date": "2026-07-24",
+          "pr": "https://github.com/openshift-pipelines/opc/pull/504"
+        },
+        {
+          "sha": "ad3cba96ddd19da3fb76fc90b1590eeae183fa5c",
+          "message": "fix(cve): fix few critical CVEs",
+          "author": "Shiv Verma",
+          "date": "2026-07-23",
+          "pr": "https://github.com/openshift-pipelines/opc/pull/503",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-13051",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Updates the OPC component to address critical CVEs by upgrading the Hub dependency to v1.24.2 and pgx/v5 to v5.10.0.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        }
+      ],
+      "upstream_head": "ad3cba96ddd19da3fb76fc90b1590eeae183fa5c",
+      "unsynced_commits": []
+    },
+    {
+      "name": "console-plugin-pf5",
+      "upstream": "",
+      "downstream": "",
+      "upstream_branch": "",
+      "downstream_branch": "",
+      "error": "failed to get head SHA at from-date: failed to list head file commits for openshift-pipelines/p12n-console-plugin-pf5: GET https://api.github.com/repos/openshift-pipelines/p12n-console-plugin-pf5/commits?path=head&per_page=1&sha=release-v1.23.x&until=2026-07-21T02%3A35%3A21Z: 404 Not Found []",
+      "commits": [
+        {
+          "sha": "71b270edbf9a66d2a750367806cd61d37844f3b2",
+          "message": "manual cherrypick of refresh-yarn-lockfile workflow into main",
+          "author": "Arvind",
+          "date": "2026-07-24",
+          "pr": "https://github.com/openshift-pipelines/console-plugin/pull/1207",
+          "jira": "https://issues.redhat.com/browse/SRVKP-12826",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Adds an automated workflow to refresh the yarn lockfile weekly for the console-plugin, keeping JavaScript dependencies current and reducing exposure to known vulnerabilities.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        }
+      ]
+    },
+    {
+      "name": "tekton-assist",
+      "upstream": "",
+      "downstream": "",
+      "upstream_branch": "",
+      "downstream_branch": "",
+      "error": "failed to get head SHA at from-date: failed to list head file commits for openshift-pipelines/p12n-tekton-assist: GET https://api.github.com/repos/openshift-pipelines/p12n-tekton-assist/commits?path=head&per_page=1&sha=release-v1.23.x&until=2026-07-21T02%3A35%3A21Z: 404 Not Found []"
+    },
+    {
+      "name": "tektoncd-hub",
+      "upstream": "openshift-pipelines/hub",
+      "downstream": "openshift-pipelines/tektoncd-hub",
+      "upstream_branch": "release-v1.24.2",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "a84deebc8e7e490af8f3c2346a15cbf266c23499",
+      "to_sha": "82bd871583da83bc46a3cb793154e66408acf69b",
+      "commits": [
+        {
+          "sha": "9e79a4912553e9dd74fd70a01a7d3e0cc5e0b8db",
+          "message": "fix(cve): fix CVE vulnerablities in the UI and Swagger",
+          "author": "Shiv Verma",
+          "date": "2026-07-22",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-13051",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Addresses CVE vulnerabilities in the Hub UI and Swagger components.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "ab9e68015562c22c89c8d90e6a016729cacda853",
+          "message": "fix(cve): fix critical CVEs and update go version to 1.26.4",
+          "author": "Shiv Verma",
+          "date": "2026-07-22",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-13051",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes critical CVEs and updates the Go runtime to version 1.26.4 in the Hub component.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "8d545e4a9e994643f12171976094c9d5df1b6177",
+          "message": "update the go version in dockerfile",
+          "author": "Shiv Verma",
+          "date": "2026-07-22",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-13051",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Updates the Go version in the Hub Dockerfile as part of CVE remediation.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        },
+        {
+          "sha": "82bd871583da83bc46a3cb793154e66408acf69b",
+          "message": "fix(cve): fix few critical CVEs in API",
+          "author": "Shiv Verma",
+          "date": "2026-07-23",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-13051",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Fixes critical CVEs in the Hub API component.",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "generated"
+        }
+      ],
+      "upstream_head": "82bd871583da83bc46a3cb793154e66408acf69b"
+    },
+    {
+      "name": "tektoncd-pruner",
+      "upstream": "tektoncd/pruner",
+      "downstream": "openshift-pipelines/tektoncd-pruner",
+      "upstream_branch": "release-v0.4.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "0dc5f88de077021e0443d3c04fcc054f273923ff",
+      "to_sha": "0dc5f88de077021e0443d3c04fcc054f273923ff",
+      "upstream_head": "0dc5f88de077021e0443d3c04fcc054f273923ff"
+    },
+    {
+      "name": "tektoncd-triggers",
+      "upstream": "tektoncd/triggers",
+      "downstream": "openshift-pipelines/tektoncd-triggers",
+      "upstream_branch": "release-v0.36.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "bf95a60db160515b64454054ace1a0b725803c14",
+      "to_sha": "bf95a60db160515b64454054ace1a0b725803c14",
+      "upstream_head": "bf95a60db160515b64454054ace1a0b725803c14"
+    },
+    {
+      "name": "syncer-service",
+      "upstream": "openshift-pipelines/syncer-service",
+      "downstream": "openshift-pipelines/p12n-syncer-service",
+      "upstream_branch": "release-v0.1.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "30b70d11b3afd3d8c4a3b537ad1243cd4ecf84b6",
+      "to_sha": "30b70d11b3afd3d8c4a3b537ad1243cd4ecf84b6",
+      "upstream_head": "30b70d11b3afd3d8c4a3b537ad1243cd4ecf84b6"
+    },
+    {
+      "name": "manual-approval-gate",
+      "upstream": "openshift-pipelines/manual-approval-gate",
+      "downstream": "openshift-pipelines/p12n-manual-approval-gate",
+      "upstream_branch": "release-v0.9.0",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "10eb1ed4c277d3c9543eb6c5db8324bc0375eb6c",
+      "to_sha": "7ed9c6cfc181094438d7dbc3b655cc41d454c86a",
+      "commits": [
+        {
+          "sha": "bcd1d4e2b076bd8329ffd472cd5971978791d8f6",
+          "message": "fix(cve): update golang.org/x/text to v0.39.0 — CVE-2026-56852",
+          "author": "diagrawa",
+          "date": "2026-07-22",
+          "pr": "https://github.com/openshift-pipelines/manual-approval-gate/pull/1035",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12834",
+          "jira_source": "pr-body",
+          "release_note": {
+            "text": "Security fix: upgrade golang.org/x/text v0.35.0 → v0.39.0 to address CVE-2026-56852 (infinite loop on invalid unicode input) on release-v0.9.0",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        },
+        {
+          "sha": "7ed9c6cfc181094438d7dbc3b655cc41d454c86a",
+          "message": "fix(cve): upgrade Go stdlib go1.25.8 → go1.25.12, x/net v0.52.0 → v0.56.0, otel v1.42.0 → v1.43.0",
+          "author": "diagrawa",
+          "date": "2026-07-16",
+          "pr": "https://github.com/openshift-pipelines/manual-approval-gate/pull/1030",
+          "jira": "https://redhat.atlassian.net/browse/SRVKP-12834",
+          "jira_source": "keyword",
+          "release_note": {
+            "text": "Security fix: upgrade Go stdlib go1.25.8 → go1.25.12, golang.org/x/net v0.52.0 → v0.56.0, otel v1.42.0 → v1.43.0 to address 14 CVEs on release-v0.9.0",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        }
+      ],
+      "upstream_head": "7ed9c6cfc181094438d7dbc3b655cc41d454c86a",
+      "unsynced_commits": []
+    },
+    {
+      "name": "tektoncd-pipeline",
+      "upstream": "tektoncd/pipeline",
+      "downstream": "openshift-pipelines/tektoncd-pipeline",
+      "upstream_branch": "release-v1.12.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "7ce6b655b0a061a8bdca75d3d5e18b7140f90ea3",
+      "to_sha": "7ce6b655b0a061a8bdca75d3d5e18b7140f90ea3",
+      "upstream_head": "6412023e43e203cc041fb86a968514ee7bf81ab0",
+      "unsynced_commits": [],
+      "commits": [
+        {
+          "sha": "2bd961f2398f1f41e40b2f7df7e78eb3aebed4a1",
+          "message": "[release-v1.12.x] bump k8s.io/apimachinery in the kubernetes group",
+          "author": "dependabot[bot]",
+          "date": "2026-07-23",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10464"
+        },
+        {
+          "sha": "3db5ac6bf073b9c1321886404713ad5ec63b0050",
+          "message": "[release-v1.12.x] bump chainguard-dev/actions/setup-kind",
+          "author": "dependabot[bot]",
+          "date": "2026-07-22",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10451"
+        },
+        {
+          "sha": "dc3343b9849d4500e5f05c59e57e095f0a7bdd5a",
+          "message": "[release-v1.12.x] bump chainguard-dev/actions/kind-diag",
+          "author": "dependabot[bot]",
+          "date": "2026-07-22",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10452"
+        },
+        {
+          "sha": "6412023e43e203cc041fb86a968514ee7bf81ab0",
+          "message": "[release-v1.12.x] bump k8s.io/apimachinery",
+          "author": "dependabot[bot]",
+          "date": "2026-07-23",
+          "pr": "https://github.com/tektoncd/pipeline/pull/10463"
+        }
+      ]
+    },
+    {
+      "name": "multicluster-proxy-aae",
+      "upstream": "openshift-pipelines/multicluster-proxy-aae",
+      "downstream": "openshift-pipelines/p12n-multicluster-proxy-aae",
+      "upstream_branch": "release-v0.1.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "7855b3abd2512b08e2445c11f72d015c2c7d666d",
+      "to_sha": "7855b3abd2512b08e2445c11f72d015c2c7d666d",
+      "upstream_head": "7855b3abd2512b08e2445c11f72d015c2c7d666d"
+    },
+    {
+      "name": "git-init",
+      "upstream": "",
+      "downstream": "",
+      "upstream_branch": "",
+      "downstream_branch": "",
+      "error": "failed to get head SHA at from-date: failed to list head file commits for openshift-pipelines/git-init: GET https://api.github.com/repos/openshift-pipelines/git-init/commits?path=head&per_page=1&sha=release-v1.23.x&until=2026-07-21T02%3A35%3A21Z: 404 Not Found []"
+    },
+    {
+      "name": "tekton-caches",
+      "upstream": "openshift-pipelines/tekton-caches",
+      "downstream": "openshift-pipelines/p12n-tekton-caches",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "768eb9ad44621a4c899e93e490bc0b1aef5b8865",
+      "to_sha": "768eb9ad44621a4c899e93e490bc0b1aef5b8865",
+      "upstream_head": "768eb9ad44621a4c899e93e490bc0b1aef5b8865"
+    },
+    {
+      "name": "tekton-kueue",
+      "upstream": "konflux-ci/tekton-kueue",
+      "downstream": "openshift-pipelines/tekton-kueue",
+      "upstream_branch": "release-v0.3.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "ec8c653bc3211e3ce971265dd7c65a282ffdacbd",
+      "to_sha": "ec8c653bc3211e3ce971265dd7c65a282ffdacbd",
+      "upstream_head": "ec8c653bc3211e3ce971265dd7c65a282ffdacbd"
+    },
+    {
+      "name": "tektoncd-chains",
+      "upstream": "tektoncd/chains",
+      "downstream": "openshift-pipelines/tektoncd-chains",
+      "upstream_branch": "release-v0.27.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "78a5dcbd6d3c48bc166d3cecd2bbf96b1da993d9",
+      "to_sha": "98182bd5cfbc2bc79baffbe3c1cb6e7238de1d26",
+      "commits": [
+        {
+          "sha": "98182bd5cfbc2bc79baffbe3c1cb6e7238de1d26",
+          "message": "chore(deps): bump chainguard-dev/actions/kind-diag in the all group (#1819)",
+          "author": "dependabot[bot]",
+          "date": "2026-07-23",
+          "pr": "https://github.com/tektoncd/chains/pull/1819"
+        }
+      ],
+      "upstream_head": "98182bd5cfbc2bc79baffbe3c1cb6e7238de1d26"
+    },
+    {
+      "name": "tektoncd-cli",
+      "upstream": "tektoncd/cli",
+      "downstream": "openshift-pipelines/tektoncd-cli",
+      "upstream_branch": "release-v0.45.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "56f5c9665ea848a3864e720100f181944867c54e",
+      "to_sha": "492f193a136170a29c6d2a78dbb7466102bdc035",
+      "commits": [
+        {
+          "sha": "2d41c06d0d68dcbf277a62726fceb5c46e7cc9a2",
+          "message": "[release-v0.45.x] bump chainguard-dev/actions/kind-diag in the all group",
+          "author": "dependabot[bot]",
+          "date": "2026-07-21",
+          "pr": "https://github.com/tektoncd/cli/pull/3047"
+        },
+        {
+          "sha": "dfd3591a3c1748c37d3b15d9385946ce6358bee6",
+          "message": "[release-v0.45.x] bump github.com/sigstore/cosign/v2 from 2.6.3 to 2.6.4",
+          "author": "dependabot[bot]",
+          "date": "2026-07-21",
+          "pr": "https://github.com/tektoncd/cli/pull/3051"
+        },
+        {
+          "sha": "492f193a136170a29c6d2a78dbb7466102bdc035",
+          "message": "fix(cve): fix few critical CVEs",
+          "author": "Shiv Verma",
+          "date": "2026-07-23",
+          "pr": "https://github.com/tektoncd/cli/pull/3063"
+        },
+        {
+          "sha": "a8f1285514d5cdd639b5c6a73e84f1ecfc06504d",
+          "message": "chore(deps): remove unused tektoncd/chains dependency",
+          "author": "Arvind",
+          "date": "2026-07-17",
+          "pr": "https://github.com/tektoncd/cli/pull/3061"
+        }
+      ],
+      "upstream_head": "492f193a136170a29c6d2a78dbb7466102bdc035",
+      "unsynced_commits": []
+    },
+    {
+      "name": "pipelines-as-code",
+      "upstream": "tektoncd/pipelines-as-code",
+      "downstream": "openshift-pipelines/pac-downstream",
+      "upstream_branch": "release-v0.48.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "87637d31d933f65b7677b228360eb80e032455f6",
+      "to_sha": "87637d31d933f65b7677b228360eb80e032455f6",
+      "upstream_head": "87637d31d933f65b7677b228360eb80e032455f6",
+      "unsynced_commits": [],
+      "commits": [
+        {
+          "sha": "97c68eb92803b37eebcfd054685baa85f9a727ab",
+          "message": "fix(ci): linting issue after new release",
+          "author": "Zaki Shaikh",
+          "date": "2026-06-16",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2857"
+        },
+        {
+          "sha": "fa5b3da72b3c4177139ef4044b70ca03151b24eb",
+          "message": "dep(go): bump go version 1.26.4",
+          "author": "Zaki Shaikh",
+          "date": "2026-07-16",
+          "pr": "https://github.com/tektoncd/pipelines-as-code/pull/2857"
+        }
+      ]
+    },
+    {
+      "name": "tektoncd-results",
+      "upstream": "tektoncd/results",
+      "downstream": "openshift-pipelines/tektoncd-results",
+      "upstream_branch": "release-v0.19.x",
+      "downstream_branch": "release-v1.23.x",
+      "from_sha": "ecca90d687d452096dfd48409f8d982e712a30b3",
+      "to_sha": "ecca90d687d452096dfd48409f8d982e712a30b3",
+      "upstream_head": "0810beb3806dead78cf43db924510210f8e8ddce",
+      "unsynced_commits": [],
+      "commits": [
+        {
+          "sha": "0810beb3806dead78cf43db924510210f8e8ddce",
+          "message": "fix(security): update Go stdlib to 1.25.12 and golang.org/x/text to v0.39.0",
+          "author": "Divyanshu Agrawal",
+          "date": "2026-07-27",
+          "pr": "https://github.com/tektoncd/results/pull/1393",
+          "release_note": {
+            "text": "Security: Update Go stdlib to 1.25.12 and golang.org/x/text to v0.39.0 to address multiple CVEs",
+            "type": "CVE",
+            "status": ""
+          },
+          "rn_source": "extracted"
+        }
+      ]
+    }
+  ],
+  "unmatched_jiras": [
+    {
+      "key": "SRVKP-13051",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-13051",
+      "summary": " Hub release with CVEs fixes for OSP 1.23.1",
+      "status": "Closed",
+      "components": [
+        "Tekton Hub"
+      ]
+    },
+    {
+      "key": "SRVKP-12879",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12879",
+      "summary": "OCP 4.22 | Incorrect tab is highlighted in Overview page, pipelines list section when switching between 'Per pipeline' & 'Per Repository'",
+      "status": "Dev Complete",
+      "components": [
+        "UI"
+      ]
+    },
+    {
+      "key": "SRVKP-12182",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12182",
+      "summary": "In pipelines page, sort with task status is not working as expected ",
+      "status": "Tasking and Estimation"
+    },
+    {
+      "key": "SRVKP-12178",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12178",
+      "summary": "In pipelines widget of Overview page, search text in pipeline widget is not honored",
+      "status": "Tasking and Estimation",
+      "components": [
+        "UI"
+      ]
+    },
+    {
+      "key": "SRVKP-12111",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-12111",
+      "summary": "OSP UI redirects to incorrect namespace/page for resolver Tasks causing misleading 404",
+      "status": "Dev Complete",
+      "components": [
+        "QA",
+        "UI"
+      ]
+    },
+    {
+      "key": "SRVKP-11468",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-11468",
+      "summary": "Logs misalignment in Pipeline run with logs having mix of tabs & spaces tabular style",
+      "status": "Closed",
+      "components": [
+        "UI"
+      ]
+    },
+    {
+      "key": "SRVKP-11467",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-11467",
+      "summary": "Logs misalignment in Pipeline run with logs of ASC|| tabular style ",
+      "status": "Closed",
+      "components": [
+        "UI"
+      ]
+    },
+    {
+      "key": "SRVKP-10831",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-10831",
+      "summary": "[QA] 3 webhooks are missing namespace owner reference",
+      "status": "Release Pending",
+      "components": [
+        "Operator",
+        "QA"
+      ]
+    },
+    {
+      "key": "SRVKP-7717",
+      "url": "https://redhat.atlassian.net/browse/SRVKP-7717",
+      "summary": "Termination messages are truncated and become unparseable causing missing results",
+      "status": "Dev Complete",
+      "components": [
+        "Tekton Pipelines"
+      ]
+    }
+  ],
+  "skill_progress": {
+    "processed_components": [
+      "operator",
+      "opc",
+      "tektoncd-hub",
+      "manual-approval-gate",
+      "tektoncd-cli",
+      "pipelines-as-code",
+      "tektoncd-results",
+      "console-plugin-pf5"
+    ],
+    "report_generated": true
+  }
+}

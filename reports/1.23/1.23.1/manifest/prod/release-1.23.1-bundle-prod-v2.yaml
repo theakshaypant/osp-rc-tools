@@ -1,0 +1,24 @@
+apiVersion: appstudio.redhat.com/v1alpha1
+kind: Release
+metadata:
+  labels:
+    appstudio.openshift.io/application: openshift-pipelines-bundle-1-23
+  generateName: openshift-pipelines-bundle-1-23-prod-rp-
+  namespace: tekton-ecosystem-tenant
+spec:
+  releasePlan: openshift-pipelines-bundle-1-23-prod-rp
+  snapshot: openshift-pipelines-bundle-1-23-20260728-193547-000
+  data:
+    mapping:
+      defaults:
+        tags:
+          - v1.23.1
+          - v1.23.1-{{ timestamp }}
+    releaseNotes:
+      description: "The 1.23.1 release of Red Hat OpenShift Pipelines Operator."
+      references:
+        - https://docs.redhat.com/en/documentation/red_hat_openshift_pipelines
+      solution: "Red Hat OpenShift Pipelines is a cloud-native, continuous integration and\ncontinuous delivery (CI/CD) solution based on Kubernetes resources.\nIt uses Tekton building blocks to automate deployments across multiple\nplatforms by abstracting away the underlying implementation details.\nTekton introduces a number of standard custom resource definitions (CRDs)\nfor defining CI/CD pipelines that are portable across Kubernetes distributions.\n"
+      synopsis: "Red Hat OpenShift Pipelines Release 1.23.1"
+      topic: "The 1.23.1 patch release of Red Hat OpenShift Pipelines Operator.\nFor more details see [product documentation](https://docs.redhat.com/en/documentation/red_hat_openshift_pipelines).\n"
+      type: RHBA
