@@ -185,6 +185,9 @@ flowchart TD
 - These PRs are merged automatically sowe only need to wait for the merge to happen.
   - The flowchart describes the proper e2e flow which also helps in debugging.
 
+---
+
+## Dev Release
 ### Update Sources Downstream (ds_update_source)
 #### Inputs
 - ds_update_konf_config: should have SUCCESS value
@@ -221,17 +224,136 @@ flowchart TD
 #### Notes
 - These PRs are merged automatically so we only need to wait for the merge to happen.
   - The flowchart describes the proper e2e flow which also helps in debugging.
-- This step may need to be run
+- This step may need to be run again when new builds are required.
 
+--- 
 
+## Builds
+### Core Build (core)
+#### Inputs
+- ds_update_konf_config: should have SUCCESS value
+- env: dev/staging/prod
+
+```mermaid
+flowchart TD
+    ds_repos([Start: Downstream Repos]) --> on_push_completed{"on-push PipelineRuns completed for HEAD commit on release branch?"}
+
+    on_push_completed -->|true| verify_pr{"Component nudge PR created on operator?"}
+    on_push_completed -->|false| fetch_prun[Get PipelineRun name from GitHub]
+
+    fetch_prun --> check_status{Status of PipelineRun on Konflux}
+
+    check_status -->|In-Progress| wait_prun[Sleep and wait]
+    wait_prun --> check_status
+    check_status -->|Failed| ERROR([ERROR: Share on Slack @rc @component-leads])
+    check_status -->|Successful| verify_pr
+
+    verify_pr -->|true| check_pr_status{"PR diff contains the same image SHA as PipelineRun?"}
+    verify_pr -->|false| create_new_pr[Close current PR, if any, and create a new one with right image SHA]
+
+    check_pr_status -->|true| ci_passing{"Is CI on the PR green?"}
+    check_pr_status -->|false| create_new_pr
+
+    ci_passing -->|true| get_snapshot[Get name of core snapshot created by PipelineRun]
+    ci_passing -->|false| ERROR
+
+    create_new_pr --> ci_passing
+    get_snapshot --> SUCCESS([SUCCESS])
+```
+
+#### Outputs
+- core_{env}_status: SUCCESS/ERROR
+- nudge_pr_list
+- core_snapshot
+
+#### Notes
+- TODO
+
+### Bundle (bundle)
+#### Inputs
+- core_{env}_status: should have SUCCESS value
+- env: should match `core_{env}_status` key
+- nudge_pr_list
+
+```mermaid
+flowchart TD
+    merge_nudge[Merge All Nudge PRs] --> bundle_completed{"Bundle on-push PipelineRun completed?"}
+
+    bundle_completed -->|true| verify_pr{"Bundle nudge PR created on operator?"}
+    bundle_completed -->|false| fetch_prun[Get bundle-on-push PipelineRun name from GitHub]
+
+    fetch_prun --> check_status{Status of PipelineRun on Konflux}
+
+    check_status -->|In-Progress| wait_prun[Sleep and wait]
+    wait_prun --> check_status
+    check_status -->|Failed| ERROR([ERROR: Share on Slack @rc])
+    check_status -->|Successful| verify_pr
+
+    verify_pr -->|true| check_pr_status{"PR diff contains the same image SHA as PipelineRun?"}
+    verify_pr -->|false| create_new_pr[Close current PR, if any, and create a new one with right image SHA]
+
+    check_pr_status -->|true| ci_passing{"Is CI on the PR green?"}
+    check_pr_status -->|false| create_new_pr
+
+    ci_passing -->|true| get_snapshot[Get name of bundle snapshot created by PipelineRun]
+    ci_passing -->|false| ERROR
+
+    create_new_pr --> ci_passing
+    get_snapshot --> SUCCESS([SUCCESS])
+```
+
+#### Outputs
+- bundle_{env}_status: SUCCESS/ERROR
+- bundle_nudge_pr
+- bundle_snapshot
+
+#### Notes
+- TODO
+
+### Index (index)
+#### Inputs
+- bundle_{env}_status: should have SUCCESS value
+- env: should match `bundle_{env}_status` key
+- bundle_nudge_pr
+
+```mermaid
+flowchart TD
+  merge_nudge[Merge Bundle Nudge PR] --> index_completed{"Index on-push PipelineRuns completed?"}
+
+  index_completed --> |true| get_snapshot[Get Index snapshots for all compatible OCP versions]
+  index_completed --> |false| fetch_prun[Get index-on-push PipelineRun names from GitHub]
+
+  fetch_prun --> check_status{Status of PipelineRuns on Konflux}
+
+  check_status -->|In-Progress| wait_prun[Sleep and wait]
+  wait_prun --> check_status
+  check_status -->|Failed| ERROR([ERROR: Share on Slack @rc])
+  check_status -->|Successful| get_snapshot
+
+  get_snapshot --> SUCCESS([SUCCESS])
+```
+
+#### Outputs
+- index_{env}_status: SUCCESS/ERROR
+- index_snapshots
+
+#### Notes
+- TODO
+
+---
 
 ## End to End Flow
 ```mermaid
 flowchart TD
+  start(START)
+
   subgraph setup[Setup]
     verify_creds[Verify all credentials] --> verify_services[Verify all services are reachable]
     verify_services --> version_parsing[Version Parsing]
   end
+
+  start --> verify_creds
+
 
   subgraph config[Configuration]
     version_parsing --> checkpoint{Last saved checkpoint}
@@ -240,16 +362,45 @@ flowchart TD
     checkpoint --> update_konflux_config[Update Konflux Config]
     checkpoint --> apply_konf_config[Apply Konflux Config]
     checkpoint --> ds_update_konf_config[Update Downstream Konflux Config]
-    checkpoint --> ds_update_source[Update Sources Downstream]
     
     hack_ver_gen --> merge_release_action
     merge_release_action --> apply_konf_config
     apply_konf_config --> update_konflux_config
     update_konflux_config --> ds_update_konf_config
-    ds_update_konf_config --> ds_update_source
   end
-  
 
+  subgraph dev[Dev Builds]
+    ds_update_source[Update Sources Downstream] --> dev_core[Core Build]
+    dev_core --> dev_bundle[Bundle Build]
+    dev_bundle --> dev_index[Index Build]
+  end
+
+  ds_update_konf_config --> ds_update_source
+
+  subgraph QE
+    testing
+  end
+
+  dev_index --> testing
+  testing --> |Dev/Stage Rejected| fix_upstream[Fix Upstream]
+  fix_upstream --> ds_update_source
+
+  subgraph stage[Stage Builds]
+    stage_core[Core Build]
+    stage_core --> stage_bundle[Bundle Build]
+    stage_bundle --> stage_index[Index Build]
+  end
+
+  testing --> |Dev Accepted| stage_core
+  stage_index --> testing
+  
+  subgraph prod[Prod Builds]
+    prod_core[Core Build]
+    prod_core --> prod_bundle[Bundle Build]
+    prod_bundle --> prod_index[Index Build]
+  end
+
+  testing --> |Stage Accepted| prod_core
 ```
 
 ## References
