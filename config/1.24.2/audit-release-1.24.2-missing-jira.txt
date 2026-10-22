@@ -1,0 +1,88 @@
+# PRs Without Linked Jira Tickets
+
+This report lists all PRs that have no linked Jira ticket, grouped by author.
+
+## By Author
+
+### Anwesha Palit
+
+- [1412](https://github.com/openshift-pipelines/console-plugin/pull/1412): chore: update install script for MAG (`859a87377469`)
+- [1416](https://github.com/openshift-pipelines/console-plugin/pull/1416): fix: refactor applyParentUpgrade, correct applyResolutions orderfix and use exact-version resolution entries and discover historical descriptors Co-Authored-By: Claude Opus 4.6 (`bde2a7418b32`)
+- [1418](https://github.com/openshift-pipelines/console-plugin/pull/1418): fix: refactor applyParentUpgrade, correct applyResolutions orderfix and use exact-version resolution entries and discover historical descriptors Co-Authored-By: Claude Opus 4.6 (`fc12aebb80d0`)
+
+### divyansh42
+
+- [3322](https://github.com/tektoncd/cli/pull/3322): fix: use latest Tekton releases and fix ConfigMap timing (`765bd6c9b922`)
+
+### Divyanshu Agrawal
+
+- [4187](https://github.com/tektoncd/operator/pull/4187): chore: update third-party image digests (`1c085a78be40`)
+- [4271](https://github.com/tektoncd/operator/pull/4271): chore: update third-party image digests (`7f865db42acd`)
+
+### Gal Levi
+
+- [563](https://github.com/tektoncd/tekton-kueue/pull/563): KFLUXINFRA-4254 Add agent files defense CI checks (`5a0637f520d6`)
+- [563](https://github.com/tektoncd/tekton-kueue/pull/563): Merge pull request #563 from glevi-rh/backport/agent-files-defense-release-v0.4.x (`674dd6371a3e`)
+
+### Jawed khelil
+
+- [4219](https://github.com/tektoncd/operator/pull/4219): fix(bundle): drop duplicate MulticlusterProxyAAE CRD from OpenShift bundle (`e037472d9adc`)
+- [4259](https://github.com/tektoncd/operator/pull/4259): fix(chains): allow slsa/v2alpha4 attestation format in validation (`bd476b3d1909`)
+- [4259](https://github.com/tektoncd/operator/pull/4259): test(chains): drive format validation from allowlist vars (`927ec44751f2`)
+
+### khelil
+
+- [1977](https://github.com/tektoncd/chains/pull/1977): fix: update google.golang.org/grpc to v1.83.1 — CVE-2026-84304 (#2039) (`d4413daf63b2`)
+
+### openshift-merge-bot[bot]
+
+- [1385](https://github.com/openshift-pipelines/console-plugin/pull/1385): Merge pull request #1385 from openshift-cherrypick-robot/cherry-pick-1384-to-release-v1.24.x (`4e0a73222661`)
+- [1389](https://github.com/openshift-pipelines/console-plugin/pull/1389): Merge pull request #1389 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.24.x (`c8968e4569be`)
+- [1403](https://github.com/openshift-pipelines/console-plugin/pull/1403): Merge pull request #1403 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.22.x (`2581fae8030b`)
+- [1405](https://github.com/openshift-pipelines/console-plugin/pull/1405): Merge pull request #1405 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.24.x (`532c343763b3`)
+- [1425](https://github.com/openshift-pipelines/console-plugin/pull/1425): Merge pull request #1425 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.24.x (`7d86e78d008b`)
+- [1429](https://github.com/openshift-pipelines/console-plugin/pull/1429): Merge pull request #1429 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.22.x (`0c45d6dc5994`)
+- [1438](https://github.com/openshift-pipelines/console-plugin/pull/1438): Merge pull request #1438 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.24.x (`1837c380c775`)
+- [1441](https://github.com/openshift-pipelines/console-plugin/pull/1441): Merge pull request #1441 from openshift-pipelines/automation/refresh-yarn-lockfile-release-v1.22.x (`8095000a88f8`)
+
+### openshift-pipelines-bot
+
+- [1385](https://github.com/openshift-pipelines/console-plugin/pull/1385): chore(i18n): update Memsource translations (`2597bd1c708e`)
+- [1389](https://github.com/openshift-pipelines/console-plugin/pull/1389): chore: regenerate yarn.lock (`e190fffb83ab`)
+- [1403](https://github.com/openshift-pipelines/console-plugin/pull/1403): chore: regenerate yarn.lock (`d8bd688a7bee`)
+- [1405](https://github.com/openshift-pipelines/console-plugin/pull/1405): chore: regenerate yarn.lock (`4845c2b42e2b`)
+- [1425](https://github.com/openshift-pipelines/console-plugin/pull/1425): chore: regenerate yarn.lock (`c81bc7feacb5`)
+- [1429](https://github.com/openshift-pipelines/console-plugin/pull/1429): chore: regenerate yarn.lock (`101c8a742d89`)
+- [1438](https://github.com/openshift-pipelines/console-plugin/pull/1438): chore: regenerate yarn.lock (`ab89206641a3`)
+- [1441](https://github.com/openshift-pipelines/console-plugin/pull/1441): chore: regenerate yarn.lock (`94a10da74304`)
+
+### pratap0007
+
+- [3320](https://github.com/tektoncd/cli/pull/3320): fix(hub): restrict tkn hub install resources fetching (`9ec89e5b788a`)
+- [4221](https://github.com/tektoncd/operator/pull/4221): fix(openshift): block SCC escalation via annotations (`7b37043c4515`)
+
+### sashture
+
+- [39](https://github.com/openshift-pipelines/multicluster-proxy-aae/pull/39): fix import issue (`3b3f3e39f69d`)
+
+### savitaashture
+
+- [38](https://github.com/openshift-pipelines/multicluster-proxy-aae/pull/38): Fix per request Kubernetes client construction (`ed397a36c6e7`)
+- [38](https://github.com/openshift-pipelines/multicluster-proxy-aae/pull/38): Update permissions for secret (`60279bf58d13`)
+
+### Shubham Bhardwaj
+
+- [4256](https://github.com/tektoncd/operator/pull/4256): feat(pruner): add default resource limits to controller and webhook (`1eb452c99309`)
+- [461](https://github.com/tektoncd/pruner/pull/461): fix: pin builder image (`483fd0ba021e`)
+
+### tekton-robot
+
+- [1977](https://github.com/tektoncd/chains/pull/1977): bumping go to 1.26.6 to fix govcloud cves (#2002) (`393a60232f53`)
+
+### Vincent Demeester
+
+- [158](https://github.com/tektoncd-catalog/git-clone/pull/158): chore: bump version to v1.7.1 (`a3772f4338bc`)
+- [158](https://github.com/tektoncd-catalog/git-clone/pull/158): ci: add Artifact Hub lint checks (`22c16b5394da`)
+- [2173](https://github.com/tektoncd/triggers/pull/2173): cherry-pick add automatic GitHub draft release creation from main (`9f74bff94034`)
+- [4160](https://github.com/tektoncd/operator/pull/4160): chore: bump chains from v0.29.5 to v0.29.6 (`f33318e635bc`)
+- [4193](https://github.com/tektoncd/operator/pull/4193): chore: bump chains from v0.29.6 to v0.29.7 (`98df9d34174b`)
