@@ -4,7 +4,7 @@
 # Usage: ./audit-snapshot.sh <snapshot-name> <version>
 #
 # Example:
-#   ./audit-snapshot.sh openshift-pipelines-core-1-24-20260702-034604-000 1.24.1
+#   ./audit-snapshot.sh openshift-pipelines-core-1-24-20261019-170342-000 1.24.2
 #
 # Requirements:
 #   - oc (authenticated to Konflux cluster)
@@ -58,7 +58,9 @@ log() {
     shift
     case "$level" in
         debug)
-            [[ "${DEBUG:-}" == "true" ]] && echo "DEBUG: $*" >&2
+            if [[ "${DEBUG:-}" == "true" ]]; then
+                echo "DEBUG: $*" >&2
+            fi
             ;;
         progress)
             echo "$*" >&2
@@ -324,24 +326,29 @@ jira_enabled() {
     [[ -n "${JIRA_EMAIL:-}" ]] && [[ -n "${JIRA_TOKEN:-}" ]] && [[ -n "${JIRA_URL:-}" ]]
 }
 
-# Extract Jira key from text (commit message, PR title/body)
+# Extract Jira keys from text (commit message, PR title/body)
 # Args: text
-# Returns: Jira key on stdout, empty if not found
-extract_jira_key() {
+# Returns: unique Jira keys on stdout, one per line
+extract_jira_keys() {
     local text="$1"
 
-    # Match PROJECT-NNNN pattern (e.g., SRVKP-1234)
-    if [[ "$text" =~ (${JIRA_PROJECT}-[0-9]+) ]]; then
-        echo "${BASH_REMATCH[1]}"
-        return 0
-    fi
+    # Match all PROJECT-NNNN patterns (e.g., SRVKP-1234)
+    printf '%s\n' "$text" | grep -Eo "${JIRA_PROJECT}-[0-9]+" | sort -u || true
+}
 
-    return 1
+# Merge two newline-separated lists of Jira keys
+# Args: first_keys, second_keys
+# Returns: unique keys on stdout, one per line
+merge_jira_keys() {
+    local first_keys="$1"
+    local second_keys="$2"
+
+    printf '%s\n%s\n' "$first_keys" "$second_keys" | sed '/^$/d' | sort -u
 }
 
 # Search Jira for tickets with a specific PR URL
 # Args: pr_url
-# Returns: Jira key on stdout, empty if not found
+# Returns: Jira keys on stdout, one per line
 search_jira_by_pr() {
     local pr_url="$1"
 
@@ -357,7 +364,7 @@ search_jira_by_pr() {
     local jql="project = ${JIRA_PROJECT} AND ${JIRA_PR_FIELD} ~ \"${pr_url}\""
 
     local payload
-    payload=$(jq -n --arg jql "$jql" '{jql: $jql, fields: ["key"], maxResults: 1}') || {
+    payload=$(jq -n --arg jql "$jql" '{jql: $jql, fields: ["key"], maxResults: 100}') || {
         log_debug "    JSON generation failed"
         echo ""
         return 0
@@ -374,9 +381,7 @@ search_jira_by_pr() {
         return 0
     }
 
-    local key
-    key=$(echo "$result" | jq -r '.issues[0].key // empty' 2>/dev/null)
-    echo "$key"
+    echo "$result" | jq -r '.issues[]?.key' 2>/dev/null
 }
 
 # Get Jira issue details including release notes
@@ -415,6 +420,33 @@ get_jira_issue() {
             rn_type: (if .fields[$tyf] then .fields[$tyf].value else null end),
             rn_status: (if .fields[$sf] then .fields[$sf].value else null end)
         }' 2>/dev/null || echo "{}"
+}
+
+# Get details for multiple Jira issues
+# Args: jira_keys (one key per line)
+# Returns: JSON array of Jira issue details
+get_jira_issues() {
+    local keys="$1"
+    local jira_json="[]"
+
+    if ! jira_enabled; then
+        echo "[]"
+        return 0
+    fi
+
+    local key issue
+    while IFS= read -r key; do
+        [[ -z "$key" ]] && continue
+
+        issue=$(get_jira_issue "$key")
+        if [[ $(echo "$issue" | jq -r '.key // empty' 2>/dev/null) == "$key" ]]; then
+            jira_json=$(echo "$jira_json" | jq --argjson issue "$issue" '. + [$issue]')
+        else
+            log_debug "    Skipping invalid Jira response for $key"
+        fi
+    done <<< "$keys"
+
+    echo "$jira_json"
 }
 
 # Search for unmatched Jiras (tickets with fixVersion but no matching commit)
@@ -555,36 +587,31 @@ enrich_commits() {
             original_pr=$(resolve_pr "$upstream_repo" "$cherry_sha")
         fi
 
-        # Resolve Jira (if enabled)
-        local jira_key=""
-        local jira_json="{}"
+        # Resolve all Jiras linked to the commit, PR, or original PR
+        local jira_keys=""
+        local jira_json="[]"
 
         if jira_enabled; then
-            # Try extracting from commit message first
-            jira_key=$(extract_jira_key "$message")
+            jira_keys=$(extract_jira_keys "$message")
 
-            # If not in message and we have a PR, search by PR URL
-            if [[ -z "$jira_key" ]] && [[ -n "$pr" ]]; then
-                jira_key=$(search_jira_by_pr "$pr")
+            if [[ -n "$pr" ]]; then
+                jira_keys=$(merge_jira_keys "$jira_keys" "$(search_jira_by_pr "$pr")")
             fi
 
-            # If not found and we have original PR, try that
-            if [[ -z "$jira_key" ]] && [[ -n "$original_pr" ]]; then
-                jira_key=$(search_jira_by_pr "$original_pr")
+            if [[ -n "$original_pr" ]]; then
+                jira_keys=$(merge_jira_keys "$jira_keys" "$(search_jira_by_pr "$original_pr")")
             fi
 
-            # Fetch Jira details if we found a key
-            if [[ -n "$jira_key" ]]; then
-                jira_json=$(get_jira_issue "$jira_key")
-            fi
+            # Fetch details for every linked Jira
+            jira_json=$(get_jira_issues "$jira_keys")
         fi
 
         # Add all enrichment fields to commit JSON
         echo "$commit" | jq \
             --arg pr "$pr" \
             --arg original_pr "$original_pr" \
-            --argjson jira "$jira_json" \
-            '. + {pr: $pr, original_pr: $original_pr, jira: $jira}'
+            --argjson jiras "$jira_json" \
+            '. + {pr: $pr, original_pr: $original_pr, jiras: $jiras}'
     done | jq -s .
 }
 
@@ -670,7 +697,7 @@ EOF
     if [[ $display_count -gt 0 ]]; then
         # Check if any commit has Jira data
         local has_jira
-        has_jira=$(echo "$display_commits" | jq '[.[] | select(.jira.key != null)] | length > 0')
+        has_jira=$(echo "$display_commits" | jq '[.[] | select((.jiras // []) | length > 0)] | length > 0')
 
         if [[ "$has_jira" == "true" ]]; then
             # Table with Jira columns including all 3 release note fields
@@ -679,8 +706,15 @@ EOF
 |-----|---------|--------|------|----|----|------|---------|-----------|---------|
 EOF
 
-            echo "$display_commits" | jq -r '.[] |
-                "| [\(.sha[:12])](https://github.com/'"$upstream_repo"'/commit/\(.sha)) | \(.message) | \(.author) | \(.date) | \(if .pr != "" then "[\(.pr | split("/")[-1])](\(.pr))" else "—" end) | \(if .original_pr != "" then "[\(.original_pr | split("/")[-1])](\(.original_pr))" else "—" end) | \(if .jira.key then "[\(.jira.key)](\(.jira.url))" else "—" end) | \(.jira.rn_type // "—") | \(.jira.rn_status // "—") | \(.jira.rn_text // "—") |"
+            echo "$display_commits" | jq -r '
+                def jira_links:
+                    (.jiras // [])
+                    | if length > 0 then map("[\(.key)](\(.url))") | join("<br>") else "—" end;
+                def jira_field($field):
+                    (.jiras // [])
+                    | if length > 0 then map(.[$field] // "—") | join("<br>") else "—" end;
+                .[] |
+                "| [\(.sha[:12])](https://github.com/'"$upstream_repo"'/commit/\(.sha)) | \(.message) | \(.author) | \(.date) | \(if .pr != "" then "[\(.pr | split("/")[-1])](\(.pr))" else "—" end) | \(if .original_pr != "" then "[\(.original_pr | split("/")[-1])](\(.original_pr))" else "—" end) | \(jira_links) | \(jira_field("rn_type")) | \(jira_field("rn_status")) | \(jira_field("rn_text")) |"
             ' >> "$report_file"
         else
             # Table without Jira columns
@@ -807,21 +841,40 @@ EOF
             continue
         fi
 
-        # Check if we have Jira but missing RN fields
-        if [[ "$jira" =~ ${JIRA_PROJECT} ]] && [[ "$rn_type" == "—" || "$rn_status" == "—" || "$rn_text" == "—" ]]; then
-            # Extract just the Jira key
-            jira_key=$(echo "$jira" | grep -o "${JIRA_PROJECT}-[0-9]*" || echo "")
-            if [[ -n "$jira_key" ]]; then
-                # Determine which fields are missing
-                missing=""
-                [[ "$rn_type" == "—" ]] && missing="${missing}type,"
-                [[ "$rn_status" == "—" ]] && missing="${missing}status,"
-                [[ "$rn_text" == "—" ]] && missing="${missing}text,"
-                missing=${missing%,}
+        # Audit each ticket in a multi-ticket cell independently
+        local jira_entries rn_types rn_statuses rn_texts
+        readarray -t jira_entries < <(printf '%s\n' "$jira" | sed 's/<br>/\n/g')
+        readarray -t rn_types < <(printf '%s\n' "$rn_type" | sed 's/<br>/\n/g')
+        readarray -t rn_statuses < <(printf '%s\n' "$rn_status" | sed 's/<br>/\n/g')
+        readarray -t rn_texts < <(printf '%s\n' "$rn_text" | sed 's/<br>/\n/g')
 
-                echo "$author|$jira_key|$missing"
+        local index jira_entry jira_key rn_type_value rn_status_value rn_text_value
+        for ((index = 0; index < ${#jira_entries[@]}; index++)); do
+            jira_entry="${jira_entries[$index]}"
+            rn_type_value="${rn_types[$index]:-—}"
+            rn_status_value="${rn_statuses[$index]:-—}"
+            rn_text_value="${rn_texts[$index]:-—}"
+
+            # Skip tickets marked as not requiring a release note
+            if [[ "$rn_type_value" =~ "Release Note Not Required" ]]; then
+                continue
             fi
-        fi
+
+            if [[ "$jira_entry" =~ ${JIRA_PROJECT} ]] && [[ "$rn_type_value" == "—" || "$rn_status_value" == "—" || "$rn_text_value" == "—" ]]; then
+                # Extract just the Jira key
+                jira_key=$(echo "$jira_entry" | grep -oE "${JIRA_PROJECT}-[0-9]+" || echo "")
+                if [[ -n "$jira_key" ]]; then
+                    # Determine which fields are missing
+                    missing=""
+                    [[ "$rn_type_value" == "—" ]] && missing="${missing}type,"
+                    [[ "$rn_status_value" == "—" ]] && missing="${missing}status,"
+                    [[ "$rn_text_value" == "—" ]] && missing="${missing}text,"
+                    missing=${missing%,}
+
+                    echo "$author|$jira_key|$missing"
+                fi
+            fi
+        done
     done | sort -u > "$temp_data"
 
     # Group by author
